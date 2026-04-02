@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kasih Nyata - Denantokh</title>
+  <meta name="theme-color" content="#FFF8E1" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+  <style>
+
+.qris-img {
+  animation: pulse 2.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+    :root{ --bg:#FFFDF2; --accent:#B38B00; --muted:#6B7280; --card:#FFF8E1; }
+    *{box-sizing:border-box;}
+    body{font-family:'Poppins',sans-serif;background:var(--bg);color:#3A3A3A;margin:0;padding:20px;}
+    .container{max-width:1000px;margin:12px auto;padding:24px;}
+    .fade-in{opacity:0;animation:fadeIn 1.2s ease-in forwards;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+    .header{background:linear-gradient(135deg,#FBE8B3,#FFFDF2);padding:36px;border-radius:18px;text-align:center;box-shadow:0 6px 30px rgba(0,0,0,0.04);}
+    h1{font-family:'Playfair Display',serif;color:#735D20;margin:0;font-size:clamp(26px,4.5vw,44px);}
+    h3{margin-top:10px;color:var(--accent);font-weight:400;}
+    .section{margin-top:32px;}
+    .mission-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;}
+    .card{
+  background:var(--card);
+  border-radius:12px;
+  padding:18px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.04);
+  transition: all 0.3s ease;
+}
+
+.card:hover{
+  transform: translateY(-6px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+}
+    .donation{background:#FDF7E3;border-radius:16px;padding:28px;text-align:center;}
+    .qris-img{max-width:360px;width:100%;height:auto;border-radius:12px;box-shadow:0 6px 22px rgba(0,0,0,0.12);display:block;margin:16px auto;}
+    .contact a{color:#735D20;text-decoration:none;font-weight:600;}
+    .footer{text-align:center;background:linear-gradient(135deg,#FFFDF2,#FBE8B3);padding:30px;border-radius:14px;margin-top:44px;}
+    .small{font-size:13px;color:var(--muted);}
+.btn{
+  display:inline-block;
+  margin:8px 6px;
+  padding:10px 14px;
+  border-radius:10px;
+  background:var(--accent);
+  color:#fff;
+  text-decoration:none;
+  font-weight:600;
+  transition: all 0.25s ease;
+}
+
+.btn:hover{
+  transform: scale(1.05);
+  background: #8C6E00;
+}
+    .socials{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+    .socials a{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;background:#fff;border-radius:10px;border:1px solid #f0e6c2;text-decoration:none;color:#333;}
+    .icon{width:18px;height:18px;display:inline-block;}
+    @media (max-width:720px){ .container{padding:16px} .header{padding:24px} }
+  </style>
+</head>
+<body class="fade-in">
+  <div class="container">
+    <header class="header">
+      <h1>Kasih Nyata - Denantokh</h1>
+      <h3>Setiap Tetes Kasih Membawa Harapan</h3>
+    </header>
+
+    <main>
+      <section class="section">
+        <h2>🌾 Tentang Kasih Nyata - Denantokh</h2>
+        <p><strong>Kasih Nyata</strong> adalah gerakan pribadi yang berfokus pada tindakan nyata untuk menolong dan meneguhkan sesama pengikut Kristus. Kami mendukung kanal-kanal rohani agar semakin kuat menyuarakan kebenaran dan kasih Tuhan.</p>
+        <p>Kami percaya setiap tindakan kecil penuh kasih dapat menjadi pengharapan baru bagi banyak orang.</p>
+      </section>
+
+      <section class="section">
+        <h2>❤️ Misi</h2>
+        <div class="mission-grid">
+          <div class="card">
+            <h3>🤝 Menolong Sesama</h3>
+            <p>Menyalurkan bantuan bagi umat Kristen yang membutuhkan dengan kasih dan transparansi.</p>
+          </div>
+          <div class="card">
+            <h3>💌 Menguatkan Channel Kristen</h3>
+            <p>Mendorong tumbuhnya kanal-kanal rohani agar mampu menjadi terang di media sosial.</p>
+          </div>
+          <div class="card">
+            <h3>🌅 Menebar Harapan</h3>
+            <p>Menjadi jembatan kasih bagi mereka yang sedang berjuang dalam masa sulit.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section donation">
+        <h2>💛 Dukungan Kasih</h2>
+        <p class="small">Dukunganmu, sekecil apa pun, membawa terang bagi banyak jiwa.<br>Scan QR berikut untuk berpartisipasi:</p>
+
+       <img id="qrisImg" class="qris-img" src="QRIS KASIHNYATA.jpg" alt="QRIS Kasih Nyata" />
+
+        <p class="small">📱 Gunakan aplikasi DANA, GoPay, OVO, BCA Mobile, Mandiri, atau aplikasi berlogo QRIS untuk scan kode di atas.</p>
+
+        <div>
+          <a href="#" class="btn" id="openBtn">Buka QR di tab baru</a>
+        <a href="#" id="downloadBtn" class="btn">Download QR</a>
+        </div>
+
+        <p class="small" style="margin-top:10px;">Jika QR belum tampil, coba buka melalui tombol di atas atau buka di incognito / jaringan seluler.</p>
+      </section>
+
+      <section class="section">
+        <div class="card">
+          <h2>🕊️ Doa & Dukungan</h2>
+          <p>Kekuatan kasih tidak hanya dari materi, tetapi juga dari doa dan empati. Semoga setiap kasih yang disalurkan menjadi berkat bagi sesama.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>📞 Kontak</h2>
+        <div class="socials">
+          <a href="https://www.tiktok.com/@denantokh" target="_blank" rel="noopener"><span class="icon">🎵</span><span class="small">TikTok</span></a>
+          <a href="https://www.youtube.com/@denantokh" target="_blank" rel="noopener"><span class="icon">🎥</span><span class="small">YouTube</span></a>
+          <a href="https://sites.google.com/view/gerakan-kasih" target="_blank" rel="noopener"><span class="icon">🌐</span><span class="small">Website</span></a>
+          <a href="mailto:gerakankasihnyata@gmail.com" target="_blank" rel="noopener"><span class="icon">📩</span><span class="small">Email</span></a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <blockquote style="font-style:italic;color:var(--muted);font-size:18px;margin:0 0 12px 0">
+        “Kebaikan sekecil apa pun akan membawa terang bagi dunia.”
+      </blockquote>
+      <p style="margin-top:12px;font-weight:600;color:#735D20">🌷 Kebaikan itu nyata ketika diwujudkan.</p>
+    </footer>
+  </div>
+
+  <script>
+    // Open new tab with centered responsive QR image (no scrolling)
+    (function(){
+      var openBtn = document.getElementById('openBtn');
+      var imgSrc = 'QRIS KASIHNYATA.jpg';
+      openBtn.addEventListener('click', function(e){
+        e.preventDefault();
+        var w = window.open('', '_blank');
+        if(!w) {
+          alert('Popup terblokir. Silakan klik tombol "Unduh QR" atau izinkan popup untuk situs ini.');
+          return;
+        }
+        var popupHtml = '<!doctype html><html><head><meta charset="utf-8"><title>QRIS — Kasih Nyata</title><style>body{margin:0;background:#fff;display:flex;align-items:center;justify-content:center;height:100vh;}img{max-width:90vw;max-height:90vh;box-shadow:0 6px 24px rgba(0,0,0,0.15);border-radius:12px;}</style></head><body><img src="'+imgSrc+'" alt="QRIS Gerakan Amal Kasih Nyata"></body></html>';
+        w.document.open();
+        w.document.write(popupHtml);
+        w.document.close();
+      });
+    })();
+  </script>
+<script>
+document.getElementById("downloadBtn").addEventListener("click", function(e) {
+  e.preventDefault();
+
+  const img = document.getElementById("qrisImg");
+
+  const a = document.createElement("a");
+  a.href = img.src; // ambil langsung dari gambar yang sudah tampil
+  a.download = "QRIS_KASIHNYATA.jpg";
+
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+});
+</script>
+</body>
+</html>
