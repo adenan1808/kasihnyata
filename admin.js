@@ -225,7 +225,16 @@ function generateInvoiceId(){
 
 /* ================= INIT STORE ================= */
 function initStore(){
-  const fields = ["storeName","ownerWa","ownerEmail","heroText","defaultMargin",
+
+  const toggles = ["heroEnabled","promoLeftEnabled","promoRightEnabled","qrisEnabled"];
+  toggles.forEach(t => {
+    const el = document.getElementById(t+"Toggle");
+    if(el) el.checked = (localStorage.getItem(t) !== "false"); // Default true
+  });
+  const waitEl = document.getElementById("waitTimerInput");
+  if(waitEl) waitEl.value = localStorage.getItem("waitTimer") || "5";
+
+  const fields = ["storeName","ownerWa","ownerEmail","heroText","defaultMargin","waitTimer",
                   "titleSize","titleColor","titleFont","heroSize","heroColor",
                   "bgColor","storeTheme","invoiceKode","invoiceStart","diskonPesan","ongkirDefault","noRekBank"];
   const defaults = { titleSize:"26", titleColor:"#f8fafc", titleFont:"'Plus Jakarta Sans',sans-serif",
@@ -252,7 +261,7 @@ function initStore(){
 
 /* ================= SAVE TOKO ================= */
 function saveToko(){
-  const fields = ["storeName","ownerWa","ownerEmail","heroText","defaultMargin",
+  const fields = ["storeName","ownerWa","ownerEmail","heroText","defaultMargin","waitTimer",
                   "titleSize","titleColor","titleFont","heroSize","heroColor",
                   "bgColor","storeTheme","invoiceKode","invoiceStart","diskonPesan","ongkirDefault","noRekBank"];
   fields.forEach(f=>{
@@ -262,6 +271,12 @@ function saveToko(){
     if(f==="invoiceKode") v = v.trim().toUpperCase().slice(0,3)||"WA";
     if(f==="heroText") v = v.trim()||"Jualan Mudah via WhatsApp ✨";
     localStorage.setItem(f, v);
+  });
+
+  const toggles = ["heroEnabled","promoLeftEnabled","promoRightEnabled","qrisEnabled"];
+  toggles.forEach(t => {
+    const el = document.getElementById(t+"Toggle");
+    if(el) localStorage.setItem(t, el.checked ? "true" : "false");
   });
   updateAllTitles();
   showToast("✅ Info toko tersimpan");

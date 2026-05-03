@@ -370,6 +370,57 @@ const products = ensureProductIndex(getProducts());
   return {total,ongkir,grand:total+ongkir,items,bundleActive,freeOngkir};
 }
 
+
+/* ================= AUTO CANCEL WAIT ================= */
+function autoCancelExpiredOrders() {
+    const waitTimerStr = localStorage.getItem("waitTimer") || "5";
+    const waitMinutes = parseInt(waitTimerStr, 10);
+
+    // If timer is 0, manual confirmation only, skip auto cancel
+    if(waitMinutes <= 0) return;
+
+    const maxWaitMs = waitMinutes * 60 * 1000;
+    const now = Date.now();
+    let txList = getTx();
+    let changed = false;
+    let products = null;
+
+    txList.forEach(tx => {
+        if((tx.status === "wait" || tx.status === "pending") && (now - tx.tgl > maxWaitMs)) {
+            tx.status = "batal";
+            changed = true;
+
+            // Return stock
+            if(!products) products = ensureProductIndex(getProducts());
+            if(tx.items && tx.items.length) {
+                tx.items.forEach(item => {
+                    const real = products._map[item.id];
+                    if(real && real.stok !== undefined) {
+                        real.stok += item.qty;
+                    }
+                });
+            }
+        }
+    });
+
+    if(changed) {
+        saveTx(txList);
+        if(products) {
+            if(window.Admin && Admin.saveProducts) {
+                Admin.saveProducts(products._list);
+                if(typeof window.notifySync==="function") window.notifySync("products");
+            } else {
+                localStorage.setItem("products", JSON.stringify(products._list));
+                if(typeof window.notifySync==="function") window.notifySync("products");
+            }
+            if(window._broadcastStockChange) window._broadcastStockChange();
+        }
+        console.log("[Auto Cancel] Canceled expired WAIT transactions and returned stock.");
+    }
+}
+setInterval(autoCancelExpiredOrders, 60000); // Check every minute
+window.autoCancelExpiredOrders = autoCancelExpiredOrders;
+
 /* ================= TRANSACTION STORAGE ================= */
 let _appTxCache = null;
 function getTx(){
@@ -477,8 +528,8 @@ async function saveTransaction(cart, data, extraFields={}){
     items:   cart.map(i=>{
       const real = products._map[i.id];
       if(!real) return null;
-      // Reduce stock ONLY if paid
-      if(!isWait && real.stok !== undefined && real.stok > 0){
+      // Reduce stock for both paid and wait to hold stock
+      if(real.stok !== undefined && real.stok > 0){
         real.stok = Math.max(0, real.stok - i.qty);
       }
       return {
@@ -654,6 +705,13 @@ function renderFull(){
 }
 
 function renderHeroPromo(){
+  const heroEnabled = localStorage.getItem("heroEnabled") !== "false";
+  const promoLeftEnabled = localStorage.getItem("promoLeftEnabled") !== "false";
+  const promoRightEnabled = localStorage.getItem("promoRightEnabled") !== "false";
+
+  const heroWrapper = document.querySelector('.hero-wrapper');
+  if (heroWrapper) heroWrapper.style.display = heroEnabled ? "" : "none";
+
   const track = document.getElementById("heroSliderTrack");
   const dotsEl = document.getElementById("heroDots");
   const left = document.getElementById("heroPromoLeft");
@@ -668,6 +726,12 @@ function renderHeroPromo(){
   try{ rightImages = JSON.parse(localStorage.getItem("heroPromoRightImages")||"[]"); }catch(e){}
   if(!leftImages.length && leftLegacy) leftImages = [leftLegacy];
   if(!rightImages.length && rightLegacy) rightImages = [rightLegacy];
+
+  if(!promoLeftEnabled) leftImages = [];
+  if(!promoRightEnabled) rightImages = [];
+  left.style.display = promoLeftEnabled ? "" : "none";
+  right.style.display = promoRightEnabled ? "" : "none";
+
 
   const promoTitle   = (localStorage.getItem("promoTitle")||"").trim();
   const promoDesc    = (localStorage.getItem("promoDesc")||"").trim();
@@ -1000,7 +1064,7 @@ function _productCardHTML(p){
     : "";
 
   return `
-    <div class="product-card" data-id="${id}" ${stok===0?'style="opacity:.6;pointer-events:none"':''}>
+    <div class="product-card" data-id="${id}" ${stok<=0?'style="opacity:.6;pointer-events:none"':''}>
       <div class="product-card-img-wrap">
         ${imgHtml}
         ${diskon?`<span class="badge-diskon">-${diskon}%</span>`:""}
@@ -1662,7 +1726,7 @@ async function _posRenderGrid(){
       : `<button class="pos-card-add-btn" onclick="event.stopPropagation();App._posQtyDelta('${id}',1)">+</button>`;
 
     return `
-      <div class="pos-card${inCart?" in-cart":""}${stokNum===0?" out-of-stock":""}" data-pos-id="${id}">
+      <div class="pos-card${inCart?" in-cart":""}${stokNum<=0?" out-of-stock":""}" ${stokNum<=0?"style=\"opacity:0.6;pointer-events:none;\"":""} data-pos-id="${id}">
         <div class="pos-card-img">
           ${imgHtml}
           ${qty>0?`<div class="pos-card-qty-badge">${qty}</div>`:""}
@@ -1682,6 +1746,9 @@ async function _posRenderGrid(){
 }
 
 function _posQtyDelta(id, delta){
+  const products = getProducts();
+  const p = products.find(x=>x.id===id);
+  if(p && p.stok <= 0) return; // Prevent adding if out of stock
   let cart = getCart();
   const idx = cart.findIndex(x => String(x.id) === String(id));
   if(delta > 0){
@@ -1881,7 +1948,13 @@ async function posBayar(){
   posBayar._lock = true;
   setTimeout(()=>{ posBayar._lock=false; }, 1500);
 
-  const payMethod = document.getElementById("posPayMethod")?.value||"Tunai";
+  let payMethod = document.getElementById("posPayMethod")?.value||"Tunai";
+
+  // Jika QRIS admin di-disable, perlakukan QRIS sebagai Tunai
+  const qrisEnabled = localStorage.getItem("qrisEnabled") !== "false";
+  if(payMethod === "QRIS" && !qrisEnabled){
+      payMethod = "Tunai";
+  }
 
   // QRIS: timer 3 detik sebelum proses otomatis
   if(payMethod === "QRIS" && !posBayar._qrisValidated){
@@ -1892,22 +1965,28 @@ async function posBayar(){
         return;
     }
 
+
     // Tampilkan overlay QRIS
     const qrisOverlay = document.getElementById("posQrisOverlay");
     if(qrisOverlay) qrisOverlay.style.display = "flex";
 
     const oldBtnText = document.getElementById("posBayarBtn").innerHTML;
-    document.getElementById("posBayarBtn").innerHTML = "Tunggu 3 Detik...";
+    document.getElementById("posBayarBtn").innerHTML = "<b style='color:#fff'>Tunggu 3 Detik...</b>";
     document.getElementById("posBayarBtn").disabled = true;
+    document.getElementById("posBayarBtn").style.backgroundColor = "#dc2626"; // Merah
+    document.getElementById("posBayarBtn").style.borderColor = "#b91c1c";
 
-    showToast("⚠️ Tunggu 3 detik untuk QRIS...");
+    showToast("⚠️ CEK PEMBAYARAN! Tunggu 3 Detik...", 3000, {background: "#dc2626", color: "#fff", fontWeight: "bold"});
     setTimeout(()=>{
       posBayar._qrisValidated = true;
       posBayar._lock = false;
       document.getElementById("posBayarBtn").disabled = false;
       document.getElementById("posBayarBtn").innerHTML = oldBtnText;
-      showToast("✅ Silakan klik BAYAR kembali");
+      document.getElementById("posBayarBtn").style.backgroundColor = ""; // Reset
+      document.getElementById("posBayarBtn").style.borderColor = "";
+      showToast("✅ Validasi OK! Silakan klik BAYAR kembali", 3000, {background: "#16a34a", color: "#fff", fontWeight: "bold"});
     }, 3000);
+
     return;
   }
 
@@ -2319,6 +2398,7 @@ window.addEventListener("resize", ()=>{
 
 // Checkout modal: ENTER on last input field triggers sendWA
 document.addEventListener("DOMContentLoaded", ()=>{
+  if(typeof autoCancelExpiredOrders === "function") autoCancelExpiredOrders();
   ["cNama","cWa","cAlamat"].forEach((id, idx, arr)=>{
     const el = document.getElementById(id);
     if(!el) return;
