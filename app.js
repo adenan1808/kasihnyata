@@ -1347,6 +1347,8 @@ msg += `\n💳 *TOTAL: Rp ${grandTampil.toLocaleString("id")}*\n`;
 msg += `🔐 Kode: *${sig}* (#${nonce})\n`;
 
 msg += `\nTerima kasih 🙏`;
+
+return { msg, inv, grand: grandTampil, sig };
 }
 
 async function sendWA(){
