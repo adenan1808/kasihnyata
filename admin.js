@@ -688,7 +688,7 @@ function addProduct(){
 
   signProduct(newProduct)
     .then(sig => _doSave(sig))
-    .catch(()  => _doSave(null));
+    .catch(e  => { console.error("signProduct error", e); _doSave(null); });
 }
 
 /* ================= DELETE PRODUCT (IDB) ================= */

@@ -995,7 +995,7 @@ function _productCardHTML(p){
     ? stok <= 0
       ? `<div class="product-card-stok habis">❌ Habis</div>`
       : stok < 5
-        ? `<div class="product-card-stok low">⚠️Stok: ${stok}</div>`
+        ? `<div class="product-card-stok low">⚠️ Stok: ${stok}</div>`
         : `<div class="product-card-stok">Stok: ${stok}</div>`
     : "";
 
