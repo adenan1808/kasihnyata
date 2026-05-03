@@ -377,7 +377,6 @@ function getTx(){
   try{ return JSON.parse(localStorage.getItem("transaksi")||"[]"); }catch(e){ return []; }
 }
 function saveTx(list){
-  localStorage.setItem("transaksi"
   localStorage.setItem("transaksi", JSON.stringify(list)); if(typeof window.notifySync==="function") window.notifySync("transactions");
   _appTxCache = list;
   if(window.Core && Core.idbPutAll){
@@ -422,7 +421,6 @@ function reduceStockForTx(tx){
     Admin.saveProducts(products); if(typeof window.notifySync==="function") window.notifySync("products");
     Admin.invalidateProductCache && Admin.invalidateProductCache();
   } else {
-    localStorage.setItem("products"
   localStorage.setItem("products", JSON.stringify(products)); if(typeof window.notifySync==="function") window.notifySync("products");
   }
   _broadcastStockChange();
@@ -507,7 +505,6 @@ async function saveTransaction(cart, data, extraFields={}){
     Admin.saveProducts(getProducts()); if(typeof window.notifySync==="function") window.notifySync("products");
     Admin.invalidateProductCache && Admin.invalidateProductCache();
   } else {
-    localStorage.setItem("products"
   localStorage.setItem("products", JSON.stringify(getProducts())); if(typeof window.notifySync==="function") window.notifySync("products");
     if(window._broadcastStockChange) window._broadcastStockChange();
   }
