@@ -420,9 +420,21 @@
           </select>
         </div>
         <div id="pTempoWrap" style="display:none; margin-top:8px;">
-          <label class="field-label">Tanggal Jatuh Tempo</label>
-          <input id="pTempo" type="date" style="width:100%">
+          <label class="field-label">Tanggal Jatuh Tempo (DDMMYYYY)</label>
+          <input id="pTempo" type="text" placeholder="DDMMYYYY" style="width:100%" pattern="[0-9]{8}" maxlength="8">
         </div>
+        <script>
+            // Set default 3 bulan
+            const tempoEl = document.getElementById('pTempo');
+            if(tempoEl && !tempoEl.value) {
+                const d = new Date();
+                d.setMonth(d.getMonth() + 3);
+                const dd = String(d.getDate()).padStart(2, '0');
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const yyyy = d.getFullYear();
+                tempoEl.value = dd + mm + yyyy;
+            }
+        </script>
 
         <label class="field-label">Margin Default (%)</label>
         <div class="margin-row">
@@ -590,9 +602,17 @@
 
         <!-- FULL REPORT -->
         <div class="panel-box">
-          <div class="panel-box-header">
-            <span class="panel-icon">📊</span>
-            <div><div class="panel-title">Laporan Keseluruhan</div><div class="panel-desc">Semua waktu</div></div>
+                    <div class="panel-box-header">
+            <span class="panel-icon">&#128202;</span>
+            <div>
+              <div class="panel-title">Laporan Keseluruhan</div>
+              <div class="panel-desc">
+                <input type="date" id="filterAwal" style="padding:2px;font-size:11px;">
+                - <input type="date" id="filterAkhir" style="padding:2px;font-size:11px;">
+                <button onclick="Admin.renderAkuntansi()" class="btn-sm" style="padding:4px 8px;font-size:11px;">Filter</button>
+              </div>
+            </div>
+            <button onclick="Admin.hapusSeluruhData()" class="btn-sm" style="background:#450a0a;color:#f87171;margin-left:auto;">&#128465; Hapus Semua Data</button>
           </div>
           <div class="report-summary-grid">
             <div class="report-item">
@@ -713,13 +733,32 @@
   <!-- TAB TABLE -->
   <div id="tabTable" class="tab-panel">
     <div class="panel-box">
-      <div class="panel-box-header"><span class="panel-icon">📋</span><div><div class="panel-title">Table Penjualan</div><div class="panel-desc">Rekap per produk + status pembayaran</div></div></div>
+            <div class="panel-box-header">
+        <span class="panel-icon">&#128203;</span>
+        <div>
+          <div class="panel-title">Rekap dan Stok</div>
+          <div class="panel-desc">Rekap per produk + status pembayaran</div>
+        </div>
+        <div style="margin-left:auto; display:flex; flex-direction:column; gap:4px; font-size:11px; background:var(--surface2); padding:6px 10px; border-radius:6px; border:1px solid var(--border2)">
+          <div>Paling laku bulan ini: <b id="topProduct" style="color:var(--accent)">-</b></div>
+          <div>Penjual terbanyak bulan ini: <b id="topSeller" style="color:var(--accent)">-</b></div>
+        </div>
+      </div>
+      <input type="text" id="searchTable" placeholder="Cari nama produk..." oninput="Admin.renderTable()" class="search-input" style="margin-bottom:12px">
       <div class="table-wrap">
         <table class="data-table" id="tableRekap">
           <thead>
             <tr>
-              <th>Nama Produk</th><th>Terjual</th><th>Sumber</th><th>Stok</th>
-              <th>Modal Avg</th><th>Omzet</th><th>HPP</th><th>Laba</th><th>Margin</th><th>Status</th>
+              <th onclick="Admin.setTableSort('nama')" style="cursor:pointer">Nama Produk &#8693;</th>
+              <th onclick="Admin.setTableSort('terjual')" style="cursor:pointer">Terjual &#8693;</th>
+              <th onclick="Admin.setTableSort('sumber')" style="cursor:pointer">Sumber &#8693;</th>
+              <th onclick="Admin.setTableSort('stok')" style="cursor:pointer">Stok &#8693;</th>
+              <th onclick="Admin.setTableSort('modalAvg')" style="cursor:pointer">Modal Avg &#8693;</th>
+              <th onclick="Admin.setTableSort('omzet')" style="cursor:pointer">Omzet &#8693;</th>
+              <th onclick="Admin.setTableSort('hpp')" style="cursor:pointer">HPP &#8693;</th>
+              <th onclick="Admin.setTableSort('laba')" style="cursor:pointer">Laba &#8693;</th>
+              <th onclick="Admin.setTableSort('margin')" style="cursor:pointer">Margin &#8693;</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody id="tableRekapBody"></tbody>
@@ -746,11 +785,37 @@
   </div>
 
   <!-- TAB PELANGGAN -->
-  <div id="tabPelanggan" class="tab-panel">
+    <div id="tabPelanggan" class="tab-panel">
     <div class="panel-box">
-      <div class="panel-box-header"><span class="panel-icon">👥</span><div><div class="panel-title">Data Pelanggan</div><div class="panel-desc" id="pelangganCount">0 pelanggan tersimpan</div></div></div>
-      <input id="pelangganSearch" class="search-input" placeholder="🔍 Cari nama / no WA..." style="margin-bottom:12px" oninput="renderPelangganList(this.value)">
-      <div id="pelangganList" class="pelanggan-list"></div>
+      <div class="panel-box-header"><span class="panel-icon">&#128101;</span><div><div class="panel-title">Data Pelanggan</div><div class="panel-desc" id="pelangganCount">0 pelanggan tersimpan</div></div></div>
+      <input id="pelangganSearch" class="search-input" placeholder="&#128269; Cari nama / no WA..." style="margin-bottom:12px" oninput="Admin.renderPelangganList(this.value)">
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nama</th>
+              <th>No WA</th>
+              <th>Alamat</th>
+              <th>Pembelian Terakhir</th>
+              <th>History Pembelian</th>
+            </tr>
+          </thead>
+          <tbody id="pelangganList"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="historyPelangganModal" class="modal">
+    <div class="modal-box" style="max-width:500px">
+      <div class="modal-header"><h3>&#128196; History Pembelian Bulanan</h3><button onclick="document.getElementById('historyPelangganModal').style.display='none'" class="modal-close">&#10005;</button></div>
+      <div style="padding:16px;">
+        <div id="historyPelangganInfo" style="margin-bottom:12px;font-weight:bold;color:var(--text1)"></div>
+        <table class="data-table" style="width:100%">
+          <thead><tr><th>Bulan/Tahun</th><th>Transaksi</th><th>Total Omzet</th></tr></thead>
+          <tbody id="historyPelangganBody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 

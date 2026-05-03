@@ -939,7 +939,7 @@ function _updateProductCards(){
     const qtyWrap=cardEl.querySelector(".product-card-qty");
     if(qtyWrap){
       if(qty>0){
-        qtyWrap.innerHTML=`<div class="stepper-row"><button class="stepper-btn stepper-min qty-btn" data-id="${id}" data-delta="-1">âˆ’</button><span class="stepper-num">${qty}</span><button class="stepper-btn stepper-plus qty-btn" data-id="${id}" data-delta="1">+</button></div>`;
+        qtyWrap.innerHTML=`<div class="stepper-row"><button class="stepper-btn stepper-min qty-btn" data-id="${id}" data-delta="-1">&#8722;</button><span class="stepper-num">${qty}</span><button class="stepper-btn stepper-plus qty-btn" data-id="${id}" data-delta="1">+</button></div>`;
       } else {
         qtyWrap.innerHTML=`<button class="buyer-add-btn qty-btn" data-id="${id}" data-delta="1">+</button>`;
       }
@@ -969,7 +969,7 @@ function _productCardHTML(p){
   const qtyControls = qty > 0
     ? `<div class="product-card-qty">
         <div class="buyer-stepper">
-          <button class="buyer-stepper-btn buyer-stepper-min qty-btn" data-id="${id}" data-delta="-1">−</button>
+          <button class="buyer-stepper-btn buyer-stepper-min qty-btn" data-id="${id}" data-delta="-1">&#8722;</button>
           <span class="buyer-stepper-num">${qty}</span>
           <button class="buyer-stepper-btn buyer-stepper-plus qty-btn" data-id="${id}" data-delta="1">+</button>
         </div>
@@ -1070,7 +1070,6 @@ document.getElementById("kategoriOptions")?.addEventListener("click", e=>{
 
 /* ================= CART UI ================= */
 function updateCartUI(){
-
 	// ================= FIX QTY UI SYNC =================
 const cart = getCart();
 
@@ -1087,7 +1086,10 @@ document.querySelectorAll("[data-id]").forEach(el=>{
 });
   const data=calculateCart();
   const bar=document.getElementById("stickyCart"); if(!bar) return;
-  if(data.items>0){
+
+  const isWebBuyer = document.getElementById("buyerView") && document.getElementById("buyerView").style.display !== "none";
+
+  if(data.items>0 && isWebBuyer){
     bar.style.display="flex";
     document.getElementById("stickyTotal").textContent="Rp "+data.grand.toLocaleString("id");
     document.getElementById("stickyItems").textContent=data.items+" item";
@@ -1219,7 +1221,7 @@ function _renderCart(){
       <div class="cart-item-right">
         <div class="cart-item-price">Rp ${sub.toLocaleString("id")}</div>
         <div class="cart-stepper">
-          <button class="stepper-btn stepper-min qty-btn" data-id="${i.id}" data-delta="-1">âˆ’</button>
+          <button class="stepper-btn stepper-min qty-btn" data-id="${i.id}" data-delta="-1">&#8722;</button>
           <span class="stepper-num">${i.qty}</span>
           <button class="stepper-btn stepper-plus qty-btn" data-id="${i.id}" data-delta="1">+</button>
         </div>
@@ -1331,18 +1333,25 @@ async function buildOrderMessage(nama, waP, alamat, extraFields={}){
 }
 
 async function sendWA(){
-  const wa=localStorage.getItem("ownerWa"); if(!wa){showToast("âŒ No WA belum diset");return;}
+  const wa=localStorage.getItem("ownerWa"); if(!wa){showToast("\xe2\x9d\x8c No WA belum diset");return;}
   const paymentMethod = document.getElementById("cPaymentMethod")?.value || "WA";
+
+  const inNama = document.getElementById("cNama").value || "Pelanggan";
+  const inWa = document.getElementById("cWa").value || "-";
+  const inAlamat = document.getElementById("cAlamat").value || "-";
+
   const result=await buildOrderMessage(
-    document.getElementById("cNama").value||"Pelanggan",
-    document.getElementById("cWa").value||"-",
-    document.getElementById("cAlamat").value||"-",
-    { paymentMethod }
+    inNama,
+    inWa,
+    inAlamat,
+    { paymentMethod: paymentMethod, status: "wait", nama: inNama, hp: inWa, alamat: inAlamat }
   );
   window.open("https://wa.me/"+wa+"?text="+encodeURIComponent(result.msg));
-  saveCart([]); closeCheckout(); updateCartUI(); renderFull();
-  showToast("âœ… Pesanan dikirim via WA");
-  if(window.Admin) Admin.renderAkuntansi&&Admin.renderAkuntansi();
+  saveCart([]); closeCheckout(); updateCartUI();
+  if(window.App && window.App.renderFull) App.renderFull();
+  showToast("\xe2\x9c\x85 Pesanan dikirim via WA");
+  if(window.Admin && Admin.renderAkuntansi) Admin.renderAkuntansi();
+  if(window.Admin && Admin.renderTable) Admin.renderTable();
 }
 
 async function sendEmail(){
@@ -1573,9 +1582,15 @@ function _posRenderKategoriChips(){
 }
 
 /* â”€â”€ Product grid â”€â”€ */
-function _posRenderGrid(){
+async function _posRenderGrid(){
   const el = document.getElementById("posProductGrid"); if(!el) return;
-  const products = getProducts();
+  let products = getProducts();
+  if(!products || products.length === 0) {
+    if(window.Core && Core.idbGetAll) {
+        products = await Core.idbGetAll("products");
+    }
+  }
+
   const cart = getCart();
   const q = _posSearch.toLowerCase();
 
@@ -1621,7 +1636,7 @@ function _posRenderGrid(){
     // Cart quantity stepper vs single + button
     const qtyCtrl = inCart
       ? `<div class="pos-card-stepper">
-           <button class="stepper-btn" onclick="event.stopPropagation();App._posQtyDelta('${id}',-1)">−</button>
+           <button class="stepper-btn" onclick="event.stopPropagation();App._posQtyDelta('${id}',-1)">&#8722;</button>
            <span class="stepper-num">${qty}</span>
            <button class="stepper-btn" onclick="event.stopPropagation();App._posQtyDelta('${id}',1)">+</button>
          </div>`
@@ -1842,33 +1857,40 @@ async function posBayar(){
   const cart = getCart();
   if(!cart.length){ showToast("Keranjang kosong"); return; }
 
-  const bayarBtn = document.getElementById("posBayarBtn");
-  if(bayarBtn && bayarBtn.disabled) return;
-
   // Debounce
   if(posBayar._lock){ return; }
   posBayar._lock = true;
   setTimeout(()=>{ posBayar._lock=false; }, 1500);
 
-  // QRIS: peringatan 3 detik menutupi tombol bayar, lalu proses otomatis
-  const payMethod0 = document.getElementById("posPayMethod")?.value||"Tunai";
-  if(payMethod0 === "QRIS" && !posBayar._qrisValidated){
-    if(document.getElementById("posQrisWarn")){ posBayar._lock=false; return; }
-    const warn = document.createElement("div");
-    warn.id = "posQrisWarn";
-    warn.className = "pos-qris-warn-overlay";
-    warn.innerHTML = "<b>⚠️ VALIDASI DULU</b><small>Lanjut otomatis dalam <span id=\"qrisCountdown\">3</span> detik...</small>";
-    bayarBtn.style.position = "relative";
-    bayarBtn.appendChild(warn);
+  const payMethod = document.getElementById("posPayMethod")?.value||"Tunai";
+
+  // QRIS: timer 3 detik sebelum proses otomatis
+  if(payMethod === "QRIS" && !posBayar._qrisValidated){
+    const qrisSrc = localStorage.getItem("qrisImg")||localStorage.getItem("qris")||"";
+    if(!qrisSrc) {
+        showToast("QRIS belum diupload di menu Toko");
+        posBayar._lock = false;
+        return;
+    }
+
+    // Show mini popup
+    const qrisMini = document.getElementById("posQrisMini");
+    const qrisImgMini = document.getElementById("posQrisImgMini");
+    if(qrisMini && qrisImgMini) {
+        qrisImgMini.src = qrisSrc;
+        qrisMini.style.display = "block";
+    }
+
     let _sisa = 3;
+    showToast("Tunggu " + _sisa + " detik untuk QRIS...");
     const _iv = setInterval(()=>{
       _sisa--;
-      const cd = document.getElementById("qrisCountdown");
-      if(cd) cd.textContent = _sisa;
+      if(_sisa > 0) {
+         showToast("Tunggu " + _sisa + " detik untuk QRIS...");
+      }
       if(_sisa <= 0){
         clearInterval(_iv);
-        warn.remove();
-        bayarBtn.style.position = "";
+        if(qrisMini) qrisMini.style.display = "none";
         posBayar._qrisValidated = true;
         posBayar._lock = false;
         App.posBayar();
@@ -1877,13 +1899,18 @@ async function posBayar(){
     posBayar._lock = false;
     return;
   }
+
+  if(payMethod !== "QRIS") {
+    const qrisMini = document.getElementById("posQrisMini");
+    if(qrisMini) qrisMini.style.display = "none";
+  }
+
   posBayar._qrisValidated = false;
 
   // Get customer data
   const namaRaw   = document.getElementById("posNama")?.value.trim()||"";
   const hpRaw     = document.getElementById("posHp")?.value.trim()||"";
   const alamatRaw = document.getElementById("posAlamat")?.value.trim()||"";
-  const payMethod = document.getElementById("posPayMethod")?.value||"Tunai";
 
   const nama   = namaRaw   ? _titleCase(namaRaw)   : "Pelanggan";
   const alamat = alamatRaw ? alamatRaw.charAt(0).toUpperCase()+alamatRaw.slice(1) : "-";
@@ -2161,6 +2188,24 @@ document.addEventListener("input", e=>{
         _enterLock=true; setTimeout(()=>_enterLock=false, 800);
         posBayar();
         return;
+      }
+
+      // Map keys to payment methods
+      if((key==="1" || key==="t" || key==="T") && !inText){
+          document.getElementById('posPayMethod').value='Tunai';
+          posBayar(); return;
+      }
+      if((key==="2" || key==="q" || key==="Q") && !inText){
+          document.getElementById('posPayMethod').value='QRIS';
+          posBayar(); return;
+      }
+      if((key==="3" || key==="r" || key==="R") && !inText){
+          document.getElementById('posPayMethod').value='Transfer';
+          posBayar(); return;
+      }
+      if((key==="4" || key==="c" || key==="C") && !inText){
+          document.getElementById('posPayMethod').value='COD';
+          posBayar(); return;
       }
       if(key==="Escape"){
         e.preventDefault();

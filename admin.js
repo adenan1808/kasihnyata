@@ -575,7 +575,13 @@ function _updateExistingProduct(id){
   const stok  = +(document.getElementById("pStok")?.value)||0;
   const kat   = document.getElementById("pKategori")?.value||"Umum";
   const sumber = document.getElementById("pSumber")?.value||"Cash";
-  const tempo  = document.getElementById("pTempo")?.value||"";
+  let tempo  = document.getElementById("pTempo")?.value||"";
+  if(tempo.length === 8) {
+      const d = tempo.substring(0,2);
+      const m = tempo.substring(2,4);
+      const y = tempo.substring(4,8);
+      tempo = y + '-' + m + '-' + d;
+  }
   if(!name){ showToast("Nama produk wajib diisi"); return; }
   if(price <= 0){ showToast("Harga jual harus > 0"); return; }
   if(products[idx].n !== undefined) products[idx].n = name; else products[idx].name = name;
@@ -626,7 +632,13 @@ function addProduct(){
   const price = +(document.getElementById("pPrice")?.value)||0;
   const stok  = +(document.getElementById("pStok")?.value)||0;
   const sumber = document.getElementById("pSumber")?.value||"Cash";
-  const tempo  = document.getElementById("pTempo")?.value||"";
+  let tempo  = document.getElementById("pTempo")?.value||"";
+  if(tempo.length === 8) {
+      const d = tempo.substring(0,2);
+      const m = tempo.substring(2,4);
+      const y = tempo.substring(4,8);
+      tempo = y + '-' + m + '-' + d;
+  }
   const imgEl = document.getElementById("pImgPrev")?.querySelector("img");
   const img   = imgEl ? imgEl.src : "";
 
@@ -667,10 +679,10 @@ function addProduct(){
     if(sig) newProduct.sig = sig;
     products.push(newProduct);
     saveProducts(products);
-    invalidateProductCache();
+    invalidateProductCache && invalidateProductCache();
     showToast("✅ Produk berhasil ditambahkan!");
     renderOwnerProdukList();
-    if(window.App) App.renderFull();
+    if(window.App && window.App.renderFull) App.renderFull();
     _resetForm();
   }
 
@@ -919,10 +931,21 @@ function renderAkuntansi(){
     }, 100);
   }
 
-  const txAll = JSON.parse(localStorage.getItem("transaksi")||"[]");
+  const txAllRaw = JSON.parse(localStorage.getItem("transaksi")||"[]");
   const rekap = JSON.parse(localStorage.getItem("rekapBulanan")||"[]");
   const rp = v => "Rp "+Math.round(v).toLocaleString("id");
   const el = id => document.getElementById(id);
+
+  const fAwal = el("filterAwal")?.value;
+  const fAkhir = el("filterAkhir")?.value;
+
+  let txAll = txAllRaw;
+  if(fAwal && fAkhir) {
+    const tAwal = new Date(fAwal).getTime();
+    const tAkhir = new Date(fAkhir);
+    tAkhir.setHours(23, 59, 59, 999);
+    txAll = txAllRaw.filter(tx => tx.tgl >= tAwal && tx.tgl <= tAkhir.getTime());
+  }
 
   const todayStart = new Date(); todayStart.setHours(0,0,0,0);
   const ts = todayStart.getTime();
@@ -1417,7 +1440,12 @@ function _editProductForm(id){
   set("pStok",  p.stok !== undefined ? p.stok : "");
   // Sumber & Tempo
   set("pSumber", p.sumber || "Cash");
-  set("pTempo", p.tempo || "");
+  let t = p.tempo || "";
+  if(t && t.includes("-")){
+     const parts = t.split("-");
+     if(parts.length === 3) t = parts[2] + parts[1] + parts[0];
+  }
+  set("pTempo", t);
   const wrap = document.getElementById("pTempoWrap");
   if(wrap) wrap.style.display = (p.sumber==="Hutang" || p.sumber==="Titip Jual") ? "block" : "none";
 
@@ -1481,14 +1509,42 @@ function clearProductForm(){
 }
 
 /* ================= TABLE TAB ================= */
+let _tableSortCol = "terjual";
+let _tableSortDir = "desc";
+function setTableSort(col) {
+  if(_tableSortCol === col) {
+    _tableSortDir = _tableSortDir === "asc" ? "desc" : "asc";
+  } else {
+    _tableSortCol = col;
+    _tableSortDir = "desc"; // default new col to desc
+  }
+  renderTable();
+}
+
 function renderTable(){
   const txAll = getTxForAdmin();
   const products = getProducts();
   const rp = v => "Rp " + Math.round(v).toLocaleString("id");
+  const sq = (document.getElementById("searchTable")?.value || "").toLowerCase();
+
+  // Find top product and seller this month
+  const now = new Date();
+  const currMonth = now.getMonth();
+  const currYear = now.getFullYear();
+  let topProdMap = {};
+  let topSellerMap = {};
 
   // Build per-product stats
   const stats = {};
   txAll.forEach(tx => {
+    const d = new Date(tx.tgl);
+    const isThisMonth = d.getMonth() === currMonth && d.getFullYear() === currYear;
+
+    if(isThisMonth) {
+       const src = tx.source || "kasir";
+       topSellerMap[src] = (topSellerMap[src] || 0) + 1;
+    }
+
     (tx.items||[]).forEach(item => {
       const id = item.id;
       if(!stats[id]) stats[id] = {
@@ -1502,22 +1558,58 @@ function renderTable(){
       stats[id].modalSum+= (item.modal||0);
       if(tx.source === "web") stats[id].web += item.qty;
       else stats[id].kasir += item.qty;
+
+      if(isThisMonth) topProdMap[item.nama] = (topProdMap[item.nama] || 0) + item.qty;
     });
   });
+
+  let topP = "-", maxP = 0;
+  for(const [k,v] of Object.entries(topProdMap)){ if(v > maxP) { maxP=v; topP=k; } }
+  let topS = "-", maxS = 0;
+  for(const [k,v] of Object.entries(topSellerMap)){ if(v > maxS) { maxS=v; topS=k; } }
+
+  const elTP = document.getElementById("topProduct"); if(elTP) elTP.textContent = topP + (maxP > 0 ? ` (${maxP})` : "");
+  const elTS = document.getElementById("topSeller"); if(elTS) elTS.textContent = topS + (maxS > 0 ? ` (${maxS})` : "");
 
   const tbody = document.getElementById("tableRekapBody"); if(!tbody) return;
   if(!Object.keys(stats).length){
     tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--text3)">Belum ada data transaksi</td></tr>';
   } else {
-    const rows = Object.values(stats).map(s => {
-      // Find current product for stock
-      const prod = products.find(p => p.n === s.nama || p.name === s.nama);
-      const stok = prod ? (prod.stok !== undefined ? prod.stok : '—') : '—';
-      const modalAvg = s.terjual > 0 ? Math.round(s.hpp / s.terjual) : 0;
-      const laba = s.omzet - s.hpp;
-      const margin = s.omzet > 0 ? ((laba/s.omzet)*100).toFixed(1) : '0';
+    let arrStats = Object.values(stats).map(s => {
+       const prod = products.find(p => p.n === s.nama || p.name === s.nama);
+       const stok = prod ? (prod.stok !== undefined ? prod.stok : 0) : 0;
+       const stokStr = prod ? (prod.stok !== undefined ? prod.stok : '\xe2\x80\x94') : '\xe2\x80\x94';
+       const modalAvg = s.terjual > 0 ? Math.round(s.hpp / s.terjual) : 0;
+       const laba = s.omzet - s.hpp;
+       const margin = s.omzet > 0 ? parseFloat(((laba/s.omzet)*100).toFixed(1)) : 0;
+       let sumberProd = "Cash";
+       if(prod && prod.sumber) sumberProd = prod.sumber;
+       return { ...s, prod, stok, stokStr, modalAvg, laba, margin, sumberProd };
+    });
 
-      let sumberProd = "Cash";
+    if(sq) {
+       arrStats = arrStats.filter(x => x.nama.toLowerCase().includes(sq));
+    }
+
+    arrStats.sort((a,b) => {
+       let va = a[_tableSortCol], vb = b[_tableSortCol];
+       if(_tableSortCol === 'sumber') { va = a.sumberProd; vb = b.sumberProd; }
+       if(_tableSortCol === 'nama') { va = a.nama; vb = b.nama; }
+
+       if(typeof va === 'string' && typeof vb === 'string') {
+          return _tableSortDir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+       } else {
+          return _tableSortDir === 'asc' ? va - vb : vb - va;
+       }
+    });
+
+    const rows = arrStats.map(s => {
+      const prod = s.prod;
+      const stokStr = s.stokStr;
+      const modalAvg = s.modalAvg;
+      const laba = s.laba;
+      const margin = s.margin;
+      let sumberProd = s.sumberProd;
       let statusWarningHtml = "<span style='color:#4ade80; font-weight:bold;'>Aman</span>";
       if(prod && prod.sumber && prod.sumber !== "Cash"){
         sumberProd = prod.sumber;
@@ -1539,7 +1631,7 @@ function renderTable(){
         <td><b>${s.nama}</b></td>
         <td>${s.terjual}</td>
         <td><span class="tx-source-badge">Kasir:${s.kasir}</span> <span class="tx-source-badge">Web:${s.web}</span></td>
-        <td>${stok}</td>
+        <td>${stokStr}</td>
         <td>${rp(modalAvg)}</td>
         <td>${rp(s.omzet)}</td>
         <td>${rp(s.hpp)}</td>
@@ -1680,7 +1772,7 @@ function renderTxListTable(txAll){
       </div>
       <div class="tx-row2">
         <span class="tx-date-sm">${tgl}</span>
-        ${_c3?`<span class="tx-cust-sm">\xb7 ${_c3}</span>`:""}
+        ${_c3?`<span class="tx-cust-sm">� ${_c3}</span>`:""}
       </div>
       <div class="tx-row3">${_i3}</div>`
     frag.appendChild(div);
@@ -1904,8 +1996,8 @@ window.Admin = {
   signProduct, verifyProduct,
   // NEW
   deleteSelectedKategori, adjustStok, clearProductForm,
-  renderTable, renderTxListTable, renderPelangganList, renderHistory,
-  showTxDetail, updateTxStatus, updateProductStatus,
+  renderTable, renderTxListTable, renderPelangganList, renderHistory, setTableSort,
+  showTxDetail, updateTxStatus, updateProductStatus, hapusSeluruhData, showHistoryPelanggan,
   applyHeroOverlay, loadHeroOverlaySettings,
   renderKategoriChipAdmin,
   // Kasir
@@ -1932,3 +2024,22 @@ window.showTab       = showTab;
 window.autoHargaJual = autoHargaJual;
 window.deleteBackupRecord = deleteBackupRecord;
 window.deleteProduct = deleteProduct;
+
+
+function hapusSeluruhData(){
+  if(!confirm("YAKIN? Ini akan menghapus semua data transaksi, rekap, dan pelanggan!")) return;
+  const pin = prompt("Masukkan PIN Owner untuk melanjutkan:");
+  // Simplified check without await since prompt is sync
+  if(!pin) return;
+
+  localStorage.setItem("transaksi", "[]");
+  localStorage.setItem("rekapBulanan", "[]");
+  localStorage.setItem("_customers", "{}");
+  if(window.Core && Core.idbClear) {
+    Core.idbClear("transaksi").catch(()=>{});
+  }
+  showToast("&#128465; Seluruh data berhasil dihapus");
+  renderAkuntansi();
+  if(window.renderTable) renderTable();
+  if(window.renderPelangganList) renderPelangganList();
+}
