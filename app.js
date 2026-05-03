@@ -377,7 +377,8 @@ function getTx(){
   try{ return JSON.parse(localStorage.getItem("transaksi")||"[]"); }catch(e){ return []; }
 }
 function saveTx(list){
-  localStorage.setItem("transaksi", JSON.stringify(list));
+  localStorage.setItem("transaksi"
+  localStorage.setItem("transaksi", JSON.stringify(list)); if(typeof window.notifySync==="function") window.notifySync("transactions");
   _appTxCache = list;
   if(window.Core && Core.idbPutAll){
     Core.idbPutAll("transaksi", list).catch(e=>{});
@@ -418,10 +419,11 @@ function reduceStockForTx(tx){
   });
   if(!changed) return;
   if(window.Admin && Admin.saveProducts){
-    Admin.saveProducts(products);
+    Admin.saveProducts(products); if(typeof window.notifySync==="function") window.notifySync("products");
     Admin.invalidateProductCache && Admin.invalidateProductCache();
   } else {
-    localStorage.setItem("products", JSON.stringify(products));
+    localStorage.setItem("products"
+  localStorage.setItem("products", JSON.stringify(products)); if(typeof window.notifySync==="function") window.notifySync("products");
   }
   _broadcastStockChange();
 }
@@ -502,10 +504,11 @@ async function saveTransaction(cart, data, extraFields={}){
 
   // Stock reduce  persist updated products
   if(window.Admin && Admin.saveProducts){
-    Admin.saveProducts(getProducts());
+    Admin.saveProducts(getProducts()); if(typeof window.notifySync==="function") window.notifySync("products");
     Admin.invalidateProductCache && Admin.invalidateProductCache();
   } else {
-    localStorage.setItem("products", JSON.stringify(getProducts()));
+    localStorage.setItem("products"
+  localStorage.setItem("products", JSON.stringify(getProducts())); if(typeof window.notifySync==="function") window.notifySync("products");
     if(window._broadcastStockChange) window._broadcastStockChange();
   }
 
@@ -2333,3 +2336,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 });
 
 window.debugApp = { getProducts, getCart, calculateCart };
+
+
+window.invalidateAppTxCache = function() { _appTxCache = null; };
+window.invalidateAppProductCache = function() { /* App relies on getProducts() from core/admin, so we may not need to do much, but we could re-render */ };

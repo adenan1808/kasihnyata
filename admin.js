@@ -123,13 +123,15 @@ async function saveProductsAsync(arr){
     try{ await Core.idbPutAll("products", minified); }catch(e){ console.warn("[IDB] save failed:",e); }
   }
   // localStorage compat
-  localStorage.setItem("products", JSON.stringify(minified));
+  localStorage.setItem("products"
+  localStorage.setItem("products", JSON.stringify(minified)); if(typeof window.notifySync==="function") window.notifySync("products");
 }
 
 // Sync save fallback
 function saveProducts(arr){
   const minified = arr.map(p => p.i !== undefined ? p : normalizeProduct(p));
-  localStorage.setItem("products", JSON.stringify(minified));
+  localStorage.setItem("products"
+  localStorage.setItem("products", JSON.stringify(minified)); if(typeof window.notifySync==="function") window.notifySync("products");
   _productsCache = minified;
   _productsDirty = false;
   // Fire-and-forget IDB sync
@@ -1226,7 +1228,8 @@ function importData(){
         const d=JSON.parse(ev.target.result);
         if(d.products && d.products.length){
           const normed = d.products.map(p => p.i !== undefined ? p : normalizeProduct(p));
-          localStorage.setItem("products", JSON.stringify(normed));
+          localStorage.setItem("products"
+  localStorage.setItem("products", JSON.stringify(normed)); if(typeof window.notifySync==="function") window.notifySync("products");
           invalidateProductCache && invalidateProductCache();
         }
         if(d.lsData && typeof d.lsData === "object"){
@@ -1759,6 +1762,7 @@ window.showTxDetail = function(inv, itemsJsonEncoded){
 };
 
 let _txCache = null;
+function invalidateTxCache(){ _txCache = null; }
 function getTxForAdmin(){
   if(_txCache) return _txCache;
   if(window.Core && Core.idbGetAll){
@@ -1846,7 +1850,8 @@ function updateTxStatus(invOrId, newStatus, selectEl){
     if(oldStatus === "paid") _restoreStockForTx(tx);
     // Hapus baris transaksi
     list.splice(idx, 1);
-    localStorage.setItem("transaksi", JSON.stringify(list));
+    localStorage.setItem("transaksi"
+  localStorage.setItem("transaksi", JSON.stringify(list)); if(typeof window.notifySync==="function") window.notifySync("transactions");
     showToast("🗑️ Transaksi dibatalkan, stok dikembalikan");
     // Hapus baris dari DOM jika ada
     const row = selectEl?.closest("tr, .tx-item");
@@ -1858,7 +1863,8 @@ function updateTxStatus(invOrId, newStatus, selectEl){
   }
 
   list[idx].status = newStatus;
-  localStorage.setItem("transaksi", JSON.stringify(list));
+  localStorage.setItem("transaksi"
+  localStorage.setItem("transaksi", JSON.stringify(list)); if(typeof window.notifySync==="function") window.notifySync("transactions");
 
   // Kurangi stok saat pertama kali dikonfirmasi paid
   if(newStatus === "paid" && oldStatus !== "paid"){
@@ -1888,7 +1894,8 @@ function updateProductStatus(nama, newStatus, selectEl){
       if((tx.status||"paid") === "paid") _restoreStockForTx(tx);
     });
     list = list.filter(tx => !(tx.items||[]).some(i => i.nama === nama));
-    localStorage.setItem("transaksi", JSON.stringify(list));
+    localStorage.setItem("transaksi"
+  localStorage.setItem("transaksi", JSON.stringify(list)); if(typeof window.notifySync==="function") window.notifySync("transactions");
     showToast("✅ Dibatalkan, stok dikembalikan");
     const row = selectEl?.closest("tr");
     if(row) row.remove();
@@ -1906,7 +1913,8 @@ function updateProductStatus(nama, newStatus, selectEl){
       if(newStatus === "wait" && oldSt === "paid") _restoreStockForTx(tx);
     }
   });
-  localStorage.setItem("transaksi", JSON.stringify(list));
+  localStorage.setItem("transaksi"
+  localStorage.setItem("transaksi", JSON.stringify(list)); if(typeof window.notifySync==="function") window.notifySync("transactions");
   if(selectEl) selectEl.className = "status-badge status-"+newStatus;
   showToast("✅ Status produk: "+newStatus);
   renderOwnerProdukList();
@@ -2018,6 +2026,7 @@ window.Admin = {
   renderOwnerProdukList, getProducts, saveProducts,
   getProductsAsync, saveProductsAsync,
   invalidateProductCache,
+  invalidateTxCache,
   normalizeProduct, denormalizeProduct,
   signProduct, verifyProduct,
   // NEW
@@ -2058,7 +2067,8 @@ function hapusSeluruhData(){
   // Simplified check without await since prompt is sync
   if(!pin) return;
 
-  localStorage.setItem("transaksi", "[]");
+  localStorage.setItem("transaksi"
+  localStorage.setItem("transaksi", "[]"); if(typeof window.notifySync==="function") window.notifySync("transactions");
   localStorage.setItem("rekapBulanan", "[]");
   localStorage.setItem("_customers", "{}");
   if(window.Core && Core.idbClear) {
