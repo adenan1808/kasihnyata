@@ -48,12 +48,12 @@ function handleSyncMessage(event) {
     }
 
     // Refresh UI Admin
-    if (typeof window.renderOwnerProdukList === "function") {
-      window.renderOwnerProdukList();
+    if (window.Admin && typeof window.Admin.renderOwnerProdukList === "function") {
+      window.Admin.renderOwnerProdukList();
     }
     // Refresh UI App (POS/Web)
-    if (typeof window.renderFull === "function") {
-      window.renderFull();
+    if (window.App && typeof window.App.renderFull === "function") {
+      window.App.renderFull();
     }
   } else if (type === "transactions") {
     // Invalidate tx caches
@@ -65,21 +65,22 @@ function handleSyncMessage(event) {
     }
 
     // Refresh UI Admin
-    if (typeof window.renderTransaksiList === "function") {
-      window.renderTransaksiList();
+    if (window.Admin && typeof window.Admin.renderAkuntansi === "function" && document.getElementById("tabAkuntansi")?.classList.contains("active")) {
+      window.Admin.renderAkuntansi();
     }
-    if (typeof window.renderHistory === "function") {
-      window.renderHistory();
+    if (window.Admin && typeof window.Admin.renderHistory === "function" && document.getElementById("tabHistory")?.classList.contains("active")) {
+      window.Admin.renderHistory();
     }
     if (typeof window.showHistoryPelanggan === "function" && document.getElementById("historyPelangganModal")?.style.display === "flex") {
-      // Re-render history pelanggan if it's open
-      const phone = document.getElementById("detailPelangganPhone")?.innerText;
-      if(phone) window.showHistoryPelanggan(phone);
+      const phone = document.getElementById("historyPelangganInfo")?.innerText.match(/\(([^)]+)\)/)?.[1];
+      const name = document.getElementById("historyPelangganInfo")?.innerText.split("Riwayat: ")[1]?.split(" (")[0];
+      if(phone && name) window.showHistoryPelanggan(phone, name);
     }
 
-    // Refresh UI App
-    if (typeof window.renderHistoryPesanan === "function") {
-      window.renderHistoryPesanan();
+    // Refresh UI App (POS grid if active)
+    if (window.App && document.getElementById("posView")?.style.display !== "none") {
+      if (typeof window._posRenderGrid === "function") window._posRenderGrid();
+      if (typeof window._posRenderCart === "function") window._posRenderCart();
     }
   }
 }

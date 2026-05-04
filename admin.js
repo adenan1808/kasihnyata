@@ -789,7 +789,7 @@ function renderOwnerProdukList(){
       <img class="owner-produk-img" src="${img||"https://placehold.co/44/1e293b/22c55e?text=P"}" loading="lazy"
         onerror="this.src='https://placehold.co/44/1e293b/22c55e?text=P'" title="Klik untuk edit">
       <div class="owner-produk-info">
-        <small class="owner-produk-kat">\xf0\x9f\x93\x82 ${kat} ${badgeSumber}</small>
+        <small class="owner-produk-kat">📂 ${kat} ${badgeSumber}</small>
         <b>${name}</b>
         <span style="display:flex;align-items:center;gap:6px;margin-top:2px">
           <small>Rp ${price.toLocaleString("id")}</small>
@@ -1887,8 +1887,8 @@ function updateTxStatus(invOrId, newStatus, selectEl){
 
   if(newStatus === "cancel"){
     if(!confirm(`Batalkan transaksi ${tx.inv||invOrId}? Stok produk akan dikembalikan dan baris ini dihapus.`)) return;
-    // Restore stok jika sebelumnya sudah paid
-    if(oldStatus === "paid") _restoreStockForTx(tx);
+    // Restore stok jika sebelumnya sudah paid atau wait
+    if(oldStatus === "paid" || oldStatus === "wait") _restoreStockForTx(tx);
     // Hapus baris transaksi
     list.splice(idx, 1);
   localStorage.setItem("transaksi", JSON.stringify(list)); if(typeof window.notifySync==="function") window.notifySync("transactions");
@@ -1905,8 +1905,8 @@ function updateTxStatus(invOrId, newStatus, selectEl){
   list[idx].status = newStatus;
   localStorage.setItem("transaksi", JSON.stringify(list)); if(typeof window.notifySync==="function") window.notifySync("transactions");
 
-  // Kurangi stok saat pertama kali dikonfirmasi paid
-  if(newStatus === "paid" && oldStatus !== "paid"){
+  // Kurangi stok jika belum pernah dikurangi (pending/etc) -> paid/wait
+  if(newStatus === "paid" && oldStatus !== "paid" && oldStatus !== "wait") {
     if(window.reduceStockForTx) reduceStockForTx(list[idx]);
     else if(window.App && App.reduceStockForTx) App.reduceStockForTx(list[idx]);
   }
@@ -1930,7 +1930,8 @@ function updateProductStatus(nama, newStatus, selectEl){
     if(!confirm('Batalkan semua transaksi produk "'+nama+'"? Stok dikembalikan dan data dihapus.')) return;
     const toCancel = list.filter(tx => (tx.items||[]).some(i => i.nama === nama));
     toCancel.forEach(tx => {
-      if((tx.status||"paid") === "paid") _restoreStockForTx(tx);
+      const st = tx.status || "pending";
+      if(st === "paid" || st === "wait") _restoreStockForTx(tx);
     });
     list = list.filter(tx => !(tx.items||[]).some(i => i.nama === nama));
   localStorage.setItem("transaksi", JSON.stringify(list)); if(typeof window.notifySync==="function") window.notifySync("transactions");
@@ -1947,7 +1948,7 @@ function updateProductStatus(nama, newStatus, selectEl){
     if((tx.items||[]).some(i => i.nama === nama)){
       const oldSt = tx.status || "pending";
       tx.status = newStatus;
-      if(newStatus === "paid" && oldSt !== "paid" && window.reduceStockForTx) reduceStockForTx(tx);
+      if(newStatus === "paid" && oldSt !== "paid" && oldSt !== "wait" && window.reduceStockForTx) reduceStockForTx(tx);
       if(newStatus === "wait" && oldSt === "paid") _restoreStockForTx(tx);
     }
   });

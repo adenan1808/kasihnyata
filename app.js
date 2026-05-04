@@ -387,7 +387,7 @@ function autoCancelExpiredOrders() {
 
     txList.forEach(tx => {
         if((tx.status === "wait" || tx.status === "pending") && (now - tx.tgl > maxWaitMs)) {
-            tx.status = "batal";
+            tx.status = "cancel";
             changed = true;
 
             // Return stock
@@ -408,10 +408,10 @@ function autoCancelExpiredOrders() {
         saveTx(txList);
         if(products) {
             if(window.Admin && Admin.saveProducts) {
-                Admin.saveProducts(products._list);
+                Admin.saveProducts(products);
                 if(typeof window.notifySync==="function") window.notifySync("products");
             } else {
-                localStorage.setItem("products", JSON.stringify(products._list));
+                localStorage.setItem(\"products\", JSON.stringify(products));
                 if(typeof window.notifySync==="function") window.notifySync("products");
             }
             if(window._broadcastStockChange) window._broadcastStockChange();
@@ -785,35 +785,40 @@ function renderHeroPromo(){
     allSlides.push({ type: "sponsor", img: "" });
   }
 
-  // Grid implementation:
-  // Kolom 1 = Banner Utama (dari heroImage)
-  // Kolom 2 = Promo 1 (dari leftImages[0] atau fallback)
-  // Kolom 3 = Promo 2 (dari rightImages[0] atau fallback)
-
   const mainBannerEl = document.getElementById("heroMainBanner");
   const promo1El = document.getElementById("heroPromo1");
   const promo2El = document.getElementById("heroPromo2");
 
-  // Banner Utama
+  // Base setup
   const mainImg = localStorage.getItem("storeHeaderImg") || localStorage.getItem("hero") || "";
-  if(mainBannerEl){
-    mainBannerEl.style.backgroundImage = mainImg
-      ? `linear-gradient(130deg, rgba(7,12,25,.75), rgba(7,12,25,.4)), url(${mainImg})`
-      : "";
-  }
 
-  // Set interval to alternate sponsor and promo images
+  // Gather all slides into one list
+  const fullSlides = [];
+  if (mainImg) fullSlides.push(mainImg);
+  if (leftImages.length > 0) fullSlides.push(...leftImages);
+  if (rightImages.length > 0) fullSlides.push(...rightImages);
+
   if(window._promoInterval) clearInterval(window._promoInterval);
-  let pIdx = 0, sIdx = 0;
+  let pIdx = 0, sIdx = 0, mIdx = 0;
 
   const updatePromoBg = () => {
-    if(promo1El) {
+    if(mainBannerEl && fullSlides.length > 0) {
+      const img = fullSlides[mIdx % fullSlides.length] || "";
+      mainBannerEl.style.backgroundImage = img ? `linear-gradient(130deg, rgba(7,12,25,.75), rgba(7,12,25,.4)), url(${img})` : "";
+    } else if(mainBannerEl && mainImg) {
+      mainBannerEl.style.backgroundImage = `linear-gradient(130deg, rgba(7,12,25,.75), rgba(7,12,25,.4)), url(${mainImg})`;
+    }
+    if(promo1El && leftImages.length > 0) {
       const img = leftImages[pIdx % leftImages.length] || "";
       promo1El.style.backgroundImage = img ? `linear-gradient(130deg, rgba(7,12,25,.75), rgba(7,12,25,.4)), url(${img})` : "";
+    } else if(promo1El) {
+        promo1El.style.backgroundImage = "";
     }
-    if(promo2El) {
+    if(promo2El && rightImages.length > 0) {
       const img = rightImages[sIdx % rightImages.length] || "";
       promo2El.style.backgroundImage = img ? `linear-gradient(130deg, rgba(7,12,25,.75), rgba(7,12,25,.4)), url(${img})` : "";
+    } else if(promo2El) {
+        promo2El.style.backgroundImage = "";
     }
   };
   updatePromoBg();
@@ -821,7 +826,7 @@ function renderHeroPromo(){
   const speedSec = parseInt(localStorage.getItem("heroSlideSpeedSec")) || 5;
   const speedMs = (speedSec > 0 ? speedSec : 5) * 1000;
   window._promoInterval = setInterval(() => {
-    pIdx++; sIdx++;
+    pIdx++; sIdx++; mIdx++;
     updatePromoBg();
   }, speedMs);
 
@@ -1334,7 +1339,7 @@ function _renderCart(){
   summaryDiv.innerHTML=`
     <div class="cart-summary-row"><span>Subtotal (${data.items} item)</span><span>Rp ${data.total.toLocaleString("id")}</span></div>
     ${diskonOwner>0?`<div class="cart-summary-row green"><span>💸 Diskon Produk ${diskonOwner}%</span><span>-Rp ${diskonNominal.toLocaleString("id")}</span></div>`:""}
-    ${diskonPesan>0?`<div class="cart-summary-row green"><span><💸 Diskon Pesan ${diskonPesan}%</span><span>-Rp ${Math.round(totalFinal*diskonPesan/100).toLocaleString("id")}</span></div>`:""}
+    ${diskonPesan>0?`<div class="cart-summary-row green"><span>💸 Diskon Pesan ${diskonPesan}%</span><span>-Rp ${Math.round(totalFinal*diskonPesan/100).toLocaleString("id")}</span></div>`:""}
     <div class="cart-summary-row"><span>🚚 Ongkir</span><span>${data.ongkir?"Rp "+data.ongkir.toLocaleString("id"):"<span class=\'free-badge\'>GRATIS/span>"}</span></div>
     <div class="cart-summary-divider"></div>
     <div class="cart-summary-row grand"><span>Total</span><span>Rp ${grand.toLocaleString("id")}</span></div>`;
@@ -1360,10 +1365,10 @@ function checkout(){
   document.getElementById("checkoutTotal").innerHTML=`
     <div class="checkout-total">
       <div class="cart-total-row"><span>Subtotal</span><span>Rp ${data.total.toLocaleString("id")}</span></div>
-      ${diskonPesan>0?`<div class="cart-total-row diskon-row"><span>< Diskon ${diskonPesan}%</span><span>-Rp ${Math.round(data.total*diskonPesan/100).toLocaleString("id")}</span></div>`:""}
-      <div class="cart-total-row"><span>= Ongkir</span><span>${data.ongkir?"Rp "+data.ongkir.toLocaleString("id"):"GRATIS"}</span></div>
-      <div class="cart-total-row cart-grand"><span>= Total Bayar</span><span>Rp ${grandTampil.toLocaleString("id")}</span></div>
-      <div class="pay-nonce-row"><span>= Kode unik akhir</span><span class="nonce-badge">#${nonce}</span></div>
+      ${diskonPesan>0?`<div class="cart-total-row diskon-row"><span>💸 Diskon ${diskonPesan}%</span><span>-Rp ${Math.round(data.total*diskonPesan/100).toLocaleString("id")}</span></div>`:""}
+      <div class="cart-total-row"><span>🚚 Ongkir</span><span>${data.ongkir?"Rp "+data.ongkir.toLocaleString("id"):"GRATIS"}</span></div>
+      <div class="cart-total-row cart-grand"><span>💰 Total Bayar</span><span>Rp ${grandTampil.toLocaleString("id")}</span></div>
+      <div class="pay-nonce-row"><span>🔐 Kode unik akhir</span><span class="nonce-badge">#${nonce}</span></div>
       <div class="pay-hint">3 digit terakhir adalah kode anti-pemalsuan.<br>Owner akan verifikasi saat konfirmasi.</div>
     </div>`;
 
@@ -1731,7 +1736,7 @@ async function _posRenderGrid(){
       ? stokNum <= 0
         ? `<div class="pos-card-stok habis">❌ Habis</div>`
         : stokNum < 5
-          ? `<div class="pos-card-stok low">a ${stokNum}</div>`
+          ? `<div class=\"pos-card-stok low\">⚠️ ${stokNum}</div>`
           : `<div class="pos-card-stok ok">Stok ${stokNum}</div>`
       : "";
 
