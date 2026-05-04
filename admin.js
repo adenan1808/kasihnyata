@@ -232,15 +232,7 @@ function initStore(){
     if(el) el.checked = (localStorage.getItem(t) !== "false"); // Default true
   });
 
-  const devToggles = [
-    {id: "devAkuntansiToggle", key: "dev_show_akuntansi"},
-    {id: "devTableToggle", key: "dev_hide_table"},
-    {id: "devHistoryToggle", key: "dev_hide_history"}
-  ];
-  devToggles.forEach(t => {
-    const el = document.getElementById(t.id);
-    if(el) el.checked = (localStorage.getItem(t.key) === "true");
-  });
+
 
   const waitEl = document.getElementById("waitTimerInput");
   if(waitEl) waitEl.value = localStorage.getItem("waitTimer") || "10";
@@ -257,16 +249,7 @@ function initStore(){
     if(el) el.value = localStorage.getItem(f)||(defaults[f]||"");
   });
 
-  const devTogglesSave = [
-    {id: "devAkuntansiToggle", key: "dev_show_akuntansi"},
-    {id: "devTableToggle", key: "dev_hide_table"},
-    {id: "devHistoryToggle", key: "dev_hide_history"}
-  ];
-  devTogglesSave.forEach(t => {
-    const el = document.getElementById(t.id);
-    if(el) localStorage.setItem(t.key, el.checked ? "true" : "");
-  });
-  checkTierAndMenus();
+
 
   updateAllTitles();
   applyStoreStyle();
@@ -304,16 +287,7 @@ function saveToko(){
     const qrisDelayEl = document.getElementById("qrisDelayInput");
   if(qrisDelayEl) localStorage.setItem("qrisDelay", qrisDelayEl.value);
 
-  const devTogglesSave = [
-    {id: "devAkuntansiToggle", key: "dev_show_akuntansi"},
-    {id: "devTableToggle", key: "dev_hide_table"},
-    {id: "devHistoryToggle", key: "dev_hide_history"}
-  ];
-  devTogglesSave.forEach(t => {
-    const el = document.getElementById(t.id);
-    if(el) localStorage.setItem(t.key, el.checked ? "true" : "");
-  });
-  checkTierAndMenus();
+
 
   updateAllTitles();
   showToast("✅ Info toko tersimpan");
@@ -1249,26 +1223,21 @@ function _initAdminKeyboard(){
 
 /* ================= INIT ================= */
 
+
 /* ================= ROLE & FEATURE TOGGLE ================= */
 function checkTierAndMenus(){
-  const tier = (window.Core && Core.getLicenseTier) ? Core.getLicenseTier() : "free";
-  // In FREE mode, hide certain advanced menus (e.g. Akuntansi)
+  // Developer Toggles override via localStorage only
   const tabAkuntansiBtn = document.querySelector(".tab-btn[onclick*='tabAkuntansi']");
-  if(tabAkuntansiBtn) {
-     if(tier === "free" && !localStorage.getItem("dev_show_akuntansi")) {
-         tabAkuntansiBtn.style.display = "none";
-     } else {
-         tabAkuntansiBtn.style.display = "inline-block";
-     }
-  }
-
-  // Developer Toggles override
   const tabTableBtn = document.querySelector(".tab-btn[onclick*='tabTable']");
   const tabHistoryBtn = document.querySelector(".tab-btn[onclick*='tabHistory']");
+  const tabPelangganBtn = document.querySelector(".tab-btn[onclick*='tabPelanggan']");
 
-  if(tabTableBtn) tabTableBtn.style.display = localStorage.getItem("dev_hide_table") ? "none" : "inline-block";
-  if(tabHistoryBtn) tabHistoryBtn.style.display = localStorage.getItem("dev_hide_history") ? "none" : "inline-block";
+  if(tabAkuntansiBtn) tabAkuntansiBtn.style.display = localStorage.getItem("dev_hide_akuntansi") === "true" ? "none" : "inline-block";
+  if(tabTableBtn) tabTableBtn.style.display = localStorage.getItem("dev_hide_table") === "true" ? "none" : "inline-block";
+  if(tabHistoryBtn) tabHistoryBtn.style.display = localStorage.getItem("dev_hide_history") === "true" ? "none" : "inline-block";
+  if(tabPelangganBtn) tabPelangganBtn.style.display = localStorage.getItem("dev_hide_pelanggan") === "true" ? "none" : "inline-block";
 }
+
 
 function initAdmin(){
   checkTierAndMenus();

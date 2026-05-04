@@ -1080,7 +1080,7 @@ function _productCardHTML(p){
            <span class="stepper-num">${qty}</span>
            <button class="stepper-btn" onclick="event.stopPropagation();App.addKranjang('${id}',event)">+</button>
          </div>`
-      : `<button class="product-card-add" onclick="event.stopPropagation();App.addKranjang('${id}',event)">+ Tambah</button>`;
+      : `<button class="product-card-add" onclick="event.stopPropagation();App.addKranjang('${id}',event)">+ Beli</button>`;
 
   return `
     <div class="product-card" data-id="${id}" ${stok<=0?'style="opacity:.6;pointer-events:none"':''}>
@@ -1742,7 +1742,7 @@ async function _posRenderGrid(){
            <span class="stepper-num">${qty}</span>
            <button class="stepper-btn" onclick="event.stopPropagation();App._posQtyDelta('${id}',1)">+</button>
          </div>`
-      : `<button class="pos-card-add-btn" onclick="event.stopPropagation();App._posQtyDelta('${id}',1)">Tambah</button>`;
+      : `<button class="pos-card-add-btn" onclick="event.stopPropagation();App._posQtyDelta('${id}',1)">+ Tambah</button>`;
 
     return `
       <div class="pos-card${inCart?" in-cart":""}${stokNum<=0?" out-of-stock":""}" ${stokNum<=0?"style=\"opacity:0.6;pointer-events:none;\"":""} data-pos-id="${id}">

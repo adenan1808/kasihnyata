@@ -125,15 +125,7 @@
         </div>
 
         <!-- SCROLL ZONE: items + summary + checkout fields -->
-        <div class="pos-cart-scroll-zone" style="position:relative;">
-
-    <div id="posQrisOverlay" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:999;flex-direction:column;align-items:center;justify-content:center;color:#fff;">
-      <h3 style="margin-bottom:15px;text-align:center;font-size:24px;color:#facc15;">SCAN QRIS SEKARANG</h3>
-      <img id="posQrisImg" src="" style="max-width:80%;max-height:50%;border-radius:10px;border:4px solid #fff;box-shadow:0 0 20px rgba(255,255,255,0.5);">
-      <p style="margin-top:20px;text-align:center;font-size:16px;font-weight:bold;color:#f87171;">Harap tunggu validasi pembayaran...</p>
-    </div>
-
-
+        <div class="pos-cart-scroll-zone">
         <!-- CART ITEMS: scroll independently -->
         <div id="posCartItemsWrap" class="pos-cart-items-wrap">
           <div id="posCartItems" class="pos-cart-items"></div>
@@ -149,7 +141,15 @@
         </div>
 
         <!-- CUSTOMER FIELDS (opsional) -->
-        <div class="pos-checkout-fields" id="posCheckoutFields" style="display:none">
+        <div class="pos-checkout-fields" id="posCheckoutFields" style="display:none;position:relative;">
+
+          <!-- QRIS OVERLAY (Hanya nutup data pelanggan) -->
+          <div id="posQrisOverlay" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:100;flex-direction:column;align-items:center;justify-content:center;color:#fff;border-radius:10px;">
+            <h4 style="margin:0 0 10px 0;text-align:center;color:#facc15;">📱 SCAN QRIS</h4>
+            <img id="posQrisImg" src="" style="max-width:120px;border-radius:8px;border:2px solid #fff;">
+            <p style="margin:10px 0 0 0;text-align:center;font-size:12px;font-weight:bold;color:#f87171;">Menunggu validasi...</p>
+          </div>
+
           <div class="pos-field-label">Data Pelanggan <span class="pos-optional">(opsional)</span></div>
           <div id="posCustomerFound" class="pos-customer-found" style="display:none"></div>
           <div class="pos-cust-input-wrap" id="posNamaWrap">
@@ -372,22 +372,7 @@
         </div>
 
 
-        <div class="panel-box-header" style="margin-top:20px"><span class="panel-icon">🛠️</span><div><div class="panel-title">Developer Toggles</div><div class="panel-desc">Sembunyikan menu</div></div></div>
 
-        <div class="acc-toggle-row" style="margin-bottom:10px;">
-          <div><div class="field-label" style="margin-top:0">Tampilkan Akuntansi (Bypass Free)</div></div>
-          <label class="toggle-switch"><input type="checkbox" id="devAkuntansiToggle"><span class="toggle-slider"></span></label>
-        </div>
-
-        <div class="acc-toggle-row" style="margin-bottom:10px;">
-          <div><div class="field-label" style="margin-top:0">Sembunyikan Table</div></div>
-          <label class="toggle-switch"><input type="checkbox" id="devTableToggle"><span class="toggle-slider"></span></label>
-        </div>
-
-        <div class="acc-toggle-row" style="margin-bottom:10px;">
-          <div><div class="field-label" style="margin-top:0">Sembunyikan History</div></div>
-          <label class="toggle-switch"><input type="checkbox" id="devHistoryToggle"><span class="toggle-slider"></span></label>
-        </div>
 
         <label class="field-label">Waktu Tunggu "WAIT" (Menit)</label>
         <input type="number" id="waitTimerInput" placeholder="10" min="0" value="10">
