@@ -231,8 +231,19 @@ function initStore(){
     const el = document.getElementById(t+"Toggle");
     if(el) el.checked = (localStorage.getItem(t) !== "false"); // Default true
   });
+
+  const devToggles = [
+    {id: "devAkuntansiToggle", key: "dev_show_akuntansi"},
+    {id: "devTableToggle", key: "dev_hide_table"},
+    {id: "devHistoryToggle", key: "dev_hide_history"}
+  ];
+  devToggles.forEach(t => {
+    const el = document.getElementById(t.id);
+    if(el) el.checked = (localStorage.getItem(t.key) === "true");
+  });
+
   const waitEl = document.getElementById("waitTimerInput");
-  if(waitEl) waitEl.value = localStorage.getItem("waitTimer") || "5";
+  if(waitEl) waitEl.value = localStorage.getItem("waitTimer") || "10";
 
   const fields = ["storeName","ownerWa","ownerEmail","heroText","defaultMargin","waitTimer",
                   "titleSize","titleColor","titleFont","heroSize","heroColor",
@@ -245,6 +256,18 @@ function initStore(){
     const el = document.getElementById(f);
     if(el) el.value = localStorage.getItem(f)||(defaults[f]||"");
   });
+
+  const devTogglesSave = [
+    {id: "devAkuntansiToggle", key: "dev_show_akuntansi"},
+    {id: "devTableToggle", key: "dev_hide_table"},
+    {id: "devHistoryToggle", key: "dev_hide_history"}
+  ];
+  devTogglesSave.forEach(t => {
+    const el = document.getElementById(t.id);
+    if(el) localStorage.setItem(t.key, el.checked ? "true" : "");
+  });
+  checkTierAndMenus();
+
   updateAllTitles();
   applyStoreStyle();
   loadHero();
@@ -278,6 +301,20 @@ function saveToko(){
     const el = document.getElementById(t+"Toggle");
     if(el) localStorage.setItem(t, el.checked ? "true" : "false");
   });
+    const qrisDelayEl = document.getElementById("qrisDelayInput");
+  if(qrisDelayEl) localStorage.setItem("qrisDelay", qrisDelayEl.value);
+
+  const devTogglesSave = [
+    {id: "devAkuntansiToggle", key: "dev_show_akuntansi"},
+    {id: "devTableToggle", key: "dev_hide_table"},
+    {id: "devHistoryToggle", key: "dev_hide_history"}
+  ];
+  devTogglesSave.forEach(t => {
+    const el = document.getElementById(t.id);
+    if(el) localStorage.setItem(t.key, el.checked ? "true" : "");
+  });
+  checkTierAndMenus();
+
   updateAllTitles();
   showToast("✅ Info toko tersimpan");
   applyStoreStyle();
@@ -1007,7 +1044,7 @@ function renderAkuntansi(){
     const frag = document.createDocumentFragment();
     last30.forEach(tx=>{
       const d = new Date(tx.tgl);
-      const tgl = d.toLocaleDateString("id",{day:"2-digit",month:"short",year:"numeric"})+" "+d.toLocaleTimeString("id",{hour:"2-digit",minute:"2-digit"});
+      const tgl = formatDate(d);
       const status = tx.status||"paid";
       const statusCls = status==="paid"?"tx-paid":status==="wait"?"tx-wait":"tx-cancel";
       const div = document.createElement("div");
@@ -1095,11 +1132,11 @@ function buildBackupPayload(){
 
 function recordBackup(dest){
   const list = getBackupList();
-  list.unshift({ ts:Date.now(), dest, label:new Date().toLocaleString("id") });
+  list.unshift({ ts:Date.now(), dest, label:formatDate(new Date()) });
   saveBackupList(list);
   renderBackupHistory();
   const stat = document.getElementById("backupStatus");
-  if(stat) stat.innerText = new Date().toLocaleDateString("id");
+  if(stat) stat.innerText = formatDate(new Date()).split(" ")[0];
 }
 
 function doBackup(){
@@ -1117,13 +1154,13 @@ function doBackup(){
   } else if(dest==="wa"){
     const wa = localStorage.getItem("ownerWa");
     if(!wa){ showToast("❌ Isi No WA dulu"); return; }
-    const msg = `BACKUP TOKO WA PRO\n\n${new Date().toLocaleString("id")}\nProduk: ${getProducts().length}\n\nData tersimpan lokal.`;
+    const msg = `BACKUP TOKO WA PRO\n\n${formatDate(new Date())}\nProduk: ${getProducts().length}\n\nData tersimpan lokal.`;
     window.open("https://wa.me/"+wa+"?text="+encodeURIComponent(msg));
     showToast("✅ Backup dikirim ke WA");
     recordBackup("wa");
   } else if(dest==="email"){
     const email = localStorage.getItem("ownerEmail")||"";
-    const subject = encodeURIComponent("Backup Toko WA PRO - "+new Date().toLocaleDateString("id"));
+    const subject = encodeURIComponent("Backup Toko WA PRO - "+formatDate(new Date()).split(" ")[0]);
     const body    = encodeURIComponent("Data backup terlampir.\n\n"+payload.slice(0,500));
     window.open(`mailto:${email}?subject=${subject}&body=${body}`);
     showToast("✅ Draft email dibuka");
@@ -1211,7 +1248,30 @@ function _initAdminKeyboard(){
 }
 
 /* ================= INIT ================= */
+
+/* ================= ROLE & FEATURE TOGGLE ================= */
+function checkTierAndMenus(){
+  const tier = (window.Core && Core.getLicenseTier) ? Core.getLicenseTier() : "free";
+  // In FREE mode, hide certain advanced menus (e.g. Akuntansi)
+  const tabAkuntansiBtn = document.querySelector(".tab-btn[onclick*='tabAkuntansi']");
+  if(tabAkuntansiBtn) {
+     if(tier === "free" && !localStorage.getItem("dev_show_akuntansi")) {
+         tabAkuntansiBtn.style.display = "none";
+     } else {
+         tabAkuntansiBtn.style.display = "inline-block";
+     }
+  }
+
+  // Developer Toggles override
+  const tabTableBtn = document.querySelector(".tab-btn[onclick*='tabTable']");
+  const tabHistoryBtn = document.querySelector(".tab-btn[onclick*='tabHistory']");
+
+  if(tabTableBtn) tabTableBtn.style.display = localStorage.getItem("dev_hide_table") ? "none" : "inline-block";
+  if(tabHistoryBtn) tabHistoryBtn.style.display = localStorage.getItem("dev_hide_history") ? "none" : "inline-block";
+}
+
 function initAdmin(){
+  checkTierAndMenus();
   initStore();
   loadConfig();
   loadAccSettings();
@@ -1711,7 +1771,7 @@ function renderHistory(){
     const noUrut = idx + 1;
     const inv = tx.inv || tx.id || "—";
     const d = new Date(tx.tgl);
-    const tgl = d.toLocaleDateString("id",{day:"2-digit",month:"short",year:"numeric"})+" "+d.toLocaleTimeString("id",{hour:"2-digit",minute:"2-digit"});
+    const tgl = formatDate(d);
     const nama = tx.nama || "—";
     const wa = tx.hp || "—";
     const alamat = tx.alamat || "—";
@@ -1793,11 +1853,11 @@ function renderTxListTable(txAll){
   const frag = document.createDocumentFragment();
   last50.forEach(tx => {
     const d = new Date(tx.tgl);
-    const tgl = d.toLocaleDateString("id",{day:"2-digit",month:"short",year:"numeric"})+" "+d.toLocaleTimeString("id",{hour:"2-digit",minute:"2-digit"});
+    const tgl = formatDate(d);
     const status = tx.status || "paid";
     const cls = status==="paid"?"tx-paid":status==="wait"?"tx-wait":"tx-cancel";
     const badge = status==="paid"?'<span class="status-badge status-paid">✅ Paid</span>':
-                  status==="wait"?'<span class="status-badge status-wait">⏳ Wait</span>':
+                  status==="wait"?`<span class="status-badge status-wait">⏳ Wait ${getWaitCountdown(tx.tgl, tx.status)}</span>` :
                                   '<span class="status-badge status-cancel">❌ Cancel</span>';
     const src = tx.source||"kasir";
     const div = document.createElement("div");
@@ -1967,7 +2027,7 @@ function renderPelangganList(filter){
   const frag = document.createDocumentFragment();
   filtered.sort((a,b) => (b[1].lastSeen||0)-(a[1].lastSeen||0));
   filtered.forEach(([hp, c]) => {
-    const lastDate = c.lastSeen ? new Date(c.lastSeen).toLocaleDateString("id",{day:"2-digit",month:"short",year:"numeric"}) : "—";
+    const lastDate = c.lastSeen ? formatDate(new Date(c.lastSeen)).split(" ")[0] : "—";
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${c.nama||"—"}</td>
@@ -2064,6 +2124,72 @@ document.addEventListener("change", function(e){
 });
 
 window.showTab       = showTab;
+
+/* ================= INVOICE DETAIL MODAL ================= */
+function showInvoiceDetail(inv) {
+  const txList = typeof _txCache !== 'undefined' && _txCache ? _txCache : JSON.parse(localStorage.getItem("transaksi")||"[]");
+  const tx = txList.find(t => t.inv === inv);
+  if(!tx) {
+     showToast("Invoice tidak ditemukan");
+     return;
+  }
+
+  const d = new Date(tx.tgl);
+  const tglStr = typeof formatDate === "function" ? formatDate(d) : d.toLocaleString("id");
+  const modal = document.getElementById("invoiceDetailModal");
+  const title = document.getElementById("invDetailTitle");
+  const body = document.getElementById("invDetailBody");
+
+  if(!modal || !title || !body) return;
+
+  title.innerHTML = `Invoice: <span style="color:var(--accent)">${tx.inv}</span>`;
+
+  let html = `
+    <div style="margin-bottom:10px;">
+      <b>Tanggal:</b> ${tglStr}<br>
+      <b>Metode:</b> ${tx.paymentMethod || "Tunai"}<br>
+      <b>Status:</b> ${tx.status.toUpperCase()}<br>
+      <b>Pelanggan:</b> ${tx.nama || "-"} (${tx.hp || "-"})
+    </div>
+    <div style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:10px 0;margin-bottom:10px;">
+      <b style="display:block;margin-bottom:5px;">Item:</b>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+  `;
+
+  (tx.items || []).forEach(i => {
+      const sub = i.qty * i.harga;
+      html += `<tr>
+        <td style="padding:2px 0;">${i.nama} x${i.qty}</td>
+        <td style="text-align:right;">Rp ${sub.toLocaleString("id")}</td>
+      </tr>`;
+  });
+
+  html += `</table></div>`;
+
+  const total = tx.total || 0;
+  const grand = tx.grand || total;
+  const ongkir = tx.ongkir || 0;
+  const diskon = (total + ongkir) - grand;
+
+  html += `<table style="width:100%;font-size:13px;font-weight:bold;">`;
+  html += `<tr><td>Total Item</td><td style="text-align:right;">Rp ${total.toLocaleString("id")}</td></tr>`;
+  if(diskon > 0) {
+      html += `<tr><td style="color:var(--accent2)">Diskon</td><td style="text-align:right;color:var(--accent2)">-Rp ${diskon.toLocaleString("id")}</td></tr>`;
+  }
+  if(ongkir > 0) {
+      html += `<tr><td>Ongkir</td><td style="text-align:right;">Rp ${ongkir.toLocaleString("id")}</td></tr>`;
+  }
+  html += `<tr style="font-size:15px;color:var(--accent);border-top:1px solid var(--border)">
+             <td style="padding-top:5px;">Grand Total</td>
+             <td style="text-align:right;padding-top:5px;">Rp ${grand.toLocaleString("id")}</td>
+           </tr>`;
+  html += `</table>`;
+
+  body.innerHTML = html;
+  modal.style.display = "flex";
+}
+window.showInvoiceDetail = showInvoiceDetail;
+
 window.autoHargaJual = autoHargaJual;
 window.deleteBackupRecord = deleteBackupRecord;
 window.deleteProduct = deleteProduct;
@@ -2104,11 +2230,11 @@ function showHistoryPelanggan(hp, nama){
     const sorted = userTx.sort((a,b) => b.tgl - a.tgl);
     historyBody.innerHTML = sorted.map(tx => {
       const d = new Date(tx.tgl);
-      const tgl = d.toLocaleDateString("id",{day:"2-digit",month:"short",year:"numeric"});
+      const tgl = formatDate(d).split(" ")[0];
       const inv = tx.inv || tx.id || "—";
       const grand = tx.grand || 0;
       let statusHtml = tx.status === "paid" ? "<span style='color:#4ade80'>Paid</span>" :
-                       (tx.status === "wait" ? "<span style='color:#facc15'>Wait</span>" :
+                       (tx.status === "wait" ? `<span style='color:#facc15'>Wait ${getWaitCountdown(tx.tgl, tx.status)}</span>` :
                        "<span style='color:#f87171'>Cancel</span>");
       return `<tr>
         <td>${tgl}</td>

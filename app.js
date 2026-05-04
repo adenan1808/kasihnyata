@@ -373,7 +373,7 @@ const products = ensureProductIndex(getProducts());
 
 /* ================= AUTO CANCEL WAIT ================= */
 function autoCancelExpiredOrders() {
-    const waitTimerStr = localStorage.getItem("waitTimer") || "5";
+    const waitTimerStr = localStorage.getItem("waitTimer") || "10";
     const waitMinutes = parseInt(waitTimerStr, 10);
 
     // If timer is 0, manual confirmation only, skip auto cancel
@@ -403,6 +403,7 @@ function autoCancelExpiredOrders() {
         }
     });
 
+
     if(changed) {
         saveTx(txList);
         if(products) {
@@ -415,10 +416,20 @@ function autoCancelExpiredOrders() {
             }
             if(window._broadcastStockChange) window._broadcastStockChange();
         }
+        if(typeof window.notifySync==="function") window.notifySync("transactions");
         console.log("[Auto Cancel] Canceled expired WAIT transactions and returned stock.");
     }
+
+    // Also re-render active admin tables if open to show real-time countdown
+    if (window.Admin && typeof window.Admin.renderHistory === 'function' && document.getElementById("tabHistory")?.classList.contains("active")) {
+       window.Admin.renderHistory();
+    }
+    if (window.Admin && typeof window.Admin.renderTransaksiList === 'function' && document.getElementById("tabKasir")?.classList.contains("active")) {
+       window.Admin.renderTransaksiList();
+    }
 }
-setInterval(autoCancelExpiredOrders, 60000); // Check every minute
+setInterval(autoCancelExpiredOrders, 1000); // Check every second for countdown UI
+
 window.autoCancelExpiredOrders = autoCancelExpiredOrders;
 
 /* ================= TRANSACTION STORAGE ================= */
@@ -1063,6 +1074,14 @@ function _productCardHTML(p){
         : `<div class="product-card-stok">Stok: ${stok}</div>`
     : "";
 
+    const qtyCtrl = qty > 0
+      ? `<div class="product-card-stepper">
+           <button class="stepper-btn" onclick="event.stopPropagation();App.kurangKranjang('${id}',event)">-</button>
+           <span class="stepper-num">${qty}</span>
+           <button class="stepper-btn" onclick="event.stopPropagation();App.addKranjang('${id}',event)">+</button>
+         </div>`
+      : `<button class="product-card-add" onclick="event.stopPropagation();App.addKranjang('${id}',event)">+ Tambah</button>`;
+
   return `
     <div class="product-card" data-id="${id}" ${stok<=0?'style="opacity:.6;pointer-events:none"':''}>
       <div class="product-card-img-wrap">
@@ -1188,7 +1207,7 @@ function posPrintReceipt(){
   const ongkir    = _getOngkirDefault();
   const nama      = document.getElementById("posNama")?.value.trim()||"Pelanggan";
   const hp        = document.getElementById("posHp")?.value.trim()||"";
-  const tgl       = new Date().toLocaleString("id");
+  const tgl       = formatDate(new Date());
 
   let subtotal = 0;
   let itemRows = "";
@@ -1368,14 +1387,14 @@ async function buildOrderMessage(nama, waP, alamat, extraFields={}){
   const inv     = await saveTransaction(cart, {total:data.total, ongkir:data.ongkir, grand}, {...extraFields, source:"web", nama:extraFields.nama||"", hp:extraFields.hp||""});
   const cfg     = getConfig();
   const nonce   = generatePaymentNonce();
-  const tgl     = new Date().toLocaleString("id");
+  const tgl     = formatDate(new Date());
 
   // Payload yang di-sign: invoice + grand + nonce + tanggal-pendek
   const sigPayload = {
     inv  : inv||"noInv",
     grand: grand,
     nonce: nonce,
-    tgl  : new Date().toLocaleDateString("id")
+    tgl  : formatDate(new Date()).split(" ")[0]
   };
   const sig = await generateOrderSignature(sigPayload);
   const grandTampil = grand + nonce;   // total tampil = bayar + nonce (3 digit akhir bukti asli)
@@ -1445,7 +1464,7 @@ async function sendEmail(){
     document.getElementById("cWa").value||"-",
     document.getElementById("cAlamat").value||"-"
   );
-  window.open(`mailto:${email}?subject=${encodeURIComponent("Pesanan Baru  "+storeName+"  "+new Date().toLocaleDateString("id"))}&body=${encodeURIComponent(result.msg)}`);
+  window.open(`mailto:${email}?subject=${encodeURIComponent("Pesanan Baru  "+storeName+"  "+formatDate(new Date()).split(" ")[0])}&body=${encodeURIComponent(result.msg)}`);
   saveCart([]); closeCheckout(); updateCartUI();
   showToast("📧 Draft email dibuka");
   if(window.Admin) Admin.renderAkuntansi&&Admin.renderAkuntansi();
@@ -1723,7 +1742,7 @@ async function _posRenderGrid(){
            <span class="stepper-num">${qty}</span>
            <button class="stepper-btn" onclick="event.stopPropagation();App._posQtyDelta('${id}',1)">+</button>
          </div>`
-      : `<button class="pos-card-add-btn" onclick="event.stopPropagation();App._posQtyDelta('${id}',1)">+</button>`;
+      : `<button class="pos-card-add-btn" onclick="event.stopPropagation();App._posQtyDelta('${id}',1)">Tambah</button>`;
 
     return `
       <div class="pos-card${inCart?" in-cart":""}${stokNum<=0?" out-of-stock":""}" ${stokNum<=0?"style=\"opacity:0.6;pointer-events:none;\"":""} data-pos-id="${id}">
@@ -1956,7 +1975,14 @@ async function posBayar(){
       payMethod = "Tunai";
   }
 
-  // QRIS: timer 3 detik sebelum proses otomatis
+  const qrisDelayStr = localStorage.getItem("qrisDelay") || "3";
+  const qrisDelay = parseInt(qrisDelayStr, 10);
+
+  if(payMethod === "QRIS" && qrisDelay === 0){
+      payMethod = "Tunai"; // Dianggap cash
+  }
+
+  // QRIS: timer dinamis sebelum proses otomatis
   if(payMethod === "QRIS" && !posBayar._qrisValidated){
     const qrisSrc = localStorage.getItem("qrisImg")||localStorage.getItem("qris")||"";
     if(!qrisSrc) {
@@ -1968,15 +1994,17 @@ async function posBayar(){
 
     // Tampilkan overlay QRIS
     const qrisOverlay = document.getElementById("posQrisOverlay");
+    const posQrisImg = document.getElementById("posQrisImg");
+    if(posQrisImg) posQrisImg.src = qrisSrc;
     if(qrisOverlay) qrisOverlay.style.display = "flex";
 
     const oldBtnText = document.getElementById("posBayarBtn").innerHTML;
-    document.getElementById("posBayarBtn").innerHTML = "<b style='color:#fff'>Tunggu 3 Detik...</b>";
+    document.getElementById("posBayarBtn").innerHTML = "<b style='color:#fff'>Menunggu Pembayaran...</b>";
     document.getElementById("posBayarBtn").disabled = true;
     document.getElementById("posBayarBtn").style.backgroundColor = "#dc2626"; // Merah
     document.getElementById("posBayarBtn").style.borderColor = "#b91c1c";
 
-    showToast("⚠️ CEK PEMBAYARAN! Tunggu 3 Detik...", 3000, {background: "#dc2626", color: "#fff", fontWeight: "bold"});
+    showToast("⚠️ CEK PEMBAYARAN! Menunggu Pembayaran...", 3000, {background: "#dc2626", color: "#fff", fontWeight: "bold"});
     setTimeout(()=>{
       posBayar._qrisValidated = true;
       posBayar._lock = false;
@@ -1985,7 +2013,7 @@ async function posBayar(){
       document.getElementById("posBayarBtn").style.backgroundColor = ""; // Reset
       document.getElementById("posBayarBtn").style.borderColor = "";
       showToast("✅ Validasi OK! Silakan klik BAYAR kembali", 3000, {background: "#16a34a", color: "#fff", fontWeight: "bold"});
-    }, 3000);
+    }, qrisDelay * 1000);
 
     return;
   }
@@ -2069,8 +2097,8 @@ async function posBayar(){
 
   // Generate signature + nonce
   const nonce = generatePaymentNonce();
-  const tgl   = new Date().toLocaleString('id');
-  const sigPayload = { inv: inv||'noInv', grand, nonce, tgl: new Date().toLocaleDateString('id') };
+  const tgl   = formatDate(new Date());
+  const sigPayload = { inv: inv||'noInv', grand, nonce, tgl: formatDate(new Date()).split(" ")[0] };
   const sig   = await generateOrderSignature(sigPayload);
   const grandBayar = grand + nonce;  // unique display total
 
