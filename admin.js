@@ -601,6 +601,8 @@ function _updateExistingProduct(id){
   const stok  = +(document.getElementById("pStok")?.value)||0;
   const kat   = document.getElementById("pKategori")?.value||"Umum";
   const sumber = document.getElementById("pSumber")?.value||"Cash";
+  const sup = document.getElementById("pSupplier")?.value.trim()||"";
+  const waSup = document.getElementById("pWaSupplier")?.value.trim()||"";
   let tempo  = document.getElementById("pTempo")?.value||"";
   if(tempo.length === 8) {
       const d = tempo.substring(0,2);
@@ -658,6 +660,8 @@ function addProduct(){
   const price = +(document.getElementById("pPrice")?.value)||0;
   const stok  = +(document.getElementById("pStok")?.value)||0;
   const sumber = document.getElementById("pSumber")?.value||"Cash";
+  const sup = document.getElementById("pSupplier")?.value.trim()||"";
+  const waSup = document.getElementById("pWaSupplier")?.value.trim()||"";
   let tempo  = document.getElementById("pTempo")?.value||"";
   if(tempo.length === 8) {
       const d = tempo.substring(0,2);
@@ -1485,9 +1489,8 @@ function _editProductForm(id){
   // Sumber & Tempo
   set("pSumber", p.sumber || "Cash");
   let t = p.tempo || "";
-  if(t && t.includes("-")){
-     const parts = t.split("-");
-     if(parts.length === 3) t = parts[2] + parts[1] + parts[0];
+  if(t && !t.includes("-") && t.length === 8) {
+      t = `${t.slice(0,2)}-${t.slice(2,4)}-${t.slice(4,8)}`;
   }
   set("pTempo", t);
   const wrap = document.getElementById("pTempoWrap");
@@ -1525,7 +1528,35 @@ function deleteSelectedKategori(){
   showToast("🗑️ Kategori dihapus");
 }
 
+function _populateSupplierDatalist() {
+  const products = getProducts();
+  const suppliers = {};
+  products.forEach(p => {
+    if(p.sup) {
+      if(!suppliers[p.sup]) suppliers[p.sup] = p.waSup || "";
+    }
+  });
+  const dl = document.getElementById("supplierList");
+  if(dl) {
+    dl.innerHTML = Object.keys(suppliers).map(s => `<option value="${s}">`).join("");
+  }
+
+  // Attach event listener to autofill WA when supplier is selected
+  const supEl = document.getElementById("pSupplier");
+  const waEl = document.getElementById("pWaSupplier");
+  if(supEl && waEl && !supEl._bound) {
+    supEl._bound = true;
+    supEl.addEventListener("input", (e) => {
+      const selected = e.target.value;
+      if(suppliers[selected]) {
+        waEl.value = suppliers[selected];
+      }
+    });
+  }
+}
+
 function renderKategoriChipAdmin(){
+  _populateSupplierDatalist();
   const el = document.getElementById("kategoriChipAdmin"); if(!el) return;
   let cats = [];
   try{ cats = JSON.parse(localStorage.getItem("kategoriList")||"[]"); }catch(e){}
@@ -1651,6 +1682,9 @@ function renderTable(){
     arrStats.sort((a,b) => {
        let va = a[_tableSortCol], vb = b[_tableSortCol];
        if(_tableSortCol === 'sumber') { va = a.sumberProd; vb = b.sumberProd; }
+       if(_tableSortCol === 'sup') { va = a.sup; vb = b.sup; }
+       if(_tableSortCol === 'waSup') { va = a.waSup; vb = b.waSup; }
+       if(_tableSortCol === 'tempo') { va = a.tempo; vb = b.tempo; }
        if(_tableSortCol === 'nama') { va = a.nama; vb = b.nama; }
 
        if(typeof va === 'string' && typeof vb === 'string') {
@@ -1688,6 +1722,9 @@ function renderTable(){
         <td><b>${s.nama}</b></td>
         <td>${s.terjual}</td>
         <td><span class="tx-source-badge">Kasir:${s.kasir}</span> <span class="tx-source-badge">Web:${s.web}</span></td>
+        <td>${s.sup}</td>
+        <td>${s.waSup}</td>
+        <td>${s.tempo}</td>
         <td>${stokStr}</td>
         <td>${rp(modalAvg)}</td>
         <td>${rp(s.omzet)}</td>
@@ -1760,7 +1797,7 @@ function renderHistory(){
 
     // Simpan json ke global var untuk modal
     const itemsJson = encodeURIComponent(JSON.stringify(tx.items||[])).replace(/'/g, "%27");
-    const btnDetail = `<button onclick="Admin.showTxDetail('${inv}', '${itemsJson}')" class="btn-sm">Detail</button>`;
+    const btnDetail = `<button onclick=\"window.showInvoiceDetail('${inv}')\" class=\"btn-sm\">Detail</button>`;
 
     return `<tr>
       <td>${noUrut}</td>
@@ -1816,48 +1853,109 @@ function getTxForAdmin(){
 
 function renderTxListTable(txAll){
   const el = document.getElementById("txListTable"); if(!el) return;
-  const last50 = (txAll||getTxForAdmin()).slice(-50).reverse();
-  if(!last50.length){ el.innerHTML='<div class="backup-empty">Belum ada transaksi</div>'; return; }
+  // User asked for "daftar 30 transaksi terakhir" (so 30 instead of 50) and to filter hidden ones
+  let list = (txAll||getTxForAdmin());
+  list = list.filter(tx => !tx.hiddenAkuntansi);
+  const last30 = list.slice(-30).reverse();
+
+  if(!last30.length){ el.innerHTML='<div class="backup-empty">Belum ada transaksi</div>'; return; }
   const rp = v => "Rp "+Math.round(v).toLocaleString("id");
   const frag = document.createDocumentFragment();
-  last50.forEach(tx => {
+
+  // Table view for Akuntansi as requested: "lengkapi dengan nama Pembeli, no WA, barang yang dibeli, diskon kalo ada, total pembayaran, Id Kasir/web, dan pembayaran cash/qris/transfer/cod"
+  const table = document.createElement("table");
+  table.className = "history-table";
+  table.style.width = "100%";
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Tgl</th>
+        <th>Pembeli</th>
+        <th>WA</th>
+        <th>Barang</th>
+        <th>Diskon</th>
+        <th>Total</th>
+        <th>Kasir/Web</th>
+        <th>Metode</th>
+        <th>Status</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody id="txListTableBody"></tbody>
+  `;
+
+  const tbody = table.querySelector("#txListTableBody");
+
+  last30.forEach(tx => {
     const d = new Date(tx.tgl);
     const tgl = formatDate(d);
     const status = tx.status || "paid";
-    const cls = status==="paid"?"tx-paid":status==="wait"?"tx-wait":"tx-cancel";
-    const badge = status==="paid"?'<span class="status-badge status-paid">✅ Paid</span>':
-                  status==="wait"?`<span class="status-badge status-wait">⏳ Wait ${getWaitCountdown(tx.tgl, tx.status)}</span>` :
-                                  '<span class="status-badge status-cancel">❌ Cancel</span>';
     const src = tx.source||"kasir";
-    const div = document.createElement("div");
-    div.className = "tx-item tx-3row "+cls;
-    div.onclick = (e) => {
-       if(e.target.tagName !== 'SELECT' && e.target.tagName !== 'OPTION') {
+    const method = tx.paymentMethod || "Tunai";
+    const nama = tx.nama || "Pelanggan";
+    const hp = tx.hp || "-";
+    const items = (tx.items||[]).map(x=>x.nama+"×"+x.qty).join(", ");
+
+    // Diskon calculations based on data
+    // Transaction object might only have grand, total, ongkir.
+    const subtotal = tx.total || 0;
+    const grand = tx.grand || subtotal;
+    const ongkir = tx.ongkir || 0;
+    const diskonNominal = (subtotal + ongkir) - grand; // Approximate if not explicitly saved
+    const diskonTxt = diskonNominal > 0 ? rp(diskonNominal) : "-";
+
+    const tr = document.createElement("tr");
+    tr.style.cursor = "pointer";
+    tr.onclick = (e) => {
+       if(e.target.tagName !== 'SELECT' && e.target.tagName !== 'OPTION' && e.target.tagName !== 'BUTTON') {
            window.showInvoiceDetail(tx.inv||tx.id);
        }
     };
-    const _c3 = tx.nama&&tx.nama!=="Pelanggan" ? tx.nama+(tx.hp?" "+tx.hp:"") : "";
-    const _i3 = (tx.items||[]).map(x=>x.nama+"\xd7"+x.qty).join(", ");
-    div.innerHTML = `
-      <div class="tx-row1">
-        <span class="tx-inv-code">${tx.inv||"—"}</span>
-        <span class="tx-source-badge">${src}</span>
-        <select class="status-badge status-${status} tx-status-sel" onchange="Admin.updateTxStatus('${tx.inv||tx.id}',this.value,this)">
-          <option value="paid"  ${status==="paid"  ?"selected":""}>✅ Paid</option>
-          <option value="wait"  ${status==="wait"  ?"selected":""}>⏳ Wait</option>
-          <option value="cancel"${status==="cancel"?"selected":""}>❌ Cancel</option>
+
+    let hapusBtn = "";
+    if(status === "cancel") {
+       hapusBtn = `<button class="btn-sm" style="background:#f87171;color:#fff;margin-top:4px;" onclick="Admin.hideTxAkuntansi('${tx.inv||tx.id}')">Hapus dari Akuntansi</button>`;
+    }
+
+    tr.innerHTML = `
+      <td>${tgl}</td>
+      <td>${nama}</td>
+      <td>${hp}</td>
+      <td style="max-width:200px;white-space:normal;">${items}</td>
+      <td>${diskonTxt}</td>
+      <td><b>${rp(grand)}</b></td>
+      <td>${src}</td>
+      <td>${method}</td>
+      <td>
+        <select class="status-badge status-${status} tx-status-sel" onchange="Admin.updateTxStatus('${tx.inv||tx.id}',this.value,this)" style="font-size:11px;padding:2px">
+          <option value="paid"  ${status==="paid"  ?"selected":""}>Paid</option>
+          <option value="wait"  ${status==="wait"  ?"selected":""}>Wait</option>
+          <option value="cancel"${status==="cancel"?"selected":""}>Cancel</option>
         </select>
-        <span class="tx-total-sm">${rp(tx.grand||tx.total||0)}</span>
-      </div>
-      <div class="tx-row2">
-        <span class="tx-date-sm">${tgl}</span>
-        ${_c3?`<span class="tx-cust-sm">� ${_c3}</span>`:""}
-      </div>
-      <div class="tx-row3">${_i3}</div>`
-    frag.appendChild(div);
+        ${hapusBtn}
+      </td>
+      <td><button class="btn-sm" onclick="window.showInvoiceDetail('${tx.inv||tx.id}')">Detail</button></td>
+    `;
+    tbody.appendChild(tr);
   });
+
+  frag.appendChild(table);
   el.innerHTML=""; el.appendChild(frag);
 }
+
+window.hideTxAkuntansi = function(invOrId){
+   if(!confirm("Sembunyikan transaksi ini dari tabel Akuntansi? (Masih muncul di History)")) return;
+   let list = JSON.parse(localStorage.getItem("transaksi")||"[]");
+   const idx = list.findIndex(tx => (tx.inv||String(tx.id)) === String(invOrId));
+   if(idx >= 0){
+      list[idx].hiddenAkuntansi = true;
+      localStorage.setItem("transaksi", JSON.stringify(list));
+      if(typeof window.notifySync==="function") window.notifySync("transactions");
+      showToast("Disembunyikan dari Akuntansi");
+      if(window.Admin && Admin.renderAkuntansi) Admin.renderAkuntansi();
+   }
+};
+Admin.hideTxAkuntansi = window.hideTxAkuntansi;
 
 /* Restore stok ketika transaksi di-cancel (kebalikan dari reduce) */
 function _restoreStockForTx(tx){

@@ -468,8 +468,13 @@
           </select>
         </div>
         <div id="pTempoWrap" style="display:none; margin-top:8px;">
-          <label class="field-label">Tanggal Jatuh Tempo (DDMMYYYY)</label>
-          <input id="pTempo" type="text" placeholder="DDMMYYYY" style="width:100%" pattern="[0-9]{8}" maxlength="8">
+          <label class="field-label">Supplier</label>
+          <input id="pSupplier" list="supplierList" type="text" placeholder="Nama Supplier" style="width:100%; margin-bottom:8px;">
+          <datalist id="supplierList"></datalist>
+          <label class="field-label">No WA Supplier</label>
+          <input id="pWaSupplier" type="tel" placeholder="08xx..." style="width:100%; margin-bottom:8px;">
+          <label class="field-label">Tanggal Jatuh Tempo (DD-MM-YYYY)</label>
+          <input id="pTempo" type="text" placeholder="DD-MM-YYYY" style="width:100%" maxlength="10">
         </div>
         <script>
             // Set default 3 bulan
@@ -800,6 +805,9 @@
               <th onclick="Admin.setTableSort('nama')" style="cursor:pointer">Nama Produk &#8693;</th>
               <th onclick="Admin.setTableSort('terjual')" style="cursor:pointer">Terjual &#8693;</th>
               <th onclick="Admin.setTableSort('sumber')" style="cursor:pointer">Sumber &#8693;</th>
+              <th onclick="Admin.setTableSort('sup')" style="cursor:pointer">Sup &#8693;</th>
+              <th onclick="Admin.setTableSort('waSup')" style="cursor:pointer">WA Sup &#8693;</th>
+              <th onclick="Admin.setTableSort('tempo')" style="cursor:pointer">J.Tempo &#8693;</th>
               <th onclick="Admin.setTableSort('stok')" style="cursor:pointer">Stok &#8693;</th>
               <th onclick="Admin.setTableSort('modalAvg')" style="cursor:pointer">Modal Avg &#8693;</th>
               <th onclick="Admin.setTableSort('omzet')" style="cursor:pointer">Omzet &#8693;</th>
