@@ -803,19 +803,19 @@ function renderHeroPromo(){
 
   const updatePromoBg = () => {
     if(mainBannerEl && fullSlides.length > 0) {
-      const img = fullSlides[mIdx % fullSlides.length] || "";
+      const img = fullSlides[window._mIdx % fullSlides.length] || "";
       mainBannerEl.style.backgroundImage = img ? `linear-gradient(130deg, rgba(7,12,25,.75), rgba(7,12,25,.4)), url(${img})` : "";
     } else if(mainBannerEl && mainImg) {
       mainBannerEl.style.backgroundImage = `linear-gradient(130deg, rgba(7,12,25,.75), rgba(7,12,25,.4)), url(${mainImg})`;
     }
     if(promo1El && leftImages.length > 0) {
-      const img = leftImages[pIdx % leftImages.length] || "";
+      const img = leftImages[window._pIdx % leftImages.length] || "";
       promo1El.style.backgroundImage = img ? `linear-gradient(130deg, rgba(7,12,25,.75), rgba(7,12,25,.4)), url(${img})` : "";
     } else if(promo1El) {
         promo1El.style.backgroundImage = "";
     }
     if(promo2El && rightImages.length > 0) {
-      const img = rightImages[sIdx % rightImages.length] || "";
+      const img = rightImages[window._sIdx % rightImages.length] || "";
       promo2El.style.backgroundImage = img ? `linear-gradient(130deg, rgba(7,12,25,.75), rgba(7,12,25,.4)), url(${img})` : "";
     } else if(promo2El) {
         promo2El.style.backgroundImage = "";
@@ -826,7 +826,7 @@ function renderHeroPromo(){
   const speedSec = parseInt(localStorage.getItem("heroSlideSpeedSec")) || 5;
   const speedMs = (speedSec > 0 ? speedSec : 5) * 1000;
   window._promoInterval = setInterval(() => {
-    pIdx++; sIdx++; mIdx++;
+    window._pIdx++; window._sIdx++; window._mIdx++;
     updatePromoBg();
   }, speedMs);
 
@@ -1447,18 +1447,29 @@ async function sendWA(){
   const inWa = document.getElementById("cWa").value || "-";
   const inAlamat = document.getElementById("cAlamat").value || "-";
 
-  const result=await buildOrderMessage(
-    inNama,
-    inWa,
-    inAlamat,
-    { paymentMethod: paymentMethod, status: "wait", nama: inNama, hp: inWa, alamat: inAlamat }
-  );
-  window.open("https://wa.me/"+wa+"?text="+encodeURIComponent(result.msg));
-  saveCart([]); closeCheckout(); updateCartUI();
-  if(window.App && window.App.renderFull) App.renderFull();
-  showToast("✅ Pesanan dikirim via WA");
-  if(window.Admin && Admin.renderAkuntansi) Admin.renderAkuntansi();
-  if(window.Admin && Admin.renderTable) Admin.renderTable();
+  // Disable button to prevent double-clicks
+  const btn = document.querySelector("#checkoutModal .checkout-action button");
+  if(btn) btn.disabled = true;
+
+  try {
+    const result=await buildOrderMessage(
+      inNama,
+      inWa,
+      inAlamat,
+      { paymentMethod: paymentMethod, status: "wait", nama: inNama, hp: inWa, alamat: inAlamat }
+    );
+    window.open("https://wa.me/"+wa+"?text="+encodeURIComponent(result.msg));
+    saveCart([]); closeCheckout(); updateCartUI();
+    if(window.App && window.App.renderFull) App.renderFull();
+    showToast("✅ Pesanan dikirim via WA");
+    if(window.Admin && Admin.renderAkuntansi) Admin.renderAkuntansi();
+    if(window.Admin && Admin.renderTable) Admin.renderTable();
+  } catch (e) {
+    console.error("sendWA error", e);
+    showToast("❌ Gagal memproses pesanan");
+  } finally {
+    if(btn) btn.disabled = false;
+  }
 }
 
 async function sendEmail(){
