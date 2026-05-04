@@ -1274,8 +1274,11 @@ function importData(){
         const d=JSON.parse(ev.target.result);
         if(d.products && d.products.length){
           const normed = d.products.map(p => p.i !== undefined ? p : normalizeProduct(p));
-  localStorage.setItem("products", JSON.stringify(normed)); if(typeof window.notifySync==="function") window.notifySync("products");
-          invalidateProductCache && invalidateProductCache();
+          localStorage.setItem("products", JSON.stringify(normed));
+          if(typeof window.notifySync==="function") window.notifySync("products");
+          if(typeof invalidateProductCache==="function") invalidateProductCache();
+          if(window.renderOwnerProdukList) renderOwnerProdukList();
+          if(window.App && App.renderFull) App.renderFull();
         }
         if(d.lsData && typeof d.lsData === "object"){
           Object.entries(d.lsData).forEach(([k,v]) => {
@@ -1295,8 +1298,9 @@ function importData(){
           if(d[k] !== undefined)
             localStorage.setItem(k, typeof d[k]==="string" ? d[k] : JSON.stringify(d[k]));
         });
-        showToast("\u2705 Restore berhasil! Memuat ulang...");
-        setTimeout(()=>location.reload(), 900);
+
+        showToast("✅ Data berhasil di-restore!");
+        setTimeout(() => location.reload(), 1500); // the best way to apply all restored data
       }catch(err){
         console.error("Restore error:", err);
         showToast("\u274c File tidak valid: "+err.message);
@@ -1566,12 +1570,13 @@ function renderKategoriChipAdmin(){
   ).join('');
 }
 
-function adjustStok(delta){
+window.adjustStok = function(delta){
   const el = document.getElementById("pStok");
   if(!el) return;
   const v = Math.max(0, (+el.value||0) + delta);
   el.value = v;
 }
+function adjustStok(delta){ window.adjustStok(delta); }
 
 function clearProductForm(){
   ["pName","pModal","pPrice","pStok","pTempo"].forEach(id=>{
@@ -1733,7 +1738,6 @@ function renderTable(){
         <td>${margin}%</td>
         <td>
           <div style="display:flex; flex-direction:column; gap:2px; align-items:center;">
-            <span style="font-size:11px; background:#e2e8f0; padding:2px 6px; border-radius:4px; font-weight:600;">${sumberProd}</span>
             ${statusWarningHtml}
           </div>
         </td>
