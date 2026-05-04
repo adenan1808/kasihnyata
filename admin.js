@@ -1699,21 +1699,8 @@ function renderTable(){
       const laba = s.laba;
       const margin = s.margin;
       let sumberProd = s.sumberProd;
-      let statusWarningHtml = "<span style='color:#4ade80; font-weight:bold;'>Aman</span>";
       if(prod && prod.sumber && prod.sumber !== "Cash"){
         sumberProd = prod.sumber;
-        if(prod.tempo){
-          const sisaHari = Math.ceil((new Date(prod.tempo).getTime() - Date.now()) / (1000 * 3600 * 24));
-          if(sisaHari <= 3){
-            statusWarningHtml = `<span style='color:#f87171; font-weight:bold;' title='Jatuh tempo: ${prod.tempo}'>Bersiap</span>`;
-          } else if(sisaHari <= 7){
-            statusWarningHtml = `<span style='color:#fbbf24; font-weight:bold;' title='Jatuh tempo: ${prod.tempo}'>Waspada</span>`;
-          } else {
-            statusWarningHtml = `<span style='color:#4ade80; font-weight:bold;' title='Jatuh tempo: ${prod.tempo}'>Aman</span>`;
-          }
-        } else {
-          statusWarningHtml = `<span style='color:#94a3b8;'>No Tempo</span>`;
-        }
       }
 
       return `<tr>
@@ -1731,7 +1718,6 @@ function renderTable(){
         <td>
           <div style="display:flex; flex-direction:column; gap:2px; align-items:center;">
             <span style="font-size:11px; background:#e2e8f0; padding:2px 6px; border-radius:4px; font-weight:600;">${sumberProd}</span>
-            ${statusWarningHtml}
           </div>
         </td>
       </tr>`;

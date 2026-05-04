@@ -475,7 +475,7 @@
           <input id="pSupplierName" type="text" placeholder="Nama Supplier" style="width:100%">
 
           <label class="field-label" style="margin-top:10px">No. WA Supplier</label>
-          <input id="pSupplierWA" type="number" placeholder="08..." style="width:100%">
+          <input id="pSupplierWA" type="text" placeholder="08..." style="width:100%">
 
           <label class="field-label" style="margin-top:10px">Alamat Supplier</label>
           <input id="pSupplierAlamat" type="text" placeholder="Alamat Supplier" style="width:100%">
@@ -1053,5 +1053,16 @@
     </div>
   </div>
 
+
+<!-- SUCCESS FEEDBACK POPUP -->
+<div id="successPopup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:#FFFDF2; padding:24px; border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,0.2); z-index:9999; text-align:center; min-width:300px;">
+  <div style="font-size:40px; margin-bottom:10px;">✅</div>
+  <h3 style="margin:0 0 10px 0; color:#4ade80;">Transaksi Berhasil</h3>
+  <div style="font-size:14px; color:var(--text2); margin-bottom:16px;">
+    <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>Total:</span> <strong id="successTotal">Rp 0</strong></div>
+    <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>Dibayar:</span> <strong id="successDibayar">Rp 0</strong></div>
+    <div style="display:flex; justify-content:space-between; margin-top:8px; padding-top:8px; border-top:1px dashed var(--border1);"><span>Kembalian:</span> <strong id="successKembalian" style="color:#4ade80; font-size:16px;">Rp 0</strong></div>
+  </div>
+</div>
 </body>
 </html>

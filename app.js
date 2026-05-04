@@ -1827,6 +1827,14 @@ function _posRenderCart(){
     if(bayarBtn){ bayarBtn.disabled=true; }
     if(summaryEl) summaryEl.style.display="none";
     if(fieldsEl) fieldsEl.style.display="none";
+
+    const dibayarInput = document.getElementById("posDibayar");
+    if(dibayarInput) dibayarInput.value = "";
+    const kembalianEl = document.getElementById("posKembalian");
+    if(kembalianEl) {
+        kembalianEl.innerText = "Rp 0";
+        kembalianEl.style.color = "var(--text2)";
+    }
     return;
   }
 
@@ -2436,3 +2444,88 @@ window.debugApp = { getProducts, getCart, calculateCart };
 
 window.invalidateAppTxCache = function() { _appTxCache = null; };
 window.invalidateAppProductCache = function() { /* App relies on getProducts() from core/admin, so we may not need to do much, but we could re-render */ };
+
+function getPosTotal() {
+  const cfg = getConfig();
+  const diskonG = cfg.diskonGlobal || 0;
+  const diskonP = +localStorage.getItem("diskonPesan") || 0;
+  const ongkir = _getOngkirDefault();
+
+  let sub = 0;
+  cart.forEach(item => {
+    const qty = item.qty;
+    let harga = item.p;
+
+    // Bundle deal logic
+    const limit = _getLimit();
+    if (limit.bundle) {
+      if (cfg.bundleActive && qty >= (cfg.bundleMin || 0)) {
+        harga = harga - (harga * ((cfg.bundleDisc || 0) / 100));
+      }
+    }
+    sub += harga * qty;
+  });
+
+  const potongan = sub * (diskonG / 100);
+  let finalOngkir = ongkir;
+  const limit = _getLimit();
+  if (limit.freeOngkir && cfg.freeOngkirActive && sub >= (cfg.freeOngkirMin || 0)) {
+    finalOngkir = 0;
+  }
+  let grand = sub - potongan + finalOngkir;
+  if(grand < 0) grand = 0;
+  return grand;
+}
+
+function calcKembalian() {
+  const total = getPosTotal();
+  const dibayarInput = document.getElementById("posDibayar");
+  let dibayar = 0;
+  if (dibayarInput && dibayarInput.value) {
+    dibayar = parseFloat(dibayarInput.value) || 0;
+  }
+
+  const kembalianEl = document.getElementById("posKembalian");
+  const bayarBtn = document.getElementById("posBayarBtn");
+
+  let kembalian = dibayar - total;
+
+  if (kembalianEl) {
+    if (dibayar === 0) {
+       kembalianEl.innerText = "Rp 0";
+       kembalianEl.style.color = "var(--text2)";
+    } else if (kembalian < 0) {
+       kembalianEl.innerText = "Kurang Rp " + Math.abs(kembalian).toLocaleString("id");
+       kembalianEl.style.color = "#f87171";
+    } else {
+       kembalianEl.innerText = "Rp " + kembalian.toLocaleString("id");
+       kembalianEl.style.color = "#4ade80";
+    }
+  }
+
+  if (bayarBtn) {
+    if (cart.length > 0 && dibayar >= total) {
+      bayarBtn.disabled = false;
+    } else {
+      bayarBtn.disabled = true;
+    }
+  }
+}
+
+function addQuickCash(amount) {
+  const dibayarInput = document.getElementById("posDibayar");
+  if(dibayarInput) {
+     let current = parseFloat(dibayarInput.value) || 0;
+     dibayarInput.value = current + amount;
+     calcKembalian();
+  }
+}
+
+function setUangPas() {
+  const total = getPosTotal();
+  const dibayarInput = document.getElementById("posDibayar");
+  if(dibayarInput) {
+     dibayarInput.value = total;
+     calcKembalian();
+  }
+}
