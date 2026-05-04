@@ -411,7 +411,7 @@ function autoCancelExpiredOrders() {
                 Admin.saveProducts(products);
                 if(typeof window.notifySync==="function") window.notifySync("products");
             } else {
-                localStorage.setItem(\"products\", JSON.stringify(products));
+                localStorage.setItem("products", JSON.stringify(products));
                 if(typeof window.notifySync==="function") window.notifySync("products");
             }
             if(window._broadcastStockChange) window._broadcastStockChange();
