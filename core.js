@@ -773,3 +773,24 @@ async function verifyData(data, sig){
   const check = await signData(data);
   return check === sig;
 }
+
+
+
+window.formatDate = function(d) {
+  if(!(d instanceof Date)) return "";
+  const pad = n => String(n).padStart(2, "0");
+  return `${pad(d.getDate())}-${pad(d.getMonth()+1)}-${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
+window.getWaitCountdown = function(txTgl, status) {
+  if(status !== "wait") return "";
+  const waitMinutes = parseInt(localStorage.getItem("waitTimer") || "10", 10);
+  if(waitMinutes <= 0) return "";
+  const expiry = txTgl + waitMinutes * 60 * 1000;
+  const now = Date.now();
+  if(now > expiry) return "Expired";
+  const diff = expiry - now;
+  const m = Math.floor(diff / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  return `${m}:${String(s).padStart(2, "0")}`;
+};

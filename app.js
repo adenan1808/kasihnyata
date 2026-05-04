@@ -1998,62 +1998,6 @@ async function posBayar(){
       payMethod = "Tunai"; // Dianggap cash
   }
 
-  // QRIS: timer dinamis sebelum proses otomatis
-  if(payMethod === "QRIS" && !posBayar._qrisValidated){
-    const qrisSrc = localStorage.getItem("qrisImg")||localStorage.getItem("qris")||"";
-    if(!qrisSrc) {
-        showToast("QRIS belum diupload di menu Toko");
-        posBayar._lock = false;
-        return;
-    }
-
-
-    // Tampilkan overlay QRIS
-    const qrisOverlay = document.getElementById("posQrisOverlay");
-    const posQrisImg = document.getElementById("posQrisImg");
-    if(posQrisImg) posQrisImg.src = qrisSrc;
-    if(qrisOverlay) qrisOverlay.style.display = "flex";
-
-    const oldBtnText = document.getElementById("posBayarBtn").innerHTML;
-    document.getElementById("posBayarBtn").innerHTML = "<b style='color:#fff'>Menunggu Pembayaran...</b>";
-    document.getElementById("posBayarBtn").disabled = true;
-    document.getElementById("posBayarBtn").style.backgroundColor = "#dc2626"; // Merah
-    document.getElementById("posBayarBtn").style.borderColor = "#b91c1c";
-
-    showToast("⚠️ CEK PEMBAYARAN! Menunggu Pembayaran...", 3000, {background: "#dc2626", color: "#fff", fontWeight: "bold"});
-    setTimeout(()=>{
-      posBayar._qrisValidated = true;
-      posBayar._lock = false;
-      document.getElementById("posBayarBtn").disabled = false;
-      document.getElementById("posBayarBtn").innerHTML = oldBtnText;
-      document.getElementById("posBayarBtn").style.backgroundColor = ""; // Reset
-      document.getElementById("posBayarBtn").style.borderColor = "";
-      // Remove overlay immediately
-      const qrisOverlayFinal = document.getElementById("posQrisOverlay");
-      if(qrisOverlayFinal) qrisOverlayFinal.style.display = "none";
-      showToast("✅ Validasi OK!", 2000, {background: "#16a34a", color: "#fff", fontWeight: "bold"});
-      // Automatically proceed
-      posBayar();
-    }, qrisDelay * 1000);
-
-    return;
-  }
-
-
-
-  if(payMethod !== "QRIS") {
-    const qrisMini = document.getElementById("posQrisMini");
-    if(qrisMini) qrisMini.style.display = "none";
-  }
-
-
-  if(payMethod !== "QRIS") {
-    const qrisMini = document.getElementById("posQrisMini");
-    if(qrisMini) qrisMini.style.display = "none";
-  }
-
-  posBayar._qrisValidated = false;
-
   // Get customer data
   const namaRaw   = document.getElementById("posNama")?.value.trim()||"";
   const hpRaw     = document.getElementById("posHp")?.value.trim()||"";
@@ -2163,6 +2107,7 @@ async function posBayar(){
 
   // Success flash + clear
   _posShowSuccess(nama, grandBayar, inv||'--');
+  posBayar._qrisValidated = false;
   saveCart([]);
   updateCartUI();
   _posRenderGrid();
@@ -2187,23 +2132,50 @@ function _posClearFields(){
 /*  Payment method change: show QRIS image or bank info  */
 function _posOnPayMethodChange(method){
   const qrisOverlay  = document.getElementById("posQrisOverlay");
-  const qrisImgLeft  = document.getElementById("posQrisImgLeft");
+  const posQrisImg   = document.getElementById("posQrisImg"); // using the new overlay img
   const transferInfo = document.getElementById("posTransferInfo");
   const transferDet  = document.getElementById("posTransferDetail");
   const waitInfo     = document.getElementById("posWaitInfo");
+  const bayarBtn     = document.getElementById("posBayarBtn");
+
+  // Reset button state
+  if (bayarBtn) {
+    bayarBtn.disabled = false;
+    bayarBtn.innerHTML = "<b>BAYAR</b>";
+    bayarBtn.style.backgroundColor = "";
+    bayarBtn.style.borderColor = "";
+  }
 
   if(qrisOverlay){
     if(method === "QRIS"){
       const qrisSrc = localStorage.getItem("qrisImg")||localStorage.getItem("qris")||"";
-      if(qrisSrc && qrisImgLeft){
-        qrisImgLeft.src = qrisSrc;
+      if(qrisSrc && posQrisImg){
+        posQrisImg.src = qrisSrc;
         qrisOverlay.style.display = "flex";
+
+        // Disable button for 3 seconds while validating
+        const qrisDelay = parseInt(localStorage.getItem("qrisDelay") || "3", 10);
+        if (qrisDelay > 0 && bayarBtn) {
+           bayarBtn.disabled = true;
+           bayarBtn.innerHTML = "<b style='color:#fff'>Validasi QRIS...</b>";
+           bayarBtn.style.backgroundColor = "#facc15"; // Yellow
+           bayarBtn.style.borderColor = "#eab308";
+
+           if(window._qrisTimer) clearTimeout(window._qrisTimer);
+           window._qrisTimer = setTimeout(()=>{
+               bayarBtn.disabled = false;
+               bayarBtn.innerHTML = "<b style='color:#fff'>BAYAR (QRIS OK)</b>";
+               bayarBtn.style.backgroundColor = "#16a34a"; // Green
+               bayarBtn.style.borderColor = "#15803d";
+           }, qrisDelay * 1000);
+        }
       } else {
         qrisOverlay.style.display = "none";
         showToast("QRIS belum diupload di menu Toko");
       }
     } else {
       qrisOverlay.style.display = "none";
+      if(window._qrisTimer) clearTimeout(window._qrisTimer);
     }
   }
 
