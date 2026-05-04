@@ -1747,7 +1747,7 @@ async function _posRenderGrid(){
            <span class="stepper-num">${qty}</span>
            <button class="stepper-btn" onclick="event.stopPropagation();App._posQtyDelta('${id}',1)">+</button>
          </div>`
-      : `<button class="pos-card-add-btn" onclick="event.stopPropagation();App._posQtyDelta('${id}',1)">+ Tambah</button>`;
+      : `<button class="pos-card-add-btn" onclick="event.stopPropagation();App._posQtyDelta('${id}',1)">+</button>`;
 
     return `
       <div class="pos-card${inCart?" in-cart":""}${stokNum<=0?" out-of-stock":""}" ${stokNum<=0?"style=\"opacity:0.6;pointer-events:none;\"":""} data-pos-id="${id}">
@@ -2017,15 +2017,18 @@ async function posBayar(){
       document.getElementById("posBayarBtn").innerHTML = oldBtnText;
       document.getElementById("posBayarBtn").style.backgroundColor = ""; // Reset
       document.getElementById("posBayarBtn").style.borderColor = "";
-      showToast("✅ Validasi OK! Silakan klik BAYAR kembali", 3000, {background: "#16a34a", color: "#fff", fontWeight: "bold"});
+      // Remove overlay immediately
+      const qrisOverlayFinal = document.getElementById("posQrisOverlay");
+      if(qrisOverlayFinal) qrisOverlayFinal.style.display = "none";
+      showToast("✅ Validasi OK!", 2000, {background: "#16a34a", color: "#fff", fontWeight: "bold"});
+      // Automatically proceed
+      posBayar();
     }, qrisDelay * 1000);
 
     return;
   }
 
-  // Sembunyikan QRIS setelah user klik tombol Bayar yang kedua (proses validasi lolos)
-  const qrisOverlayFinal = document.getElementById("posQrisOverlay");
-  if(qrisOverlayFinal) qrisOverlayFinal.style.display = "none";
+
 
   if(payMethod !== "QRIS") {
     const qrisMini = document.getElementById("posQrisMini");
