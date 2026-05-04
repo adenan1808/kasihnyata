@@ -1831,6 +1831,11 @@ function renderTxListTable(txAll){
     const src = tx.source||"kasir";
     const div = document.createElement("div");
     div.className = "tx-item tx-3row "+cls;
+    div.onclick = (e) => {
+       if(e.target.tagName !== 'SELECT' && e.target.tagName !== 'OPTION') {
+           window.showInvoiceDetail(tx.inv||tx.id);
+       }
+    };
     const _c3 = tx.nama&&tx.nama!=="Pelanggan" ? tx.nama+(tx.hp?" "+tx.hp:"") : "";
     const _i3 = (tx.items||[]).map(x=>x.nama+"\xd7"+x.qty).join(", ");
     div.innerHTML = `
