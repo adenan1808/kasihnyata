@@ -1,179 +1,1080 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Kasih Nyata - Denantokh</title>
-  <meta name="theme-color" content="#FFF8E1" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
-  <style>
-
-.qris-img {
-  animation: pulse 2.5s infinite;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.04); }
-  100% { transform: scale(1); }
-}
-    :root{ --bg:#FFFDF2; --accent:#B38B00; --muted:#6B7280; --card:#FFF8E1; }
-    *{box-sizing:border-box;}
-    body{font-family:'Poppins',sans-serif;background:var(--bg);color:#3A3A3A;margin:0;padding:20px;}
-    .container{max-width:1000px;margin:12px auto;padding:24px;}
-    .fade-in{opacity:0;animation:fadeIn 1.2s ease-in forwards;}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
-    .header{background:linear-gradient(135deg,#FBE8B3,#FFFDF2);padding:36px;border-radius:18px;text-align:center;box-shadow:0 6px 30px rgba(0,0,0,0.04);}
-    h1{font-family:'Playfair Display',serif;color:#735D20;margin:0;font-size:clamp(26px,4.5vw,44px);}
-    h3{margin-top:10px;color:var(--accent);font-weight:400;}
-    .section{margin-top:32px;}
-    .mission-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;}
-    .card{
-  background:var(--card);
-  border-radius:12px;
-  padding:18px;
-  box-shadow:0 6px 18px rgba(0,0,0,0.04);
-  transition: all 0.3s ease;
-}
-
-.card:hover{
-  transform: translateY(-6px);
-  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
-}
-    .donation{background:#FDF7E3;border-radius:16px;padding:28px;text-align:center;}
-    .qris-img{max-width:360px;width:100%;height:auto;border-radius:12px;box-shadow:0 6px 22px rgba(0,0,0,0.12);display:block;margin:16px auto;}
-    .contact a{color:#735D20;text-decoration:none;font-weight:600;}
-    .footer{text-align:center;background:linear-gradient(135deg,#FFFDF2,#FBE8B3);padding:30px;border-radius:14px;margin-top:44px;}
-    .small{font-size:13px;color:var(--muted);}
-.btn{
-  display:inline-block;
-  margin:8px 6px;
-  padding:10px 14px;
-  border-radius:10px;
-  background:var(--accent);
-  color:#fff;
-  text-decoration:none;
-  font-weight:600;
-  transition: all 0.25s ease;
-}
-
-.btn:hover{
-  transform: scale(1.05);
-  background: #8C6E00;
-}
-    .socials{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
-    .socials a{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;background:#fff;border-radius:10px;border:1px solid #f0e6c2;text-decoration:none;color:#333;}
-    .icon{width:18px;height:18px;display:inline-block;}
-    @media (max-width:720px){ .container{padding:16px} .header{padding:24px} }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">Toko WA PRO</title>
+<link rel="stylesheet" href="style.css">
 </head>
-<body class="fade-in">
-  <div class="container">
-    <header class="header">
-      <h1>Kasih Nyata - Denantokh</h1>
-      <h3>Setiap Tetes Kasih Membawa Harapan</h3>
-    </header>
+<body>
 
-    <main>
-      <section class="section">
-        <h2>🌾 Tentang Kasih Nyata - Denantokh</h2>
-        <p><strong>Kasih Nyata</strong> adalah gerakan pribadi yang berfokus pada tindakan nyata untuk menolong dan meneguhkan sesama pengikut Kristus. Kami mendukung kanal-kanal rohani agar semakin kuat menyuarakan kebenaran dan kasih Tuhan.</p>
-        <p>Kami percaya setiap tindakan kecil penuh kasih dapat menjadi pengharapan baru bagi banyak orang.</p>
-      </section>
+<!-- ================= PIN OVERLAY ================= -->
+<div id="pinOverlay" style="display:none">
+  <div class="pin-box">
+    <div class="pin-logo">🔐</div>
+    <h3>Mode Owner</h3>
+    <p>Masukkan PIN untuk masuk ke panel admin</p>
+    <div class="pin-dots" id="pinDots">
+      <span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <div class="pin-pad">
+      <button onclick="pinInput(1)">1</button><button onclick="pinInput(2)">2</button><button onclick="pinInput(3)">3</button>
+      <button onclick="pinInput(4)">4</button><button onclick="pinInput(5)">5</button><button onclick="pinInput(6)">6</button>
+      <button onclick="pinInput(7)">7</button><button onclick="pinInput(8)">8</button><button onclick="pinInput(9)">9</button>
+      <button onclick="pinClear()" class="pin-del">⌫</button>
+      <button onclick="pinInput(0)">0</button>
+      <button onclick="pinCancel()" class="pin-cancel">✕</button>
+    </div>
+    <div id="pinError" class="pin-error"></div>
+  </div>
+</div>
 
-      <section class="section">
-        <h2>❤️ Misi</h2>
-        <div class="mission-grid">
-          <div class="card">
-            <h3>🤝 Menolong Sesama</h3>
-            <p>Menyalurkan bantuan bagi umat Kristen yang membutuhkan dengan kasih dan transparansi.</p>
-          </div>
-          <div class="card">
-            <h3>💌 Menguatkan Channel Kristen</h3>
-            <p>Mendorong tumbuhnya kanal-kanal rohani agar mampu menjadi terang di media sosial.</p>
-          </div>
-          <div class="card">
-            <h3>🌅 Menebar Harapan</h3>
-            <p>Menjadi jembatan kasih bagi mereka yang sedang berjuang dalam masa sulit.</p>
-          </div>
-        </div>
-      </section>
+<!-- ================= BUYER VIEW ================= -->
+<div id="buyerView" style="display:none">
+<div class="container">
 
-      <section class="section donation">
-        <h2>💛 Dukungan Kasih</h2>
-        <p class="small">Dukunganmu, sekecil apa pun, membawa terang bagi banyak jiwa.<br>Scan QR berikut untuk berpartisipasi:</p>
+  <header class="header">
+    <h2 id="buyerJudulToko" class="store-title-tap">
+      <span id="buyerStoreLogo" class="store-logo-wrap">
+        <svg id="buyerStoreLogoFallback" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <img id="buyerStoreLogoImg" alt="Logo toko" style="display:none">
+      </span>
+      <span id="buyerStoreNameText">Toko WA</span>
+    </h2>
+    <div class="actions">
+      <button id="cartBtn" onclick="App.openCart()" aria-label="Keranjang Belanja">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span id="cartCount" class="cart-badge">0</span>
+      </button>
+      <button onclick="App.chatWA()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+        WA
+      </button>
+    </div>
+  </header>
 
-       <img id="qrisImg" class="qris-img" src="QRIS KASIHNYATA.jpg" alt="QRIS Kasih Nyata" />
+  <section id="buyerHero" class="hero hero-grid">
+    <!-- Kolom 1: Banner Utama -->
+    <div id="heroMainBanner" class="hero-slide">
+      <div class="hero-content" id="heroPromoContent" style="display:none">
+        <h2 id="buyerHeroText"></h2>
+        <p id="heroPromoDesc"></p>
+      </div>
+    </div>
+    <!-- Kolom 2: Promo 1 -->
+    <div id="heroPromo1" class="hero-slide"></div>
+    <!-- Kolom 3: Promo 2 -->
+    <div id="heroPromo2" class="hero-slide">
+      <div class="hero-content" id="heroSponsorContent" style="display:none">
+        <span class="hero-sponsor-label">Sponsor</span>
+        <h3 id="heroSponsorTitle"></h3>
+        <p id="heroSponsorDesc"></p>
+      </div>
+    </div>
+  </section>
 
-        <p class="small">📱 Gunakan aplikasi DANA, GoPay, OVO, BCA Mobile, Mandiri, atau aplikasi berlogo QRIS untuk scan kode di atas.</p>
-
-        <div>
-          <a href="#" class="btn" id="openBtn">Buka QR di tab baru</a>
-        <a href="#" id="downloadBtn" class="btn">Download QR</a>
-        </div>
-
-        <p class="small" style="margin-top:10px;">Jika QR belum tampil, coba buka melalui tombol di atas atau buka di incognito / jaringan seluler.</p>
-      </section>
-
-      <section class="section">
-        <div class="card">
-          <h2>🕊️ Doa & Dukungan</h2>
-          <p>Kekuatan kasih tidak hanya dari materi, tetapi juga dari doa dan empati. Semoga setiap kasih yang disalurkan menjadi berkat bagi sesama.</p>
-        </div>
-      </section>
-
-      <section class="section">
-        <h2>📞 Kontak</h2>
-        <div class="socials">
-          <a href="https://www.tiktok.com/@denantokh" target="_blank" rel="noopener"><span class="icon">🎵</span><span class="small">TikTok</span></a>
-          <a href="https://www.youtube.com/@denantokh" target="_blank" rel="noopener"><span class="icon">🎥</span><span class="small">YouTube</span></a>
-          <a href="https://sites.google.com/view/gerakan-kasih" target="_blank" rel="noopener"><span class="icon">🌐</span><span class="small">Website</span></a>
-          <a href="mailto:gerakankasihnyata@gmail.com" target="_blank" rel="noopener"><span class="icon">📩</span><span class="small">Email</span></a>
-        </div>
-      </section>
-    </main>
-
-    <footer class="footer">
-      <blockquote style="font-style:italic;color:var(--muted);font-size:18px;margin:0 0 12px 0">
-        “Kebaikan sekecil apa pun akan membawa terang bagi dunia.”
-      </blockquote>
-      <p style="margin-top:12px;font-weight:600;color:#735D20">🌷 Kebaikan itu nyata ketika diwujudkan.</p>
-    </footer>
+  <div class="search-bar-row">
+    <input id="searchInput" placeholder="🔍 Cari produk..." class="search-input">
   </div>
 
-  <script>
-    // Open new tab with centered responsive QR image (no scrolling)
-    (function(){
-      var openBtn = document.getElementById('openBtn');
-      var imgSrc = 'QRIS KASIHNYATA.jpg';
-      openBtn.addEventListener('click', function(e){
-        e.preventDefault();
-        var w = window.open('', '_blank');
-        if(!w) {
-          alert('Popup terblokir. Silakan klik tombol "Unduh QR" atau izinkan popup untuk situs ini.');
-          return;
-        }
-        var popupHtml = '<!doctype html><html><head><meta charset="utf-8"><title>QRIS — Kasih Nyata</title><style>body{margin:0;background:#fff;display:flex;align-items:center;justify-content:center;height:100vh;}img{max-width:90vw;max-height:90vh;box-shadow:0 6px 24px rgba(0,0,0,0.15);border-radius:12px;}</style></head><body><img src="'+imgSrc+'" alt="QRIS Gerakan Amal Kasih Nyata"></body></html>';
-        w.document.open();
-        w.document.write(popupHtml);
-        w.document.close();
-      });
-    })();
-  </script>
-<script>
-document.getElementById("downloadBtn").addEventListener("click", function(e) {
-  e.preventDefault();
+  <div id="kategoriChipsWrap" class="kategori-chips-wrap"></div>
+  <div id="productsByKategori"></div>
 
-  const img = document.getElementById("qrisImg");
+  <section class="recommend-section">
+    <h3>🔥 Sering Dibeli Bareng</h3>
+    <div id="recommendList" class="products-grid"></div>
+  </section>
 
-  const a = document.createElement("a");
-  a.href = img.src; // ambil langsung dari gambar yang sudah tampil
-  a.download = "QRIS_KASIHNYATA.jpg";
+</div>
+</div>
 
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-});
-</script>
+<!-- ================= BUYER VIEW WRAPPER END ================= -->
+
+<!-- ================= POS MODE (Owner inline cashier) ================= -->
+<div id="posView" style="display:none">
+  <div class="pos-layout">
+    <!-- LEFT: Product Grid -->
+    <div class="pos-left">
+      <div class="pos-search-bar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input id="posSearchInput" placeholder="Cari produk..." autocomplete="off">
+        <span id="posLicBadge" class="pos-lic-badge">FREE</span>
+      </div>
+      <div id="posKategoriChips" class="pos-chips"></div>
+      <div id="posProductGrid" class="pos-product-grid"></div>
+      <!-- QRIS overlay di area produk -->
+      <!-- qris overlay moved -->
+<div id="posQrisOverlayOLD" class="pos-qris-overlay" style="display:none">
+        <div class="pos-qris-overlay-inner">
+          <div class="pos-qris-overlay-label">Scan QRIS untuk membayar</div>
+          <img id="posQrisImgLeft" src="" alt="QRIS" class="pos-qris-overlay-img">
+        </div>
+      </div>
+    </div>
+    <!-- RIGHT: Full Cart + Checkout -->
+    <div class="pos-right">
+      <div class="pos-cart-panel">
+
+        <!-- HEADER -->
+        <div class="pos-cart-header">
+          <div class="pos-cart-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            Keranjang
+          </div>
+          <span id="posCartBadge" class="pos-cart-badge">0</span>
+        </div>
+
+        <!-- SCROLL ZONE: items + summary + checkout fields -->
+        <div class="pos-cart-scroll-zone">
+        <!-- CART ITEMS: scroll independently -->
+        <div id="posCartItemsWrap" class="pos-cart-items-wrap">
+          <div id="posCartItems" class="pos-cart-items"></div>
+        </div>
+
+        <!-- SUMMARY BREAKDOWN -->
+        <div class="pos-summary" id="posSummary" style="display:none">
+          <div class="pos-sum-row"><span>Subtotal</span><span id="posSumSubtotal">Rp 0</span></div>
+          <div class="pos-sum-row diskon" id="posSumDiskonRow" style="display:none"><span id="posSumDiskonLbl">Diskon</span><span id="posSumDiskon">- Rp 0</span></div>
+          <div class="pos-sum-row"><span>Ongkir</span><span id="posSumOngkir">Rp 0</span></div>
+          <div class="pos-sum-divider"></div>
+          <div class="pos-sum-row grand"><span>TOTAL</span><span id="posSumGrand">Rp 0</span></div>
+        </div>
+
+        <!-- CUSTOMER FIELDS (opsional) -->
+        <div class="pos-checkout-fields" id="posCheckoutFields" style="display:none;position:relative;">
+
+          <!-- QRIS OVERLAY (Hanya nutup data pelanggan) -->
+          <div id="posQrisOverlay" style="display:none;position:absolute;bottom:0;left:0;right:0;padding:20px;background:rgba(0,0,0,0.95);z-index:100;flex-direction:column;align-items:center;justify-content:center;color:#fff;border-radius:12px;box-shadow: 0 -10px 30px rgba(0,0,0,0.5);">
+            <h4 style="margin:0 0 10px 0;text-align:center;color:#facc15;">📱 SCAN QRIS</h4>
+            <img id="posQrisImg" src="" style="max-width:120px;border-radius:8px;border:2px solid #fff;">
+            <p style="margin:10px 0 0 0;text-align:center;font-size:12px;font-weight:bold;color:#f87171;">Menunggu validasi...</p>
+          </div>
+
+          <div class="pos-field-label" style="cursor:pointer; color:var(--accent); font-weight:600; background:var(--surface2); padding:8px 12px; border-radius:8px;" onclick="const el = document.getElementById('posCustomerInputs'); const icon = document.getElementById('posCustomerIcon'); if(el.style.display === 'none'){ el.style.display = 'block'; icon.textContent='▼'; }else{ el.style.display = 'none'; icon.textContent='▶'; }">
+            <span id="posCustomerIcon" style="display:inline-block; width:16px; font-size:10px;">▶</span> Data Pelanggan <span class="pos-optional" style="color:var(--text2); font-weight:400;">(opsional)</span>
+          </div>
+          <div id="posCustomerInputs" style="display:none; margin-top:10px; padding:10px; border:1px dashed var(--border2); border-radius:8px;">
+            <div id="posCustomerFound" class="pos-customer-found" style="display:none"></div>
+            <div class="pos-cust-input-wrap" id="posNamaWrap">
+              <input id="posNama" class="pos-cust-input" placeholder="Nama pelanggan" autocomplete="off">
+            </div>
+            <div class="pos-cust-input-wrap" id="posHpWrap">
+              <input id="posHp" class="pos-cust-input" placeholder="No HP (08xx...)" type="tel" autocomplete="off">
+            </div>
+            <div class="pos-cust-input-wrap" id="posAlamatWrap">
+              <input id="posAlamat" class="pos-cust-input" placeholder="Alamat (opsional)" autocomplete="off">
+            </div>
+          </div>
+          <select id="posPayMethod" class="pos-pay-select" onchange="_posOnPayMethodChange(this.value)">
+            <option value="Tunai">💵 Tunai</option>
+            <option value="QRIS">📱 QRIS</option>
+            <option value="Transfer">🏦 Transfer</option>
+            <option value="COD">🚚 COD</option>
+          </select>
+          <!-- QRIS displayed in pos-left area -->
+          <!-- Transfer Info -->
+          <div id="posTransferInfo" class="pos-transfer-info" style="display:none">
+            <div class="pos-transfer-label">Transfer ke:</div>
+            <div id="posTransferDetail" class="pos-transfer-detail"></div>
+          </div>
+          <!-- Wait info for Transfer/COD -->
+          <div id="posWaitInfo" class="pos-wait-info" style="display:none">
+            <span>⏳</span>
+            <span>Status <b>WAIT</b> — dikonfirmasi owner</span>
+          </div>
+        </div>
+
+        </div><!-- end scroll zone -->
+
+        <!-- FOOTER -->
+        <div class="pos-cart-footer">
+          <div class="pos-payment-block" style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="font-size:16px; font-weight:800; color:var(--text1); text-transform:uppercase;">Dibayar</div>
+              <input type="number" id="posDibayar" placeholder="0" style="width:140px; text-align:right; font-size:18px; font-weight:bold; color:#10b981; padding:4px 8px; border-radius:6px; border:1px solid var(--border1);" oninput="if(window.App && typeof App.calcKembalian === 'function') App.calcKembalian()">
+            </div>
+
+            <div style="display:flex; gap:4px; flex-wrap:wrap;">
+              <button class="btn-sm" style="flex:1; padding:4px 2px; font-size:11px;" onclick="if(window.App && typeof App.addQuickCash === 'function') App.addQuickCash(10000)">+10k</button>
+              <button class="btn-sm" style="flex:1; padding:4px 2px; font-size:11px;" onclick="if(window.App && typeof App.addQuickCash === 'function') App.addQuickCash(20000)">+20k</button>
+              <button class="btn-sm" style="flex:1; padding:4px 2px; font-size:11px;" onclick="if(window.App && typeof App.addQuickCash === 'function') App.addQuickCash(50000)">+50k</button>
+              <button class="btn-sm" style="flex:1; padding:4px 2px; font-size:11px;" onclick="if(window.App && typeof App.addQuickCash === 'function') App.addQuickCash(100000)">+100k</button>
+              <button class="btn-sm" style="flex:1; padding:4px 2px; font-size:11px;" onclick="if(window.App && typeof App.setUangPas === 'function') App.setUangPas()">Uang Pas</button>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface2); padding:6px 10px; border-radius:6px;">
+              <div style="font-size:13px; font-weight:600; color:var(--text2);">Kembalian</div>
+              <div id="posKembalian" style="font-size:15px; font-weight:bold; color:#4ade80;">Rp 0</div>
+            </div>
+          </div>
+          <div class="pos-total-block">
+            <div class="pos-total-label">TOTAL BAYAR</div>
+            <div class="pos-total-amount" id="posTotalAmount">Rp 0</div>
+          </div>
+          <button id="posBayarBtn" class="pos-bayar-btn" onclick="App.posBayar()" disabled>
+            <span>BAYAR + WA</span>
+            <kbd class="pos-enter-hint">ENTER</kbd>
+          </button>
+          <button id="posPrintBtn" class="pos-print-btn" onclick="App.posPrintReceipt()" style="display:none">
+            🖨️ Print Resi Thermal
+          </button>
+          <button class="pos-clear-btn" onclick="App.posClearCart()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            ESC — Kosongkan
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= OWNER VIEW ================= -->
+<div id="ownerView" style="display:none">
+<div class="container">
+
+  <header class="header owner-header">
+    <div class="owner-title-wrap">
+      <span class="owner-badge">👑 OWNER</span>
+      <h2 id="ownerJudulToko">🛍️ Toko WA</h2>
+    </div>
+    <div class="actions">
+      <button onclick="switchToBuyer()" class="btn-preview">👁️ Preview</button>
+      <button onclick="App.chatWA()">💬 WA</button>
+    </div>
+  </header>
+
+  <section class="stats-bar">
+    <div class="stat-card"><span class="stat-val" id="totalProduk">0</span><span class="stat-lbl">Produk</span></div>
+    <div class="stat-card"><span class="stat-val" id="statusLicense">FREE</span><span class="stat-lbl">Lisensi</span></div>
+    <div class="stat-card"><span class="stat-val" id="qrisStatus">OFF</span><span class="stat-lbl">QRIS</span></div>
+    <div class="stat-card"><span class="stat-val" id="backupStatus">—</span><span class="stat-lbl">Backup</span></div>
+  </section>
+
+  <div class="owner-tabs">
+    <button class="tab-btn" onclick="App.openPOS()" id="btnPOSMode">🖥️ POS Kasir</button>
+    <button class="tab-btn active" onclick="showTab('tabToko',this)">🏪 Toko</button>
+    <button class="tab-btn" onclick="showTab('tabProduk',this)">📦 Produk</button>
+    <button class="tab-btn" onclick="showTab('tabPromo',this)">🎁 Promo</button>
+    <button class="tab-btn" onclick="showTab('tabAkuntansi',this)">📊 Akuntansi</button>
+    <button class="tab-btn" onclick="showTab('tabTable',this)">📋 Table</button>
+    <button class="tab-btn" onclick="showTab('tabHistory',this)">📜 History</button>
+    <button class="tab-btn" onclick="showTab('tabPelanggan',this)">👥 Pelanggan</button>
+    <button class="tab-btn" onclick="showTab('tabBackup',this)">💾 Backup</button>
+  </div>
+
+  <!-- TAB TOKO -->
+  <div id="tabToko" class="tab-panel active">
+    <div class="panel-grid">
+      <div class="panel-box">
+        <div class="panel-box-header"><span class="panel-icon">🏪</span><div><div class="panel-title">Info Toko</div><div class="panel-desc">Nama, kontak & tampilan toko</div></div></div>
+        <label class="field-label">Nama Toko</label>
+        <input id="storeName" placeholder="Masukkan nama toko...">
+        <label class="field-label">Tagline / Slogan Hero</label>
+        <input id="heroText" placeholder="Jualan Mudah via WhatsApp ✨">
+
+        <div class="style-panel">
+          <div class="style-panel-title">Atur Tampilan Toko</div>
+          <div class="style-grid-2">
+            <div>
+              <label class="field-label">Ukuran Nama Toko</label>
+              <select id="titleSize" class="select-field">
+                <option value="16">Mini (16px)</option>
+                <option value="20">Compact (20px)</option>
+                <option value="26">Standout (26px)</option>
+                <option value="34">Hero (34px)</option>
+                <option value="44">Jumbo (44px)</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label">Font Nama Toko</label>
+              <select id="titleFont" class="select-field">
+                <option value="'Plus Jakarta Sans',sans-serif">Plus Jakarta Sans</option>
+                <option value="'Poppins',sans-serif">Poppins</option>
+                <option value="'Sora',sans-serif">Sora</option>
+                <option value="'Outfit',sans-serif">Outfit</option>
+                <option value="'Georgia',serif">Georgia (Klasik)</option>
+              </select>
+            </div>
+          </div>
+          <div class="style-grid-2">
+            <div>
+              <label class="field-label">Ukuran Slogan</label>
+              <select id="heroSize" class="select-field">
+                <option value="12">Micro (12px)</option>
+                <option value="16">Calm (16px)</option>
+                <option value="20">Balanced (20px)</option>
+                <option value="24">Bold (24px)</option>
+                <option value="30">Loud (30px)</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label">Tema Cepat</label>
+              <select id="storeTheme" class="select-field">
+                <option value="matcha">Matcha Pop</option>
+                <option value="sunset">Sunset Soda</option>
+                <option value="ocean">Ocean Neon</option>
+                <option value="mono">Mono Luxe</option>
+              </select>
+            </div>
+          </div>
+          <div class="style-grid-3">
+            <div>
+              <label class="field-label">Warna Nama</label>
+              <input type="color" id="titleColor">
+            </div>
+            <div>
+              <label class="field-label">Warna Slogan</label>
+              <input type="color" id="heroColor">
+            </div>
+            <div>
+              <label class="field-label">Warna Background</label>
+              <input type="color" id="bgColor">
+            </div>
+          </div>
+        </div>
+
+        <div class="field-hint" style="margin-top:8px">Teks besar di banner utama buyer</div>
+        <label class="field-label">No WhatsApp Owner</label>
+        <input id="ownerWa" placeholder="628xxxxxxxxxx">
+        <div class="field-hint">Digunakan untuk terima order</div>
+        <label class="field-label">Email (untuk backup)</label>
+        <input id="ownerEmail" placeholder="email@gmail.com" type="email">
+
+        <!-- Invoice & Discount Settings -->
+        <div class="style-panel" style="margin-top:14px">
+          <div class="style-panel-title">⚡ Invoice & Diskon Pesan</div>
+          <label class="field-label">Kode Invoice</label>
+          <input id="invoiceKode" placeholder="contoh: WA, JKT, TKO (maks 3 huruf)" maxlength="3" style="text-transform:uppercase">
+          <div class="field-hint">Format: DDMMYY-KODE-NOURUT (cth: 260426-WA-00001)</div>
+          <label class="field-label">No Invoice Mulai (start)</label>
+          <input id="invoiceStart" type="number" placeholder="1" min="1">
+          <div class="field-hint">Urutan pertama invoice. Akan auto-increment setiap transaksi.</div>
+          <label class="field-label">Diskon Pesan (%) — tampil di WA &amp; Email</label>
+          <input id="diskonPesan" type="number" placeholder="0" min="0" max="100">
+          <div class="field-hint">Diskon ini akan muncul di pesan order ke pembeli</div>
+          <label class="field-label">Ongkir Default (Rp) — POS &amp; WA</label>
+          <input id="ongkirDefault" type="number" placeholder="0" min="0">
+          <div class="field-hint">Set 0 = gratis ongkir. Berlaku di POS &amp; checkout WA</div>
+          <label class="field-label">Rekening Bank (Transfer) — tampil di POS</label>
+          <input id="noRekBank" placeholder="cth: BCA 1234567890 a.n Budi Santoso">
+          <div class="field-hint">Tampil otomatis saat pembeli pilih Transfer di kasir</div>
+        </div>
+
+
+        <div class="panel-box-header" style="margin-top:20px"><span class="panel-icon">⚙️</span><div><div class="panel-title">Pengaturan Fitur & Tampilan</div><div class="panel-desc">Aktifkan atau nonaktifkan fitur toko</div></div></div>
+
+        <div class="acc-toggle-row" style="margin-bottom:10px;">
+          <div><div class="field-label" style="margin-top:0">Banner Toko (Tampil)</div></div>
+          <label class="toggle-switch"><input type="checkbox" id="heroEnabledToggle"><span class="toggle-slider"></span></label>
+        </div>
+
+        <div class="acc-toggle-row" style="margin-bottom:10px;">
+          <div><div class="field-label" style="margin-top:0">Promo Kiri (Tampil)</div></div>
+          <label class="toggle-switch"><input type="checkbox" id="promoLeftEnabledToggle"><span class="toggle-slider"></span></label>
+        </div>
+
+        <div class="acc-toggle-row" style="margin-bottom:10px;">
+          <div><div class="field-label" style="margin-top:0">Sponsor Kanan (Tampil)</div></div>
+          <label class="toggle-switch"><input type="checkbox" id="promoRightEnabledToggle"><span class="toggle-slider"></span></label>
+        </div>
+
+        <div class="acc-toggle-row" style="margin-bottom:10px;">
+          <div>
+            <div class="field-label" style="margin-top:0">Pembayaran QRIS</div>
+            <div class="field-hint">Jika OFF, tombol QRIS akan dianggap sebagai pembayaran TUNAI</div>
+          </div>
+          <label class="toggle-switch"><input type="checkbox" id="qrisEnabledToggle"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="acc-toggle-row" style="margin-bottom:10px;">
+          <div>
+            <div class="field-label" style="margin-top:0">Delay Validasi QRIS (Detik)</div>
+            <div class="field-hint">Berapa lama tombol tertahan saat bayar QRIS (0 = Cash)</div>
+          </div>
+          <input type="number" id="qrisDelayInput" placeholder="3" min="0" value="3" style="width: 80px;">
+        </div>
+
+
+
+
+        <label class="field-label">Waktu Tunggu "WAIT" (Menit)</label>
+        <input type="number" id="waitTimerInput" placeholder="10" min="0" value="10">
+        <div class="field-hint">Jika diset 0, pesanan harus dikonfirmasi manual. Jika lebih dari 0, otomatis batal dan stok kembali jika belum di approve.</div>
+
+<button onclick="Admin.saveToko()" class="btn-save">💾 Simpan Info Toko</button>
+      </div>
+      <div class="panel-box">
+        <div class="panel-box-header"><span class="panel-icon">🖼️</span><div><div class="panel-title">Banner & QRIS</div><div class="panel-desc">Gambar Banner Utama (Kiri) dan QR pembayaran</div></div></div>
+        <label class="field-label">Banner Toko (Kiri)</label>
+        <div class="upload-area" onclick="document.getElementById('heroInput').click()">
+          <div id="heroPrev" class="upload-preview"><span>📷 Klik upload banner</span></div>
+        </div>
+        <input type="file" id="heroInput" accept="image/*" style="display:none">
+        <label class="field-label" style="margin-top:14px">QRIS Pembayaran</label>
+        <div class="upload-area" onclick="document.getElementById('qrisInput').click()">
+          <div id="qrisPrev" class="upload-preview"><span>📷 Klik upload QRIS</span></div>
+        </div>
+        <input type="file" id="qrisInput" accept="image/*" style="display:none">
+
+        <div class="panel-box" style="margin-top:14px;padding:14px">
+          <div class="panel-box-header" style="margin-bottom:10px;padding-bottom:10px"><span class="panel-icon">🔑</span><div><div class="panel-title">Keamanan & Lisensi</div></div></div>
+          <label class="field-label">Ganti PIN Owner</label>
+          <div class="pin-setting-row">
+            <input id="pinBaru" type="password" placeholder="PIN baru (6 digit)" maxlength="6">
+            <button onclick="Admin.savePin()" class="btn-sm">Simpan</button>
+          </div>
+          <label class="field-label" style="margin-top:10px">PIN Kasir</label>
+          <div class="pin-setting-row">
+            <input id="pinKasirBaru" type="password" placeholder="PIN kasir (6 digit)" maxlength="6">
+            <button onclick="Admin.saveKasirPin()" class="btn-sm">Simpan</button>
+          </div>
+
+          <!-- MANAJEMEN KASIR -->
+          <div style="margin-top:16px;padding-top:14px;border-top:1px solid #273251">
+            <div class="field-label" style="margin-bottom:8px">👤 Daftar Kasir</div>
+            <div id="kasirLimitInfo" style="font-size:11px;color:var(--text3);margin-bottom:8px"></div>
+            <div id="kasirList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px"></div>
+            <div id="kasirAddForm" style="display:flex;flex-direction:column;gap:6px">
+              <input id="kasirNamaBaru" placeholder="Nama kasir..." class="field-input" style="padding:8px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text1);font-size:13px">
+              <input id="kasirPinBaru" type="password" placeholder="PIN kasir (6 digit)" maxlength="6" class="field-input" style="padding:8px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text1);font-size:13px">
+              <button onclick="typeof Admin!=='undefined'?Admin.addKasir():addKasir()" class="btn-sm" style="background:var(--accent);color:#07101f;font-weight:800">+ Tambah Kasir</button>
+            </div>
+          </div>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid #273251">
+            <div class="field-label" style="margin-bottom:6px">🏷️ Status Lisensi</div>
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+              <span id="licBadgePanel" style="background:#1e3a2a;color:#5cf17b;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:700;letter-spacing:.05em">FREE</span>
+              <code id="licDeviceId" style="color:#475569;font-size:10px"></code>
+            </div>
+            <button onclick="openLicenseModal()" class="btn-outline" style="width:100%;margin-bottom:6px">🔑 Aktifkan / Ganti Lisensi</button>
+            <button onclick="Core.checkLicense(true).then(r=>{ showToast('✅ Tier: '+(r&&r.tier||'free').toUpperCase()); if(r&&r.tier) Core.updateLicenseBadge(r.tier); })" class="btn-outline" style="width:100%;font-size:12px">🔄 Cek Lisensi Sekarang</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB PRODUK -->
+  <div id="tabProduk" class="tab-panel">
+    <!-- KATEGORI di atas Produk -->
+    <div class="panel-box" style="margin-bottom:14px">
+      <div class="panel-box-header"><span class="panel-icon">📂</span><div><div class="panel-title">Kategori</div><div class="panel-desc">Kelola kategori produk</div></div></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <select id="pKategori" class="select-field" style="flex:1;min-width:140px"></select>
+        <button onclick="App.openTambahKategoriModal()" class="btn-sm">+ Tambah Kategori</button>
+        <button onclick="Admin.deleteSelectedKategori()" class="btn-sm" style="background:#450a0a;color:#f87171">🗑️ Hapus Dipilih</button>
+      </div>
+      <div id="kategoriChipAdmin" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"></div>
+    </div>
+    <div class="panel-grid">
+      <div class="panel-box">
+        <div class="panel-box-header"><span class="panel-icon">➕</span><div><div class="panel-title">Tambah / Edit Produk</div><div class="panel-desc">Isi detail produk</div></div></div>
+        <label class="field-label">Nama Produk</label>
+        <input id="pName" placeholder="Nama produk...">
+        <label class="field-label">Harga Modal (Rp)</label>
+        <input id="pModal" type="number" placeholder="0" oninput="autoHargaJual()">
+        <label class="field-label">Harga Jual (Rp)</label>
+        <input id="pPrice" type="number" placeholder="0">
+        <label class="field-label">Stok</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="pStok" type="number" placeholder="0" min="0" style="flex:1">
+          <button onclick="Admin.adjustStok(1)" class="btn-sm">+</button>
+          <button onclick="Admin.adjustStok(-1)" class="btn-sm" style="background:#450a0a;color:#f87171">−</button>
+        </div>
+
+        <label class="field-label" style="margin-top:10px">Sumber Produk</label>
+        <div style="display:flex;gap:8px;">
+          <select id="pSumber" class="select-field" style="flex:1" onchange="document.getElementById('pTempoWrap').style.display = (this.value==='Hutang' || this.value==='Titip Jual') ? 'block' : 'none'">
+            <option value="Cash">Cash</option>
+            <option value="Hutang">Hutang</option>
+            <option value="Titip Jual">Titip Jual</option>
+          </select>
+        </div>
+        <div id="pTempoWrap" style="display:none; margin-top:8px;">
+          <label class="field-label">Tanggal Jatuh Tempo (DD-MM-YY)</label>
+          <input id="pTempo" type="text" placeholder="DD-MM-YY" style="width:100%">
+
+          <label class="field-label" style="margin-top:10px">Nama Supplier</label>
+          <input id="pSupplierName" type="text" placeholder="Nama Supplier" style="width:100%">
+
+          <label class="field-label" style="margin-top:10px">No. WA Supplier</label>
+          <input id="pSupplierWA" type="text" placeholder="08..." style="width:100%">
+
+          <label class="field-label" style="margin-top:10px">Alamat Supplier</label>
+          <input id="pSupplierAlamat" type="text" placeholder="Alamat Supplier" style="width:100%">
+        </div>
+        <script>
+            // Set default 90 hari
+            const tempoEl = document.getElementById('pTempo');
+            if(tempoEl && !tempoEl.value) {
+                const d = new Date();
+                d.setDate(d.getDate() + 90);
+                const dd = String(d.getDate()).padStart(2, '0');
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const yy = String(d.getFullYear()).slice(-2);
+                tempoEl.value = dd + '-' + mm + '-' + yy;
+            }
+        </script>
+
+        <label class="field-label">Margin Default (%)</label>
+        <div class="margin-row">
+          <input id="defaultMargin" type="number" placeholder="30" style="flex:1">
+          <span class="field-hint">%</span>
+          <button onclick="Admin.saveMargin()" class="btn-sm">Simpan</button>
+        </div>
+        <label class="field-label" style="margin-top:10px">Foto Produk</label>
+        <div class="upload-area" onclick="document.getElementById('pImg').click()">
+          <div id="pImgPrev" class="upload-preview"><span>📷 Klik upload foto</span></div>
+        </div>
+        <input type="file" id="pImg" accept="image/*" style="display:none">
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button onclick="Admin.addProduct()" class="btn-save" style="flex:1">💾 Simpan Produk</button>
+          <button onclick="Admin.clearProductForm()" class="btn-sm" style="background:var(--surface2)">✕ Batal</button>
+        </div>
+      </div>
+      <div class="panel-box">
+        <div class="panel-box-header"><span class="panel-icon">📋</span><div><div class="panel-title">Daftar Produk</div><div class="panel-desc" id="produkInfo">0 produk tersimpan</div></div></div>
+        <input id="produkSearchAdmin" placeholder="🔍 Cari produk..." oninput="Admin.filterProdukAdmin(this.value)" style="margin-bottom:8px;padding:8px 12px;width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text1);font-size:12px">
+        <div id="ownerProdukList" class="owner-produk-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB PROMO -->
+  <div id="tabPromo" class="tab-panel">
+    <div class="panel-grid">
+      <div class="promo-left-stack">
+        <div class="panel-box">
+          <div class="panel-box-header"><span class="panel-icon">🎯</span><div><div class="panel-title">Diskon Global</div><div class="panel-desc">Potongan harga ke semua produk</div></div></div>
+          <label class="field-label">Diskon (%)</label>
+          <input id="diskonGlobal" type="number" placeholder="0">
+          <div class="field-hint">Masukkan 0 untuk menonaktifkan</div>
+        </div>
+        <div class="promo-bottom-grid">
+          <div class="panel-box">
+            <div class="panel-box-header"><span class="panel-icon">🎁</span><div><div class="panel-title">Bundle Deal</div><div class="panel-desc">Diskon jika beli banyak item sekaligus</div></div></div>
+            <label class="field-label"><input type="checkbox" id="bundleOn"> Aktifkan Bundle</label>
+            <label class="field-label">Min Jumlah Item</label>
+            <input id="bundleMin" type="number" placeholder="3">
+            <label class="field-label">Diskon Bundle (%)</label>
+            <input id="bundleDiskon" type="number" placeholder="10">
+          </div>
+          <div class="panel-box">
+            <div class="panel-box-header"><span class="panel-icon">🚚</span><div><div class="panel-title">Free Ongkir</div><div class="panel-desc">Gratis ongkir jika total belanja tercapai</div></div></div>
+            <label class="field-label"><input type="checkbox" id="ongkirOn"> Aktifkan Free Ongkir</label>
+            <label class="field-label">Min Total Belanja (Rp)</label>
+            <input id="ongkirMin" type="number" placeholder="100000">
+          </div>
+        </div>
+      </div>
+      <div class="panel-box">
+        <div class="panel-box-header"><span class="panel-icon">🖼️</span><div><div class="panel-title">Hero Promo Buyer</div><div class="panel-desc">Promo kiri + sponsor kanan</div></div></div>
+        <label class="field-label">Judul Promo</label>
+        <input id="promoTitle" placeholder="Produk unggulan hari ini">
+        <label class="field-label">Deskripsi Promo</label>
+        <input id="promoDesc" placeholder="Deskripsi singkat promo">
+        <label class="field-label" style="margin-top:10px">Judul Sponsor</label>
+        <input id="sponsorTitle" placeholder="Pesan sponsor">
+        <label class="field-label">Deskripsi Sponsor</label>
+        <input id="sponsorDesc" placeholder="Deskripsi sponsor">
+        <!-- Hero Overlay Style -->
+        <div class="panel-box" style="padding:12px;margin-top:12px">
+          <div class="field-label" style="margin-top:0">🎨 Gaya Teks Hero (tidak menutupi gambar)</div>
+          <div class="hero-style-row">
+            <div class="hero-style-col">
+              <label>Warna Overlay</label>
+              <input type="color" id="heroOverlayColor" value="#070c19" onchange="applyHeroOverlay()">
+            </div>
+            <div class="hero-style-col">
+              <label>Transparansi: <span class="hero-overlay-val" id="heroOverlayVal">55%</span></label>
+              <input type="range" id="heroOverlayOpacity" min="0" max="95" step="5" value="55" oninput="document.getElementById('heroOverlayVal').textContent=this.value+'%';applyHeroOverlay()">
+            </div>
+            <div class="hero-style-col">
+              <label>Warna Teks</label>
+              <input type="color" id="heroTextColor" value="#ffffff" onchange="applyHeroOverlay()">
+            </div>
+          </div>
+        </div>
+        <!-- Kecepatan Slider -->
+        <label class="field-label" style="margin-top:14px">⏱️ Kecepatan Slider Hero</label>
+        <div class="slider-speed-row">
+          <label>Lambat</label>
+          <input type="range" id="heroSlideSpeed" min="2" max="15" step="1" value="5" oninput="document.getElementById('heroSlideSpeedVal').textContent=this.value+'d'">
+          <label>Cepat</label>
+          <span class="slider-speed-val" id="heroSlideSpeedVal">5d</span>
+        </div>
+        <div class="field-hint">Interval antar slide (detik). Akan aktif saat ada lebih dari 1 gambar.</div>
+        <div class="promo-manage-grid">
+          <div class="promo-manage-col">
+            <label class="field-label">Gambar Promo (kiri)</label>
+            <div class="upload-area" onclick="document.getElementById('promoLeftInput').click()">
+              <div id="promoLeftPrev" class="upload-preview"><span>📷 Klik upload promo kiri</span></div>
+            </div>
+            <input type="file" id="promoLeftInput" accept="image/*" style="display:none">
+            <div id="promoLeftList" class="owner-produk-list" style="margin-top:8px"></div>
+          </div>
+          <div class="promo-manage-col">
+            <label class="field-label">Gambar Sponsor (kanan)</label>
+            <div class="upload-area" onclick="document.getElementById('promoRightInput').click()">
+              <div id="promoRightPrev" class="upload-preview"><span>📷 Klik upload sponsor kanan</span></div>
+            </div>
+            <input type="file" id="promoRightInput" accept="image/*" style="display:none">
+            <div id="promoRightList" class="owner-produk-list" style="margin-top:8px"></div>
+          </div>
+        </div>
+        <label class="field-label" style="margin-top:10px">Logo Toko Header</label>
+        <div class="upload-area" onclick="document.getElementById('storeLogoInput').click()">
+          <div id="storeLogoPrev" class="upload-preview"><span>📷 Klik upload logo toko</span></div>
+        </div>
+        <input type="file" id="storeLogoInput" accept="image/*" style="display:none">
+      </div>
+      <div class="panel-box" style="grid-column:1/-1">
+        <button onclick="Admin.savePromo()" class="btn-save">💾 Simpan Semua Promo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB AKUNTANSI -->
+  <div id="tabAkuntansi" class="tab-panel">
+    <div id="accDisabledBanner" class="acc-disabled-banner" style="display:none">
+      <span>📴</span> Akuntansi tidak aktif — aktifkan di pengaturan di bawah
+    </div>
+
+    <!-- TODAY REPORT -->
+    <div id="accActiveSection">
+      <div class="acc-today-grid">
+        <div class="acc-today-card">
+          <div class="acc-today-label">💰 Omzet Hari Ini</div>
+          <div class="acc-today-val" id="todayOmzet">Rp 0</div>
+        </div>
+        <div class="acc-today-card">
+          <div class="acc-today-label">📦 Item Terjual</div>
+          <div class="acc-today-val" id="todayItems">0</div>
+        </div>
+        <div class="acc-today-card">
+          <div class="acc-today-label">📈 Laba Bersih</div>
+          <div class="acc-today-val accent" id="todayLaba">Rp 0</div>
+        </div>
+        <div class="acc-today-card">
+          <div class="acc-today-label">🏛️ Pajak Hari Ini</div>
+          <div class="acc-today-val warn" id="todayPajak">Rp 0</div>
+        </div>
+      </div>
+
+      <div class="panel-grid" style="margin-top:14px">
+        <!-- MONTHLY SUMMARY -->
+        <div class="panel-box">
+          <div class="panel-box-header">
+            <span class="panel-icon">📅</span>
+            <div><div class="panel-title">Rekap Bulanan</div><div class="panel-desc">Summary per bulan otomatis</div></div>
+          </div>
+          <div id="rekapBulananList" class="rekap-list"></div>
+        </div>
+
+        <!-- LAST TRANSACTIONS -->
+        <div class="panel-box">
+          <div class="panel-box-header">
+            <span class="panel-icon">🧾</span>
+            <div><div class="panel-title">30 Transaksi Terakhir</div><div class="panel-desc" id="txCountLabel">0 total tersimpan</div></div>
+          </div>
+          <div id="txList" class="tx-list"></div>
+        </div>
+
+        <!-- FULL REPORT -->
+        <div class="panel-box">
+                    <div class="panel-box-header">
+            <span class="panel-icon">&#128202;</span>
+            <div>
+              <div class="panel-title">Laporan Keseluruhan</div>
+              <div class="panel-desc">
+                <input type="date" id="filterAwal" style="padding:2px;font-size:11px;">
+                - <input type="date" id="filterAkhir" style="padding:2px;font-size:11px;">
+                <button onclick="Admin.renderAkuntansi()" class="btn-sm" style="padding:4px 8px;font-size:11px;">Filter</button>
+              </div>
+            </div>
+            <button onclick="Admin.hapusSeluruhData()" class="btn-sm" style="background:#450a0a;color:#f87171;margin-left:auto;">&#128465; Hapus Semua Data</button>
+          </div>
+          <div class="report-summary-grid">
+            <div class="report-item">
+              <div class="report-item-lbl">💵 Total Omzet</div>
+              <div class="report-item-val" id="rptOmzet">Rp 0</div>
+            </div>
+            <div class="report-item">
+              <div class="report-item-lbl">📦 Item Terjual</div>
+              <div class="report-item-val" id="rptItems">0</div>
+            </div>
+            <div class="report-item">
+              <div class="report-item-lbl">🏷️ Total Modal</div>
+              <div class="report-item-val" id="rptModal">Rp 0</div>
+            </div>
+            <div class="report-item">
+              <div class="report-item-lbl">📈 Gross Profit</div>
+              <div class="report-item-val accent" id="rptProfit">Rp 0</div>
+            </div>
+            <div class="report-item">
+              <div class="report-item-lbl">🏛️ Total Pajak</div>
+              <div class="report-item-val warn" id="rptPajak">Rp 0</div>
+            </div>
+            <div class="report-item">
+              <div class="report-item-lbl">✅ Laba Bersih</div>
+              <div class="report-item-val accent" id="rptLabaBersih">Rp 0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div class="panel-box">
+          <div class="panel-box-header">
+            <span class="panel-icon">⚙️</span>
+            <div><div class="panel-title">Pengaturan Akuntansi</div><div class="panel-desc">Konfigurasi sistem</div></div>
+          </div>
+
+          <div class="acc-toggle-row">
+            <div>
+              <div class="field-label" style="margin-top:0">Akuntansi ON/OFF</div>
+              <div class="field-hint">Jika OFF, tidak ada transaksi yang disimpan</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="accEnabledToggle" onchange="Admin.saveAccSettings()">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="acc-toggle-row" style="margin-top:12px">
+            <div>
+              <div class="field-label" style="margin-top:0">Pajak UMKM ON/OFF</div>
+              <div class="field-hint">Dihitung dari omzet (bukan laba)</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="taxEnabledToggle" onchange="Admin.saveAccSettings()">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <label class="field-label">Tarif Pajak (%)</label>
+          <input id="taxRateInput" type="number" placeholder="0.5" step="0.1" min="0" max="10">
+          <div class="field-hint">Default 0.5% (PP No.23/2018 UMKM)</div>
+
+          <label class="field-label">Simpan Data (hari)</label>
+          <input id="maxDaysInput" type="number" placeholder="37" min="1" max="90">
+          <div class="field-hint">Maks 60 hari. Data lama otomatis dihapus.</div>
+
+          <button onclick="Admin.saveAccSettings()" class="btn-save">💾 Simpan Pengaturan</button>
+          <button onclick="Admin.clearTransaksi()" class="btn-danger" style="margin-top:8px">🗑️ Hapus Semua Transaksi</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB BACKUP -->
+  <div id="tabBackup" class="tab-panel">
+    <div class="panel-grid">
+      <div class="panel-box">
+        <div class="panel-box-header"><span class="panel-icon">💾</span><div><div class="panel-title">Backup Data Toko</div><div class="panel-desc">Otomatis dihapus setelah 7 hari</div></div></div>
+        <p class="field-hint" style="line-height:1.7;margin-bottom:12px">
+          Backup menyimpan semua produk, pengaturan, dan promo toko Anda.
+        </p>
+        <label class="field-label">Tujuan Backup</label>
+        <div class="backup-options">
+          <label class="backup-opt">
+            <input type="radio" name="backupDest" value="download" id="backupDownload" checked>
+            <span class="backup-opt-box"><span class="backup-icon">⬇️</span><b>Download</b><small>Simpan file JSON</small></span>
+          </label>
+          <label class="backup-opt">
+            <input type="radio" name="backupDest" value="wa" id="backupWa">
+            <span class="backup-opt-box"><span class="backup-icon">💬</span><b>WhatsApp</b><small>Kirim ke WA owner</small></span>
+          </label>
+          <label class="backup-opt">
+            <input type="radio" name="backupDest" value="email" id="backupEmail">
+            <span class="backup-opt-box"><span class="backup-icon">📧</span><b>Email</b><small>Buka Gmail draft</small></span>
+          </label>
+        </div>
+        <label class="field-label" style="margin-top:14px">Jadwal Otomatis</label>
+        <select id="backupSchedule" class="select-field">
+          <option value="off">Tidak otomatis</option>
+          <option value="daily">Setiap hari</option>
+          <option value="weekly">Setiap minggu</option>
+        </select>
+        <button onclick="Admin.doBackup()" class="btn-save" style="margin-top:14px">💾 Backup Sekarang</button>
+        <button onclick="Admin.importData()" class="btn-outline" style="margin-top:8px">📂 Restore dari File</button>
+      </div>
+      <div class="panel-box">
+        <div class="panel-box-header"><span class="panel-icon">🗂️</span><div><div class="panel-title">Riwayat Backup</div><div class="panel-desc">7 hari terakhir</div></div></div>
+        <div id="backupHistory" class="backup-history"></div>
+        <button onclick="Admin.resetData()" class="btn-danger" style="margin-top:16px">🗑️ Reset Semua Data</button>
+        <div class="field-hint" style="color:#ef4444;margin-top:4px">Hati-hati! Ini menghapus semua data toko.</div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <!-- TAB TABLE -->
+  <div id="tabTable" class="tab-panel">
+    <div class="panel-box">
+            <div class="panel-box-header">
+        <span class="panel-icon">&#128203;</span>
+        <div>
+          <div class="panel-title">Rekap dan Stok</div>
+          <div class="panel-desc">Rekap per produk + status pembayaran</div>
+        </div>
+        <div style="margin-left:auto; display:flex; flex-direction:column; gap:4px; font-size:11px; background:var(--surface2); padding:6px 10px; border-radius:6px; border:1px solid var(--border2)">
+          <div>Paling laku bulan ini: <b id="topProduct" style="color:var(--accent)">-</b></div>
+          <div>Penjual terbanyak bulan ini: <b id="topSeller" style="color:var(--accent)">-</b></div>
+        </div>
+      </div>
+      <input type="text" id="searchTable" placeholder="Cari nama produk..." oninput="Admin.renderTable()" class="search-input" style="margin-bottom:12px">
+      <div class="table-wrap">
+        <table class="data-table" id="tableRekap">
+          <thead>
+            <tr>
+              <th onclick="Admin.setTableSort('nama')" style="cursor:pointer">Nama Produk &#8693;</th>
+              <th onclick="Admin.setTableSort('terjual')" style="cursor:pointer">Terjual &#8693;</th>
+              <th onclick="Admin.setTableSort('supplierName')" style="cursor:pointer">Nama Supplier &#8693;</th>
+              <th onclick="Admin.setTableSort('supplierWA')" style="cursor:pointer">No. WA supplier &#8693;</th>
+              <th onclick="Admin.setTableSort('supplierAlamat')" style="cursor:pointer">Alamat Supplier &#8693;</th>
+              <th onclick="Admin.setTableSort('stok')" style="cursor:pointer">Stok &#8693;</th>
+              <th onclick="Admin.setTableSort('modalAvg')" style="cursor:pointer">Modal Avg &#8693;</th>
+              <th onclick="Admin.setTableSort('omzet')" style="cursor:pointer">Omzet &#8693;</th>
+              <th onclick="Admin.setTableSort('hpp')" style="cursor:pointer">HPP &#8693;</th>
+              <th onclick="Admin.setTableSort('laba')" style="cursor:pointer">Laba &#8693;</th>
+              <th onclick="Admin.setTableSort('margin')" style="cursor:pointer">Margin &#8693;</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tableRekapBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB HISTORY -->
+  <div id="tabHistory" class="tab-panel">
+    <div class="panel-box">
+      <div class="panel-box-header"><span class="panel-icon">🧾</span><div><div class="panel-title">Riwayat Transaksi Lengkap</div><div class="panel-desc">Daftar semua transaksi beserta detail</div></div></div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th onclick="Admin.setTableSort('inv', 'history')" style="cursor:pointer">Invoice &#8693;</th>
+              <th onclick="Admin.setTableSort('tgl', 'history')" style="cursor:pointer">Tanggal &#8693;</th>
+              <th onclick="Admin.setTableSort('nama', 'history')" style="cursor:pointer">Nama &#8693;</th>
+              <th onclick="Admin.setTableSort('hp', 'history')" style="cursor:pointer">WA &#8693;</th>
+              <th>Alamat</th>
+              <th onclick="Admin.setTableSort('total', 'history')" style="cursor:pointer">Total &#8693;</th>
+              <th onclick="Admin.setTableSort('source', 'history')" style="cursor:pointer">Kasir/Web &#8693;</th>
+              <th onclick="Admin.setTableSort('status', 'history')" style="cursor:pointer">Status &#8693;</th>
+              <th onclick="Admin.setTableSort('paymentMethod', 'history')" style="cursor:pointer">Metode &#8693;</th>
+              <th>Detail</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB PELANGGAN -->
+    <div id="tabPelanggan" class="tab-panel">
+    <div class="panel-box">
+      <div class="panel-box-header"><span class="panel-icon">&#128101;</span><div><div class="panel-title">Data Pelanggan</div><div class="panel-desc" id="pelangganCount">0 pelanggan tersimpan</div></div></div>
+      <input id="pelangganSearch" class="search-input" placeholder="&#128269; Cari nama / no WA..." style="margin-bottom:12px" oninput="Admin.renderPelangganList(this.value)">
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nama</th>
+              <th>No WA</th>
+              <th>Alamat</th>
+              <th>Pembelian Terakhir</th>
+              <th>History Pembelian</th>
+            </tr>
+          </thead>
+          <tbody id="pelangganList"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="historyPelangganModal" class="modal">
+    <div class="modal-box" style="max-width:500px">
+      <div class="modal-header"><h3>&#128196; History Pembelian Bulanan</h3><button onclick="document.getElementById('historyPelangganModal').style.display='none'" class="modal-close">&#10005;</button></div>
+      <div style="padding:16px;">
+        <div id="historyPelangganInfo" style="margin-bottom:12px;font-weight:bold;color:var(--text1)"></div>
+        <table class="data-table" style="width:100%">
+          <thead><tr><th>Bulan/Tahun</th><th>Transaksi</th><th>Total Omzet</th></tr></thead>
+          <tbody id="historyPelangganBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+</div>
+
+<!-- ================= MODALS ================= -->
+<div id="detailTxModal" class="modal">
+  <div class="modal-box" style="max-width:500px">
+    <div class="modal-header"><h3>🛒 Detail Item Transaksi</h3><button onclick="document.getElementById('detailTxModal').style.display='none'" class="modal-close">✕</button></div>
+    <div style="padding:16px;">
+      <div id="detailTxInfo" style="margin-bottom:12px;font-size:13px;color:var(--text2)"></div>
+      <table class="data-table" style="width:100%">
+        <thead><tr><th>Produk</th><th>Qty</th><th>Harga</th><th>Subtotal</th></tr></thead>
+        <tbody id="detailTxBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="kategoriPopup" class="modal">
+  <div class="modal-box kategori-modal">
+    <div class="modal-header"><h3>📂 Kategori</h3><button onclick="App.closeKategoriPopup()" class="modal-close">✕</button></div>
+    <div id="kategoriOptions"></div>
+  </div>
+</div>
+
+<div id="katPickerModal" class="modal">
+  <div class="modal-box kategori-modal">
+    <div class="modal-header">
+      <h3>📂 Pilih Kategori</h3>
+      <button onclick="App.closeKategoriPicker()" class="modal-close">✕</button>
+    </div>
+    <div class="kpopup-quota">
+      <div class="kpopup-quota-row">
+        <span>Jumlah kategori</span>
+        <b id="katQuotaText">0 / 10</b>
+      </div>
+      <div class="kpopup-bar-track">
+        <div id="katQuotaBar" class="kpopup-bar-fill"></div>
+      </div>
+    </div>
+    <div class="kpopup-label">Kategori tersedia</div>
+    <div id="katPickerList"></div>
+    <div class="kpopup-label" style="margin-top:14px">Tambah baru</div>
+    <input id="katNewInput" placeholder="Tulis kategori baru...">
+    <button onclick="App.addNewKategori()" class="btn-save">➕ Tambah Kategori</button>
+  </div>
+</div>
+
+<div id="cartModal" class="modal">
+  <div class="modal-box cart-modal-box">
+    <div class="modal-header">
+      <div class="modal-title-row">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <h3>Keranjang Belanja</h3>
+      </div>
+      <button onclick="App.closeCart()" class="modal-close">✕</button>
+    </div>
+    <div id="cartList" class="cart-list-scroll"></div>
+    <div class="cart-modal-footer">
+      <button onclick="App.checkout()" class="btn-checkout-main" id="btnCheckoutFromCart">
+        <span>Lanjut ke Checkout</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="checkoutModal" class="modal">
+  <div class="modal-box checkout-modal-box">
+    <!-- ONE SCREEN: split left info / right summary -->
+    <div class="checkout-header">
+      <h3>✅ Konfirmasi Pesanan</h3>
+      <button onclick="App.closeCheckout()" class="modal-close">✕</button>
+    </div>
+    <div class="checkout-body">
+      <div class="checkout-left">
+        <div class="checkout-section-title">Data Pemesan</div>
+        <div class="checkout-field-group">
+          <div class="checkout-input-wrap">
+            <svg class="chk-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <input id="cNama" placeholder="Nama pemesan" autocomplete="name">
+          </div>
+          <div class="checkout-input-wrap">
+            <svg class="chk-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+            <input id="cWa" placeholder="No WhatsApp (628xxx)" type="tel" autocomplete="tel">
+          </div>
+          <div class="checkout-input-wrap">
+            <svg class="chk-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <input id="cAlamat" placeholder="Alamat pengiriman">
+          </div>
+        </div>
+        <div class="checkout-section-title" style="margin-top:14px">Pembayaran</div>
+        <select id="cPaymentMethod" class="select-field checkout-select">
+          <option value="WA">💬 WhatsApp (konfirmasi manual)</option>
+          <option value="QRIS">📱 QRIS</option>
+          <option value="Transfer">🏦 Transfer Bank</option>
+          <option value="COD">🚚 COD (Bayar di tempat)</option>
+        </select>
+        <div id="qrisBox" style="margin-top:10px"></div>
+      </div>
+      <div class="checkout-right">
+        <div class="checkout-section-title">Ringkasan</div>
+        <div id="checkoutTotal"></div>
+        <div class="checkout-action-row">
+          <button onclick="App.sendWA()" class="btn-wa-checkout" id="btnSendWA">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+            Bayar dan kirim WA
+          </button>
+          <button onclick="App.sendEmail()" class="btn-email-checkout">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Email
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tambahKategoriModal" class="modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Tambah Kategori</h3>
+      <button onclick="App.closeTambahKategoriModal()" class="modal-close">✕</button>
+    </div>
+    <input id="newKategoriInput" placeholder="Nama kategori...">
+    <button class="btn-save" onclick="App.simpanKategoriBaru()">Simpan</button>
+  </div>
+</div>
+
+<div id="stickyCart" class="sticky-cart" style="display:none">
+  <div><b id="stickyTotal">Rp 0</b><br><small id="stickyItems">0 item</small></div>
+  <button onclick="App.openCart()">Lihat Keranjang →</button>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- ================= CHANGE PIN MODAL (FIRST LOGIN) ================= -->
+<div id="changePinModal" class="modal" style="display:none">
+  <div class="modal-box" style="max-width:320px;text-align:center">
+    <div style="font-size:32px;margin-bottom:8px">🔐</div>
+    <h3 style="margin-bottom:6px">Buat PIN Baru</h3>
+    <p style="color:var(--text2);font-size:13px;margin-bottom:16px">
+      Ini pertama kali login. Buat PIN 6 digit untuk keamanan toko Anda.
+    </p>
+    <input id="firstPin" type="password" maxlength="6" inputmode="numeric"
+      placeholder="PIN baru (6 digit)"
+      style="text-align:center;font-size:20px;letter-spacing:8px;margin-bottom:12px">
+    <button onclick="saveFirstPin()" class="btn-save">✅ Simpan PIN</button>
+  </div>
+</div>
+
+<script src="core.js"></script>
+    <script src="sync.js"></script>
+<script src="admin.js"></script>
+<script src="app.js"></script>
+
+  <!-- INVOICE DETAIL MODAL -->
+  <div id="invoiceDetailModal" class="modal-overlay" style="display:none;z-index:9999;">
+    <div class="modal-content" style="max-width:400px;">
+      <h3 id="invDetailTitle" style="margin-top:0">Detail Transaksi</h3>
+      <div id="invDetailBody" style="font-size:13px;line-height:1.5;margin-bottom:15px;max-height:400px;overflow-y:auto;text-align:left;"></div>
+      <button onclick="document.getElementById('invoiceDetailModal').style.display='none'" class="btn-save" style="width:100%">Tutup</button>
+    </div>
+  </div>
+
 </body>
 </html>
