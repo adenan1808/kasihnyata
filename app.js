@@ -2445,7 +2445,7 @@ window.debugApp = { getProducts, getCart, calculateCart };
 window.invalidateAppTxCache = function() { _appTxCache = null; };
 window.invalidateAppProductCache = function() { /* App relies on getProducts() from core/admin, so we may not need to do much, but we could re-render */ };
 
-function getPosTotal() {
+function _getPosGrandTotal() {
   const cfg = getConfig();
   const diskonG = cfg.diskonGlobal || 0;
   const diskonP = +localStorage.getItem("diskonPesan") || 0;
@@ -2453,8 +2453,11 @@ function getPosTotal() {
 
   let sub = 0;
   cart.forEach(item => {
+    const products = ensureProductIndex(getProducts());
+    const real = products._map ? products._map[item.id] : products.find(p=>String(p.i||p.id)===String(item.id));
+    if(!real) return;
     const qty = item.qty;
-    let harga = item.p;
+    let harga = getHarga(real, products.filter(x=>x));
 
     // Bundle deal logic
     const limit = _getLimit();
@@ -2466,19 +2469,22 @@ function getPosTotal() {
     sub += harga * qty;
   });
 
-  const potongan = sub * (diskonG / 100);
+  const diskonNominal = diskonG > 0 ? Math.round(sub * diskonG / 100) : 0;
+  const afterGlobal = sub - diskonNominal;
+  const diskonPNominal = diskonP > 0 ? Math.round(afterGlobal * diskonP / 100) : 0;
+  const afterAll = afterGlobal - diskonPNominal;
   let finalOngkir = ongkir;
   const limit = _getLimit();
   if (limit.freeOngkir && cfg.freeOngkirActive && sub >= (cfg.freeOngkirMin || 0)) {
     finalOngkir = 0;
   }
-  let grand = sub - potongan + finalOngkir;
+  let grand = afterAll + finalOngkir;
   if(grand < 0) grand = 0;
   return grand;
 }
 
 function calcKembalian() {
-  const total = getPosTotal();
+  const total = _getPosGrandTotal();
   const dibayarInput = document.getElementById("posDibayar");
   let dibayar = 0;
   if (dibayarInput && dibayarInput.value) {
@@ -2486,7 +2492,6 @@ function calcKembalian() {
   }
 
   const kembalianEl = document.getElementById("posKembalian");
-  const bayarBtn = document.getElementById("posBayarBtn");
 
   let kembalian = dibayar - total;
 
@@ -2502,14 +2507,6 @@ function calcKembalian() {
        kembalianEl.style.color = "#4ade80";
     }
   }
-
-  if (bayarBtn) {
-    if (cart.length > 0 && dibayar >= total) {
-      bayarBtn.disabled = false;
-    } else {
-      bayarBtn.disabled = true;
-    }
-  }
 }
 
 function addQuickCash(amount) {
@@ -2522,7 +2519,7 @@ function addQuickCash(amount) {
 }
 
 function setUangPas() {
-  const total = getPosTotal();
+  const total = _getPosGrandTotal();
   const dibayarInput = document.getElementById("posDibayar");
   if(dibayarInput) {
      dibayarInput.value = total;
