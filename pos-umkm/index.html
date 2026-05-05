@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>POS UMKM</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary:   { DEFAULT:'#6366f1', dark:'#4f46e5', light:'#a5b4fc' },
+            secondary: { DEFAULT:'#8b5cf6', dark:'#7c3aed' },
+            accent:    { DEFAULT:'#06b6d4', dark:'#0891b2' },
+            success:   { DEFAULT:'#10b981', dark:'#059669' },
+            warning:   { DEFAULT:'#f59e0b', dark:'#d97706' },
+            danger:    { DEFAULT:'#ef4444', dark:'#dc2626' },
+            surface:   { DEFAULT:'#ffffff', dark:'#1e1b4b' },
+            bg:        { DEFAULT:'#f5f3ff', dark:'#0f0a1e' },
+          },
+          fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+          borderRadius: { '2xl':'1rem', '3xl':'1.5rem', '4xl':'2rem' },
+          boxShadow: {
+            'glow':      '0 0 20px rgba(99,102,241,0.3)',
+            'glow-sm':   '0 0 10px rgba(99,102,241,0.2)',
+            'card':      '0 4px 24px rgba(0,0,0,0.06)',
+            'card-hover':'0 8px 32px rgba(0,0,0,0.12)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/app.css">
+
+  <!-- Manifest -->
+  <link rel="manifest" href="manifest.json">
+</head>
+<body class="bg-bg text-slate-800 pb-safe antialiased">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-indigo-100 px-4 py-3">
+    <div class="flex items-center justify-between max-w-lg mx-auto">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+          <span class="text-white text-xs font-bold">POS</span>
+        </div>
+        <span id="storeName" class="font-bold text-slate-800 text-sm truncate max-w-[120px]">POS UMKM</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span id="tierBadge" class="px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">FREE</span>
+        <button id="btnNotif" class="relative w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center">
+          <i data-lucide="bell" class="w-4 h-4 text-slate-600"></i>
+          <span id="notifDot" class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full hidden"></span>
+        </button>
+        <button id="btnLogout" class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center">
+          <i data-lucide="log-out" class="w-4 h-4 text-slate-600"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content (Pages) -->
+  <main class="max-w-lg mx-auto p-4 pb-24">
+
+    <!-- Page: Login -->
+    <div id="page-login" class="page relative">
+      <!-- Will be populated by auth.js -->
+    </div>
+
+    <!-- Page: Dashboard -->
+    <div id="page-dashboard" class="page active space-y-4">
+      <div id="dashboard-content"></div>
+    </div>
+
+    <!-- Page: Kasir -->
+    <div id="page-kasir" class="page space-y-4">
+      <div id="kasir-content"></div>
+    </div>
+
+    <!-- Page: Produk -->
+    <div id="page-produk" class="page space-y-4">
+      <div id="produk-content"></div>
+    </div>
+
+    <!-- Page: Pelanggan -->
+    <div id="page-pelanggan" class="page space-y-4">
+      <div id="pelanggan-content"></div>
+    </div>
+
+    <!-- Page: Transaksi (Histori) -->
+    <div id="page-transaksi" class="page space-y-4">
+      <div id="transaksi-content"></div>
+    </div>
+
+    <!-- Page: Pengeluaran -->
+    <div id="page-pengeluaran" class="page space-y-4">
+      <div id="pengeluaran-content"></div>
+    </div>
+
+    <!-- Page: Settings -->
+    <div id="page-settings" class="page space-y-4">
+      <div id="settings-content"></div>
+    </div>
+
+    <!-- Page: Lainnya -->
+    <div id="page-lainnya" class="page space-y-4">
+      <div id="lainnya-content">
+        <!-- Settings, Backup, Reports, Transactions, Expenses Menu Items -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-slate-100 pb-safe" id="bottomNav">
+    <div class="flex items-center justify-around max-w-lg mx-auto px-2 py-2">
+      <button class="nav-tab flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-2xl transition-all text-indigo-600 bg-indigo-50" data-page="dashboard">
+        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium">Home</span>
+      </button>
+      <button class="nav-tab flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-2xl transition-all text-slate-400" data-page="kasir">
+        <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium">Kasir</span>
+      </button>
+      <button class="nav-tab flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-2xl transition-all text-slate-400" data-page="produk">
+        <i data-lucide="package" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium">Produk</span>
+      </button>
+      <button class="nav-tab flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-2xl transition-all text-slate-400" data-page="pelanggan">
+        <i data-lucide="users" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium">Pelanggan</span>
+      </button>
+      <button class="nav-tab flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-2xl transition-all text-slate-400" data-page="lainnya">
+        <i data-lucide="grid-3x3" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium">Lainnya</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Modal Overlay & Bottom Sheet -->
+  <div id="modalOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] hidden opacity-0 transition-opacity duration-300">
+    <div id="modalSheet" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-4xl p-6 transform translate-y-full transition-transform duration-300 ease-out max-h-[90vh] overflow-y-auto max-w-lg mx-auto">
+      <div class="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-6"></div>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <!-- Print Area -->
+  <div id="receipt-area" class="hidden"></div>
+
+  <!-- External Libraries -->
+  <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js"></script>
+  <script src="https://unpkg.com/dexie-export-import@1.0.3/dist/dexie-export-import.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- App Scripts -->
+  <script src="js/utils.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/license.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/wa-notification.js"></script>
+  <script src="js/products.js"></script>
+  <script src="js/customers.js"></script>
+  <script src="js/expenses.js"></script>
+  <script src="js/pos.js"></script>
+  <script src="js/payment-qris.js"></script>
+  <script src="js/payment-midtrans.js"></script>
+  <script src="js/transactions.js"></script>
+  <script src="js/reports.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/backup.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
