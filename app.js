@@ -1990,7 +1990,7 @@ async function posBayar(){
   const dibayarInput = document.getElementById("posDibayar");
   const dibayar = dibayarInput ? (parseFloat(dibayarInput.value) || 0) : 0;
   const rawPayMethod = document.getElementById("posPayMethod")?.value || "Tunai";
-  if (rawPayMethod !== "QRIS" && dibayar < total) {
+  if (rawPayMethod === "Tunai" && dibayar < total) {
       showToast("⚠️ KURANG BAYAR: " + "Rp " + Math.abs(dibayar - total).toLocaleString("id"));
       const kembalianEl = document.getElementById("posKembalian");
       if(kembalianEl) {
@@ -2547,7 +2547,7 @@ function calcKembalian() {
 
   const kembalianEl = document.getElementById("posKembalian");
   const bayarBtn = document.getElementById("posBayarBtn");
-  const isQris = document.getElementById("posPayMethod")?.value === "QRIS";
+  const isTunai = document.getElementById("posPayMethod")?.value === "Tunai";
 
   let kembalian = dibayar - total;
 
@@ -2556,7 +2556,7 @@ function calcKembalian() {
        kembalianEl.innerText = "Rp 0";
        kembalianEl.style.color = "var(--text2)";
        kembalianEl.classList.remove('blink-warning');
-    } else if (kembalian < 0 && !isQris) {
+    } else if (kembalian < 0 && isTunai) {
        kembalianEl.innerText = "⚠️ Kurang Rp " + Math.abs(kembalian).toLocaleString("id");
        kembalianEl.style.color = "#f87171";
        kembalianEl.classList.add('blink-warning');
@@ -2568,7 +2568,7 @@ function calcKembalian() {
   }
 
   if (bayarBtn) {
-    if (getCart().length > 0 && (dibayar >= total || isQris)) {
+    if (getCart().length > 0 && (!isTunai || dibayar >= total)) {
       bayarBtn.disabled = false;
     } else {
       bayarBtn.disabled = true;
