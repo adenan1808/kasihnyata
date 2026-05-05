@@ -1,0 +1,60 @@
+/* Fonts */
+* { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+/* Smooth scroll */
+html { scroll-behavior: smooth; }
+
+/* Page transition */
+.page { display: none; opacity: 0; transform: translateY(8px); transition: all 0.25s ease; }
+.page.active { display: block; opacity: 1; transform: translateY(0); }
+
+/* Fade in down (untuk toast) */
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateX(-50%) translateY(-16px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* Pulse glow (untuk total di kasir) */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99,102,241,0.4); }
+  50%      { box-shadow: 0 0 0 8px rgba(99,102,241,0); }
+}
+.pulse-glow { animation: pulseGlow 2s ease-in-out infinite; }
+
+/* Bounce scale (untuk tambah item ke keranjang) */
+@keyframes bounceScale {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+.bounce-scale { animation: bounceScale 0.3s ease; }
+
+/* Skeleton loading */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 12px;
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+/* Print struk */
+@media print {
+  body > *:not(#receipt-area) { display: none !important; }
+  #receipt-area {
+    display: block !important;
+    width: 80mm;
+    font-family: 'Courier New', monospace;
+    font-size: 9pt;
+    line-height: 1.5;
+    color: #000;
+    -webkit-print-color-adjust: exact;
+  }
+  .receipt-line { border-top: 1px dashed #000; margin: 3px 0; }
+}
+
+/* Safe area untuk iPhone notch */
+.pb-safe { padding-bottom: env(safe-area-inset-bottom, 16px); }
