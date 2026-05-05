@@ -613,6 +613,7 @@ function _updateExistingProduct(id){
   if(products[idx].k !== undefined) products[idx].k = kat;   else products[idx].kategori = kat;
   products[idx].stok = stok;
   products[idx].sumber = sumber;
+  if(sumber === 'Cash') { tempo = ''; pSupplierName = ''; pSupplierWA = ''; pSupplierAlamat = ''; }
   products[idx].tempo = tempo;
   products[idx].supplierName = pSupplierName;
   products[idx].supplierWA = pSupplierWA;
@@ -686,6 +687,12 @@ function addProduct(){
     return;
   }
 
+  if(sumber === 'Cash') {
+    tempo = '';
+    pSupplierName = '';
+    pSupplierWA = '';
+    pSupplierAlamat = '';
+  }
   const newProduct = { i: Date.now(), n: name, p: price, m: modal, k: kat, g: img, stok: stok, sumber: sumber, tempo: tempo, supplierName: pSupplierName, supplierWA: pSupplierWA, supplierAlamat: pSupplierAlamat };
 
   function _resetForm(){
@@ -1569,7 +1576,7 @@ function adjustStok(delta){
 }
 
 function clearProductForm(){
-  ["pName","pModal","pPrice","pStok","pTempo"].forEach(id=>{
+  ["pName","pModal","pPrice","pStok","pTempo","pSupplierName","pSupplierWA","pSupplierAlamat"].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value="";
   });
   const elS = document.getElementById("pSumber"); if(elS) elS.value="Cash";
@@ -1703,7 +1710,16 @@ function renderTable(){
       if(prod && prod.sumber && prod.sumber !== "Cash"){
         sumberProd = prod.sumber;
         if(prod.tempo){
-          const sisaHari = Math.ceil((new Date(prod.tempo).getTime() - Date.now()) / (1000 * 3600 * 24));
+          let parsedDate = NaN;
+          if (prod.tempo.includes('-')) {
+            const parts = prod.tempo.split('-');
+            if (parts.length === 3) {
+              parsedDate = new Date(`20${parts[2]}-${parts[1]}-${parts[0]}`).getTime();
+            }
+          } else {
+            parsedDate = new Date(prod.tempo).getTime();
+          }
+          const sisaHari = Math.ceil((parsedDate - Date.now()) / (1000 * 3600 * 24));
           if(sisaHari <= 3){
             statusWarningHtml = `<span style='color:#f87171; font-weight:bold;' title='Jatuh tempo: ${prod.tempo}'>Bersiap</span>`;
           } else if(sisaHari <= 7){

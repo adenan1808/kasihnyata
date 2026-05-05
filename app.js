@@ -2498,44 +2498,6 @@ function _getPosGrandTotal() {
   return grand;
 }
 
-function _getPosGrandTotal() {
-  const cfg = getConfig();
-  const diskonG = cfg.diskonGlobal || 0;
-  const diskonP = +localStorage.getItem("diskonPesan") || 0;
-  const ongkir = _getOngkirDefault();
-
-  let sub = 0;
-  const cart = getCart();
-  cart.forEach(item => {
-    const products = ensureProductIndex(getProducts());
-    const real = products._map ? products._map[item.id] : products.find(p=>String(p.i||p.id)===String(item.id));
-    if(!real) return;
-    const qty = item.qty;
-    let harga = getHarga(real, products.filter(x=>x));
-
-    // Bundle deal logic
-    const limit = _getLimit();
-    if (limit.bundle) {
-      if (cfg.bundleActive && qty >= (cfg.bundleMin || 0)) {
-        harga = harga - (harga * ((cfg.bundleDisc || 0) / 100));
-      }
-    }
-    sub += harga * qty;
-  });
-
-  const diskonNominal = diskonG > 0 ? Math.round(sub * diskonG / 100) : 0;
-  const afterGlobal = sub - diskonNominal;
-  const diskonPNominal = diskonP > 0 ? Math.round(afterGlobal * diskonP / 100) : 0;
-  const afterAll = afterGlobal - diskonPNominal;
-  let finalOngkir = ongkir;
-  const limit = _getLimit();
-  if (limit.freeOngkir && cfg.freeOngkirActive && sub >= (cfg.freeOngkirMin || 0)) {
-    finalOngkir = 0;
-  }
-  let grand = afterAll + finalOngkir;
-  if(grand < 0) grand = 0;
-  return grand;
-}
 
 function calcKembalian() {
   const total = _getPosGrandTotal();
