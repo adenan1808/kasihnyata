@@ -150,16 +150,20 @@
             <p style="margin:10px 0 0 0;text-align:center;font-size:12px;font-weight:bold;color:#f87171;">Menunggu validasi...</p>
           </div>
 
-          <div class="pos-field-label">Data Pelanggan <span class="pos-optional">(opsional)</span></div>
-          <div id="posCustomerFound" class="pos-customer-found" style="display:none"></div>
-          <div class="pos-cust-input-wrap" id="posNamaWrap">
-            <input id="posNama" class="pos-cust-input" placeholder="Nama pelanggan" autocomplete="off">
+          <div class="pos-field-label" style="cursor:pointer; color:var(--accent); font-weight:600; background:var(--surface2); padding:8px 12px; border-radius:8px;" onclick="const el = document.getElementById('posCustomerInputs'); const icon = document.getElementById('posCustomerIcon'); if(el.style.display === 'none'){ el.style.display = 'block'; icon.textContent='▼'; }else{ el.style.display = 'none'; icon.textContent='▶'; }">
+            <span id="posCustomerIcon" style="display:inline-block; width:16px; font-size:10px;">▶</span> Data Pelanggan <span class="pos-optional" style="color:var(--text2); font-weight:400;">(opsional)</span>
           </div>
-          <div class="pos-cust-input-wrap" id="posHpWrap">
-            <input id="posHp" class="pos-cust-input" placeholder="No HP (08xx...)" type="tel" autocomplete="off">
-          </div>
-          <div class="pos-cust-input-wrap" id="posAlamatWrap">
-            <input id="posAlamat" class="pos-cust-input" placeholder="Alamat (opsional)" autocomplete="off">
+          <div id="posCustomerInputs" style="display:none; margin-top:10px; padding:10px; border:1px dashed var(--border2); border-radius:8px;">
+            <div id="posCustomerFound" class="pos-customer-found" style="display:none"></div>
+            <div class="pos-cust-input-wrap" id="posNamaWrap">
+              <input id="posNama" class="pos-cust-input" placeholder="Nama pelanggan" autocomplete="off">
+            </div>
+            <div class="pos-cust-input-wrap" id="posHpWrap">
+              <input id="posHp" class="pos-cust-input" placeholder="No HP (08xx...)" type="tel" autocomplete="off">
+            </div>
+            <div class="pos-cust-input-wrap" id="posAlamatWrap">
+              <input id="posAlamat" class="pos-cust-input" placeholder="Alamat (opsional)" autocomplete="off">
+            </div>
           </div>
           <select id="posPayMethod" class="pos-pay-select" onchange="_posOnPayMethodChange(this.value)">
             <option value="Tunai">💵 Tunai</option>
@@ -186,8 +190,8 @@
         <div class="pos-cart-footer">
           <div class="pos-payment-block" style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-              <div style="font-size:13px; font-weight:600; color:var(--text1);">Dibayar</div>
-              <input type="number" id="posDibayar" placeholder="0" style="width:120px; text-align:right; font-size:14px; font-weight:bold; padding:4px 8px; border-radius:6px; border:1px solid var(--border1);" oninput="if(window.App && typeof App.calcKembalian === 'function') App.calcKembalian()">
+              <div style="font-size:16px; font-weight:800; color:var(--text1); text-transform:uppercase;">Dibayar</div>
+              <input type="number" id="posDibayar" placeholder="0" style="width:140px; text-align:right; font-size:18px; font-weight:bold; color:#10b981; padding:4px 8px; border-radius:6px; border:1px solid var(--border1);" oninput="if(window.App && typeof App.calcKembalian === 'function') App.calcKembalian()">
             </div>
 
             <div style="display:flex; gap:4px; flex-wrap:wrap;">

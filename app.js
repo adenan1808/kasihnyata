@@ -1986,6 +1986,20 @@ async function posBayar(){
   const cart = getCart();
   if(!cart.length){ showToast("Keranjang kosong"); return; }
 
+  const total = _getPosGrandTotal();
+  const dibayarInput = document.getElementById("posDibayar");
+  const dibayar = dibayarInput ? (parseFloat(dibayarInput.value) || 0) : 0;
+  const rawPayMethod = document.getElementById("posPayMethod")?.value || "Tunai";
+  if (rawPayMethod !== "QRIS" && dibayar < total) {
+      showToast("⚠️ KURANG BAYAR: " + "Rp " + Math.abs(dibayar - total).toLocaleString("id"));
+      const kembalianEl = document.getElementById("posKembalian");
+      if(kembalianEl) {
+         kembalianEl.classList.add('blink-warning');
+         setTimeout(() => kembalianEl.classList.remove('blink-warning'), 2000);
+      }
+      return;
+  }
+
   // Debounce
   if(posBayar._lock){ return; }
   posBayar._lock = true;
@@ -2452,6 +2466,46 @@ function _getPosGrandTotal() {
   const ongkir = _getOngkirDefault();
 
   let sub = 0;
+  const cart = getCart();
+  cart.forEach(item => {
+    const products = ensureProductIndex(getProducts());
+    const real = products._map ? products._map[item.id] : products.find(p=>String(p.i||p.id)===String(item.id));
+    if(!real) return;
+    const qty = item.qty;
+    let harga = getHarga(real, products.filter(x=>x));
+
+    // Bundle deal logic
+    const limit = _getLimit();
+    if (limit.bundle) {
+      if (cfg.bundleActive && qty >= (cfg.bundleMin || 0)) {
+        harga = harga - (harga * ((cfg.bundleDisc || 0) / 100));
+      }
+    }
+    sub += harga * qty;
+  });
+
+  const diskonNominal = diskonG > 0 ? Math.round(sub * diskonG / 100) : 0;
+  const afterGlobal = sub - diskonNominal;
+  const diskonPNominal = diskonP > 0 ? Math.round(afterGlobal * diskonP / 100) : 0;
+  const afterAll = afterGlobal - diskonPNominal;
+  let finalOngkir = ongkir;
+  const limit = _getLimit();
+  if (limit.freeOngkir && cfg.freeOngkirActive && sub >= (cfg.freeOngkirMin || 0)) {
+    finalOngkir = 0;
+  }
+  let grand = afterAll + finalOngkir;
+  if(grand < 0) grand = 0;
+  return grand;
+}
+
+function _getPosGrandTotal() {
+  const cfg = getConfig();
+  const diskonG = cfg.diskonGlobal || 0;
+  const diskonP = +localStorage.getItem("diskonPesan") || 0;
+  const ongkir = _getOngkirDefault();
+
+  let sub = 0;
+  const cart = getCart();
   cart.forEach(item => {
     const products = ensureProductIndex(getProducts());
     const real = products._map ? products._map[item.id] : products.find(p=>String(p.i||p.id)===String(item.id));
@@ -2492,6 +2546,8 @@ function calcKembalian() {
   }
 
   const kembalianEl = document.getElementById("posKembalian");
+  const bayarBtn = document.getElementById("posBayarBtn");
+  const isQris = document.getElementById("posPayMethod")?.value === "QRIS";
 
   let kembalian = dibayar - total;
 
@@ -2499,12 +2555,23 @@ function calcKembalian() {
     if (dibayar === 0) {
        kembalianEl.innerText = "Rp 0";
        kembalianEl.style.color = "var(--text2)";
-    } else if (kembalian < 0) {
-       kembalianEl.innerText = "Kurang Rp " + Math.abs(kembalian).toLocaleString("id");
+       kembalianEl.classList.remove('blink-warning');
+    } else if (kembalian < 0 && !isQris) {
+       kembalianEl.innerText = "⚠️ Kurang Rp " + Math.abs(kembalian).toLocaleString("id");
        kembalianEl.style.color = "#f87171";
+       kembalianEl.classList.add('blink-warning');
     } else {
        kembalianEl.innerText = "Rp " + kembalian.toLocaleString("id");
        kembalianEl.style.color = "#4ade80";
+       kembalianEl.classList.remove('blink-warning');
+    }
+  }
+
+  if (bayarBtn) {
+    if (getCart().length > 0 && (dibayar >= total || isQris)) {
+      bayarBtn.disabled = false;
+    } else {
+      bayarBtn.disabled = true;
     }
   }
 }
