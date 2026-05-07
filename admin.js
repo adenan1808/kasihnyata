@@ -621,6 +621,37 @@ function loadQRIS(){
   if(q&&stat) stat.innerText="ON";
 }
 
+
+  /* Drag and drop for product image */
+  const uploadArea = document.querySelector('.upload-area');
+  if (uploadArea) {
+      uploadArea.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          uploadArea.style.borderColor = 'var(--accent)';
+      });
+      uploadArea.addEventListener('dragleave', (e) => {
+          e.preventDefault();
+          uploadArea.style.borderColor = 'var(--border2)';
+      });
+      uploadArea.addEventListener('drop', (e) => {
+          e.preventDefault();
+          uploadArea.style.borderColor = 'var(--border2)';
+          if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+              const file = e.dataTransfer.files[0];
+              const fileInput = document.getElementById('pImg');
+
+              // We need to construct a DataTransfer object to update the actual file input
+              const dataTransfer = new DataTransfer();
+              dataTransfer.items.add(file);
+              fileInput.files = dataTransfer.files;
+
+              // Trigger the change event
+              const event = new Event('change');
+              fileInput.dispatchEvent(event);
+          }
+      });
+  }
+
 /* ================= ADD PRODUCT (strict validation + stock + keyboard ENTER) ================= */
 function _updateExistingProduct(id){
   const products = getProducts();

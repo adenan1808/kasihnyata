@@ -203,7 +203,8 @@
             </div>
 
 
-            <div id="posNumpad" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin: 12px 0;">
+            <button class="btn-sm" style="width:100%; margin:8px 0; background:var(--surface2);" onclick="document.getElementById('posNumpad').style.display = document.getElementById('posNumpad').style.display === 'none' ? 'grid' : 'none'">🔢 Kalkulator Kasir</button>
+            <div id="posNumpad" style="display:none; grid-template-columns:repeat(3, 1fr); gap:6px; margin: 0 0 12px 0;">
               <button class="btn-sm" style="font-size:18px; padding:8px 0;" onclick="App.numpadPress(1)">1</button>
               <button class="btn-sm" style="font-size:18px; padding:8px 0;" onclick="App.numpadPress(2)">2</button>
               <button class="btn-sm" style="font-size:18px; padding:8px 0;" onclick="App.numpadPress(3)">3</button>

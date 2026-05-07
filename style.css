@@ -4492,3 +4492,6 @@ input[type=color] {
 #posTotalAmount { font-size: 24px !important; }
 #posDibayar { font-size: 20px !important; font-weight: 900 !important; }
 #posKembalian { font-size: 20px !important; font-weight: 900 !important; }
+
+.pos-cart-scroll-zone { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.pos-cart-items-wrap { flex: 1; overflow-y: auto; }
