@@ -2298,7 +2298,7 @@ input[type=color] {
 
 .pos-card-stok {
   position: absolute;
-  bottom: 46px; /* above the add button */
+  top: 6px;
   right: 6px;
   font-size: 11px;
   font-weight: 900;
@@ -4004,7 +4004,7 @@ input[type=color] {
 }
 .pos-card-stok {
   position: absolute;
-  bottom: 46px; /* above the add button */
+  top: 6px;
   right: 6px;
   font-size: 11px;
   font-weight: 900;
@@ -4169,7 +4169,7 @@ input[type=color] {
 /* ── POS card stok big + contrast ── */
 .pos-card-stok {
   position: absolute;
-  bottom: 46px; /* above the add button */
+  top: 6px;
   right: 6px;
   font-size: 11px;
   font-weight: 900;
@@ -4495,3 +4495,5 @@ input[type=color] {
 
 .pos-cart-scroll-zone { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .pos-cart-items-wrap { flex: 1; overflow-y: auto; }
+
+.pos-cart-panel { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }

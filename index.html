@@ -127,6 +127,12 @@
         <!-- SCROLL ZONE: items + summary + checkout fields -->
         <div class="pos-cart-scroll-zone">
         <!-- CART ITEMS: scroll independently -->
+
+        <div style="display:flex; justify-content:center; gap: 8px; margin: 4px 0;">
+          <button class="btn-sm" style="flex:1;" onclick="document.getElementById('posCartItemsWrap').scrollBy({top: -50, behavior: 'smooth'})">⬆️ Scroll Up</button>
+          <button class="btn-sm" style="flex:1;" onclick="document.getElementById('posCartItemsWrap').scrollBy({top: 50, behavior: 'smooth'})">⬇️ Scroll Down</button>
+        </div>
+
         <div id="posCartItemsWrap" class="pos-cart-items-wrap">
           <div id="posCartItems" class="pos-cart-items"></div>
         </div>
