@@ -912,8 +912,8 @@ input[type=color] {
 ───────────────────────────────────────────── */
 .owner-produk-list {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
   max-height: 480px;
   overflow-y: auto;
   padding-right: 2px;
@@ -928,8 +928,8 @@ input[type=color] {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 10px;
-  padding: 10px 12px;
+  gap: 6px;
+  padding: 6px 8px;
   background: var(--bg);
   border: 1px solid var(--border2);
   border-radius: var(--radius-sm);
@@ -941,9 +941,9 @@ input[type=color] {
 
 .owner-produk-img {
   width: 100%;
-  height: 120px;
+  aspect-ratio: 1 / 1;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 6px;
   flex-shrink: 0;
   background: var(--bg3);
 }
@@ -4499,13 +4499,18 @@ input[type=color] {
 
 .pos-card-img { position: relative; }
 
+@media (max-width: 1200px) {
+  .owner-produk-list {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
 @media (max-width: 900px) {
   .owner-produk-list {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 @media (max-width: 600px) {
   .owner-produk-list {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 }

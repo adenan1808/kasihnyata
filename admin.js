@@ -966,23 +966,23 @@ function renderOwnerProdukList(){
       <img class="owner-produk-img" src="${img||"https://placehold.co/44/1e293b/22c55e?text=P"}" loading="lazy"
         onerror="this.src='https://placehold.co/44/1e293b/22c55e?text=P'" title="Klik untuk edit">
       <div class="owner-produk-info" style="width: 100%;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-            <small class="owner-produk-kat">📂 ${kat} ${badgeSumber}</small>
-            <button class="owner-produk-del" data-id="${id}" title="Hapus produk" style="background: none; border: none; font-size: 14px; cursor: pointer;">🗑️</button>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 2px;">
+            <small class="owner-produk-kat" style="font-size: 9px; line-height: 1.2;">📂 ${kat} ${badgeSumber}</small>
+            <button class="owner-produk-del" data-id="${id}" title="Hapus produk" style="background: none; border: none; font-size: 12px; cursor: pointer; padding: 0;">🗑️</button>
         </div>
-        <b>${name}</b>
-        ${p.sku ? `<div style="font-size:10px;color:var(--text3);font-family:monospace;margin-top:2px">${p.sku}</div>` : ""}
-        <span style="display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap;">
-          <small title="Harga Modal: Rp ${(p.m || p.modal || 0).toLocaleString('id')}">Modal: Rp ${(p.m || p.modal || 0).toLocaleString("id")}</small> |
-          <small>Jual: Rp ${price.toLocaleString("id")}</small>
-        </span>
+        <b style="font-size: 11px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 2px;">${name}</b>
+        ${p.sku ? `<div style="font-size:9px;color:var(--text3);font-family:monospace;margin-top:2px">${p.sku}</div>` : ""}
+        <div style="display:flex;flex-direction:column;gap:2px;margin-top:4px;font-size:10px;">
+          <span style="color:var(--text2);" title="Harga Modal: Rp ${(p.m || p.modal || 0).toLocaleString('id')}">M: Rp ${(p.m || p.modal || 0).toLocaleString("id")}</span>
+          <span style="font-weight:700;">J: Rp ${price.toLocaleString("id")}</span>
+        </div>
       </div>
-      <div style="display:flex; justify-content:space-between; align-items:center; width: 100%; margin-top: auto; padding-top: 8px; border-top: 1px solid var(--border2);">
-          <span class="oprod-stok-badge ${stokCls}" id="oprod-stok-${id}">${stokLabel}</span>
-          <div style="display:flex;gap:2px;align-items:center;">
-            <button class="opir-stok-btn minus" data-id="${id}" title="Kurang stok">−</button>
-            <input type="number" class="opir-stok-input" data-id="${id}" value="${stokNum !== null ? stokNum : 0}" onclick="event.stopPropagation();">
-            <button class="opir-stok-btn plus" data-id="${id}" title="Tambah stok">+</button>
+      <div style="display:flex; flex-direction:column; gap:6px; align-items:center; width: 100%; margin-top: auto; padding-top: 6px; border-top: 1px solid var(--border2);">
+          <span class="oprod-stok-badge ${stokCls}" id="oprod-stok-${id}" style="width:100%; text-align:center;">${stokLabel}</span>
+          <div style="display:flex; gap:2px; align-items:center; width:100%; justify-content:space-between;">
+            <button class="opir-stok-btn minus" data-id="${id}" title="Kurang stok" style="width:20px; height:20px;">−</button>
+            <input type="number" class="opir-stok-input" data-id="${id}" value="${stokNum !== null ? stokNum : 0}" onclick="event.stopPropagation();" style="flex:1; width:auto; height:20px; font-size:11px; padding:0;">
+            <button class="opir-stok-btn plus" data-id="${id}" title="Tambah stok" style="width:20px; height:20px;">+</button>
           </div>
       </div>`;
 
