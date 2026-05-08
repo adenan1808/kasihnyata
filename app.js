@@ -1098,7 +1098,7 @@ function _productCardHTML(p){
       : `<button class="product-card-add" onclick="event.stopPropagation();App.addKranjang('${id}',event)">+ Beli</button>`;
 
   return `
-    <div class="product-card" data-id="${id}" ${stok<=0?'style="opacity:.6;pointer-events:none"':''}>
+    <div class="product-card" data-id="${id}" ${stok<=0?'style="opacity:.6"':''}>
       <div class="product-card-img-wrap">
         ${imgHtml}
         ${diskon?`<span class="badge-diskon">-${diskon}%</span>`:""}
@@ -1793,7 +1793,7 @@ async function _posRenderGrid(){
       : `<button class="pos-card-add-btn" onclick="event.stopPropagation();App._posQtyDelta('${id}',1)">+</button>`;
 
     return `
-      <div class="pos-card${inCart?" in-cart":""}${stokNum<=0?" out-of-stock":""}" ${stokNum<=0?"style=\"opacity:0.6;pointer-events:none;\"":""} data-pos-id="${id}">
+      <div class="pos-card${inCart?" in-cart":""}${stokNum<=0?" out-of-stock":""}" ${stokNum<=0?"style=\"opacity:0.6;\"":""} data-pos-id="${id}">
         <div class="pos-card-img">
           ${imgHtml}
           ${qty>0?`<div class="pos-card-qty-badge">${qty}</div>`:""}
