@@ -1078,7 +1078,8 @@ function _productCardHTML(p){
         <button class="buyer-add-btn qty-btn" data-id="${id}" data-delta="1">+</button>
        </div>`;
 
-  const stok = p.stok;
+  const stokRaw = p.stok;
+  const stok = stokRaw !== undefined ? stokRaw - qty : undefined;
   const minStokLimit = p.minStok !== undefined ? p.minStok : 10;
   const stokHtml = stok !== undefined
     ? stok <= 0
@@ -1573,7 +1574,7 @@ function numpadPress(key) {
     const input = document.getElementById("posDibayar");
     if(!input) return;
 
-    let val = input.value.toString();
+    let val = input.value.toString().replace(/\D/g, '');
     if(key === 'C') {
         val = '';
     } else {
@@ -1581,7 +1582,7 @@ function numpadPress(key) {
         val += key;
     }
 
-    input.value = val;
+    input.value = val ? parseInt(val, 10).toLocaleString('id') : '';
     if(typeof App.calcKembalian === 'function') App.calcKembalian();
 }
 window.numpadPress = numpadPress;
@@ -1771,7 +1772,8 @@ async function _posRenderGrid(){
     const originalPrice = p.p||p.price||0;
     const hasDiskon = diskonGPos > 0 && originalPrice > price;
 
-    const stokNum = typeof stok === "number" ? stok : null;
+    const stokNumRaw = typeof stok === "number" ? stok : null;
+    const stokNum = stokNumRaw !== null ? stokNumRaw - qty : null;
     const minStokLimit = p.minStok !== undefined ? p.minStok : 10;
     const stokHtml = stokNum !== null
       ? stokNum <= 0
@@ -2024,7 +2026,7 @@ async function posBayar(){
 
   const total = _getPosGrandTotal();
   const dibayarInput = document.getElementById("posDibayar");
-  const dibayar = dibayarInput ? (parseFloat(dibayarInput.value) || 0) : 0;
+  const dibayar = dibayarInput ? (parseFloat(dibayarInput.value.replace(/\D/g, '')) || 0) : 0;
   const rawPayMethod = document.getElementById("posPayMethod")?.value || "Tunai";
   if (rawPayMethod === "Tunai" && dibayar < total) {
       showToast("⚠️ KURANG BAYAR: " + "Rp " + Math.abs(dibayar - total).toLocaleString("id"));
@@ -2540,7 +2542,7 @@ function calcKembalian() {
   const dibayarInput = document.getElementById("posDibayar");
   let dibayar = 0;
   if (dibayarInput && dibayarInput.value) {
-    dibayar = parseFloat(dibayarInput.value) || 0;
+    dibayar = parseFloat(dibayarInput.value.replace(/\D/g, '')) || 0;
   }
 
   const kembalianEl = document.getElementById("posKembalian");
@@ -2577,8 +2579,8 @@ function calcKembalian() {
 function addQuickCash(amount) {
   const dibayarInput = document.getElementById("posDibayar");
   if(dibayarInput) {
-     let current = parseFloat(dibayarInput.value) || 0;
-     dibayarInput.value = current + amount;
+     let current = parseFloat(dibayarInput.value.replace(/\D/g, '')) || 0;
+     dibayarInput.value = (current + amount).toLocaleString('id');
      calcKembalian();
   }
 }
@@ -2587,7 +2589,7 @@ function setUangPas() {
   const total = _getPosGrandTotal();
   const dibayarInput = document.getElementById("posDibayar");
   if(dibayarInput) {
-     dibayarInput.value = total;
+     dibayarInput.value = total.toLocaleString('id');
      calcKembalian();
   }
 }

@@ -1321,8 +1321,8 @@ input[type=color] {
   background: var(--bg);
   border: 1px solid var(--border2);
   border-radius: var(--radius-sm);
-  padding: 10px 12px;
-  font-size: 13px;
+  padding: 6px 8px;
+  font-size: 11px;
   transition: var(--transition);
 }
 

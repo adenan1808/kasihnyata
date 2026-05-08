@@ -197,7 +197,14 @@
           <div class="pos-payment-block" style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <div style="font-size:16px; font-weight:800; color:var(--text1); text-transform:uppercase;">Dibayar</div>
-              <input type="number" id="posDibayar" placeholder="0" style="width:140px; text-align:right; font-size:18px; font-weight:bold; color:#10b981; padding:4px 8px; border-radius:6px; border:1px solid var(--border1);" oninput="if(window.App && typeof App.calcKembalian === 'function') App.calcKembalian()">
+              <div style="display:flex; align-items:center; background:var(--bg); border:1px solid var(--border1); border-radius:6px; padding-left:8px; width: 60%;">
+                  <span style="font-weight:bold; color:#10b981;">Rp</span>
+                  <input type="text" id="posDibayar" placeholder="0" style="width:100%; text-align:right; font-size:18px; font-weight:bold; color:#10b981; padding:4px 8px; border:none; background:transparent; outline:none;" oninput="
+                      let val = this.value.replace(/\D/g, '');
+                      this.value = val ? parseInt(val, 10).toLocaleString('id') : '';
+                      if(window.App && typeof App.calcKembalian === 'function') App.calcKembalian();
+                  ">
+              </div>
             </div>
 
             <div style="display:flex; gap:4px; flex-wrap:wrap;">
