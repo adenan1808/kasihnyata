@@ -912,8 +912,8 @@ input[type=color] {
 ───────────────────────────────────────────── */
 .owner-produk-list {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
   max-height: 480px;
   overflow-y: auto;
   padding-right: 2px;
@@ -4494,7 +4494,7 @@ input[type=color] {
 
 @media (max-width: 1200px) {
   .owner-produk-list {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 @media (max-width: 900px) {
