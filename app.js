@@ -640,6 +640,10 @@ if(!item && delta > 0){
     return;
   }
 
+  if (p && p.stok !== undefined && p.stok <= 0) {
+      showToast("❌ Stok produk habis!");
+      return;
+  }
   cart.push({
     id: pField(p,"id") || p.i,
     qty: 1
@@ -655,6 +659,11 @@ if(!item && delta > 0){
 
   // = update qty
   else if(item){
+    const p = products._map[id];
+    if(delta > 0 && p && p.stok !== undefined && (item.qty || 0) + delta > p.stok) {
+        showToast("❌ Stok tidak mencukupi!");
+        return;
+    }
     item.qty = (item.qty || 0) + delta;
 
     // = batas bawah
@@ -1070,10 +1079,11 @@ function _productCardHTML(p){
        </div>`;
 
   const stok = p.stok;
+  const minStokLimit = p.minStok !== undefined ? p.minStok : 10;
   const stokHtml = stok !== undefined
     ? stok <= 0
       ? `<div class="product-card-stok habis">❌ Habis</div>`
-      : stok < 5
+      : stok <= minStokLimit
         ? `<div class="product-card-stok low">⚠️ Stok: ${stok}</div>`
         : `<div class="product-card-stok">Stok: ${stok}</div>`
     : "";
@@ -1762,10 +1772,11 @@ async function _posRenderGrid(){
     const hasDiskon = diskonGPos > 0 && originalPrice > price;
 
     const stokNum = typeof stok === "number" ? stok : null;
+    const minStokLimit = p.minStok !== undefined ? p.minStok : 10;
     const stokHtml = stokNum !== null
       ? stokNum <= 0
         ? `<div class="pos-card-stok habis">❌ Habis</div>`
-        : stokNum < 5
+        : stokNum <= minStokLimit
           ? `<div class=\"pos-card-stok low\">⚠️ ${stokNum}</div>`
           : `<div class="pos-card-stok ok">Stok ${stokNum}</div>`
       : "";
@@ -1802,11 +1813,16 @@ async function _posRenderGrid(){
 
 function _posQtyDelta(id, delta){
   const products = getProducts();
-  const p = products.find(x=>x.id===id);
-  if(p && p.stok <= 0) return; // Prevent adding if out of stock
+  const p = products.find(x=>String(x.i||x.id)===String(id));
   let cart = getCart();
   const idx = cart.findIndex(x => String(x.id) === String(id));
+
   if(delta > 0){
+    const currentQty = idx >= 0 ? cart[idx].qty : 0;
+    if(p && p.stok !== undefined && currentQty + delta > p.stok) {
+        showToast("❌ Stok tidak mencukupi!");
+        return;
+    }
     if(idx >= 0) cart[idx].qty += delta;
     else cart.push({ id: String(id), qty: delta });
   } else {

@@ -701,6 +701,7 @@ function _updateExistingProduct(id){
   if(products[idx].m !== undefined) products[idx].m = modal; else products[idx].modal = modal;
   if(products[idx].k !== undefined) products[idx].k = kat;   else products[idx].kategori = kat;
   products[idx].stok = stok;
+  products[idx].minStok = minStok;
   products[idx].sumber = sumber;
   if(sumber === 'Cash') { tempo = ''; pSupplierName = ''; pSupplierWA = ''; pSupplierAlamat = ''; }
   products[idx].tempo = tempo;
@@ -826,7 +827,8 @@ function addProduct(){
     pSupplierWA = '';
     pSupplierAlamat = '';
   }
-  const newProduct = { i: Date.now(), n: name, p: price, m: modal, k: kat, g: img, stok: stok, sumber: sumber, tempo: tempo, supplierName: pSupplierName, supplierWA: pSupplierWA, supplierAlamat: pSupplierAlamat };
+  const minStok = +(document.getElementById("pMinStok")?.value) || 10;
+  const newProduct = { i: Date.now(), n: name, p: price, m: modal, k: kat, g: img, stok: stok, minStok: minStok, sumber: sumber, tempo: tempo, supplierName: pSupplierName, supplierWA: pSupplierWA, supplierAlamat: pSupplierAlamat };
 
   function _resetForm(){
     const katEl = document.getElementById("pKategori");
@@ -928,7 +930,8 @@ function renderOwnerProdukList(){
     // 🔐 HANDLE PRODUK INVALID (POSISI BENAR)
 
     const stokNum = p.stok !== undefined ? +p.stok : null;
-    const stokCls = stokNum === null ? "na" : stokNum <= 0 ? "habis" : stokNum < 5 ? "low" : "ok";
+    const minStokLimit = p.minStok !== undefined ? p.minStok : 10;
+    const stokCls = stokNum === null ? "na" : stokNum <= 0 ? "habis" : stokNum <= minStokLimit ? "low" : "ok";
     const stokLabel = stokNum === null ? "—" : stokNum <= 0 ? "Habis" : stokNum;
     div.dataset.prodId = String(id);
     let tempoWarning = "";
@@ -962,23 +965,25 @@ function renderOwnerProdukList(){
     div.innerHTML = `
       <img class="owner-produk-img" src="${img||"https://placehold.co/44/1e293b/22c55e?text=P"}" loading="lazy"
         onerror="this.src='https://placehold.co/44/1e293b/22c55e?text=P'" title="Klik untuk edit">
-      <div class="owner-produk-info">
-        <small class="owner-produk-kat">📂 ${kat} ${badgeSumber}</small>
+      <div class="owner-produk-info" style="width: 100%;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <small class="owner-produk-kat">📂 ${kat} ${badgeSumber}</small>
+            <button class="owner-produk-del" data-id="${id}" title="Hapus produk" style="background: none; border: none; font-size: 14px; cursor: pointer;">🗑️</button>
+        </div>
         <b>${name}</b>
         ${p.sku ? `<div style="font-size:10px;color:var(--text3);font-family:monospace;margin-top:2px">${p.sku}</div>` : ""}
         <span style="display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap;">
           <small title="Harga Modal: Rp ${(p.m || p.modal || 0).toLocaleString('id')}">Modal: Rp ${(p.m || p.modal || 0).toLocaleString("id")}</small> |
           <small>Jual: Rp ${price.toLocaleString("id")}</small>
-          <span class="oprod-stok-badge ${stokCls}" id="oprod-stok-${id}">${stokLabel}</span>
         </span>
       </div>
-      <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
-        <button class="owner-produk-del" data-id="${id}" title="Hapus produk">🗑️</button>
-        <div style="display:flex;gap:2px;align-items:center;">
-          <button class="opir-stok-btn minus" data-id="${id}" title="Kurang stok">−</button>
-          <input type="number" class="opir-stok-input" data-id="${id}" value="${stokNum !== null ? stokNum : 0}" onclick="event.stopPropagation();">
-          <button class="opir-stok-btn plus" data-id="${id}" title="Tambah stok">+</button>
-        </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; width: 100%; margin-top: auto; padding-top: 8px; border-top: 1px solid var(--border2);">
+          <span class="oprod-stok-badge ${stokCls}" id="oprod-stok-${id}">${stokLabel}</span>
+          <div style="display:flex;gap:2px;align-items:center;">
+            <button class="opir-stok-btn minus" data-id="${id}" title="Kurang stok">−</button>
+            <input type="number" class="opir-stok-input" data-id="${id}" value="${stokNum !== null ? stokNum : 0}" onclick="event.stopPropagation();">
+            <button class="opir-stok-btn plus" data-id="${id}" title="Tambah stok">+</button>
+          </div>
       </div>`;
 
 	  // 🔐 TARUH DI SINI (SETELAH innerHTML)
@@ -1683,6 +1688,7 @@ function _editProductForm(id){
   set("pModal", p.m||p.modal||0);
   set("pPrice", p.p||p.price||0);
   set("pStok",  p.stok !== undefined ? p.stok : "");
+  set("pMinStok", p.minStok !== undefined ? p.minStok : 10);
   // Sumber & Tempo
   set("pSumber", p.sumber || "Cash");
   set("pTempo", p.tempo || "");
