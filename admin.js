@@ -828,7 +828,7 @@ function addProduct(){
     pSupplierAlamat = '';
   }
   const minStok = +(document.getElementById("pMinStok")?.value) || 10;
-  const newProduct = { i: Date.now(), n: name, p: price, m: modal, k: kat, g: img, stok: stok, minStok: minStok, sumber: sumber, tempo: tempo, supplierName: pSupplierName, supplierWA: pSupplierWA, supplierAlamat: pSupplierAlamat };
+  const newProduct = { i: Date.now(), n: name, p: price, m: modal, k: kat, g: img, thumb: thumb, sku: sku, stok: stok, minStok: minStok, sumber: sumber, tempo: tempo, supplierName: pSupplierName, supplierWA: pSupplierWA, supplierAlamat: pSupplierAlamat };
 
   function _resetForm(){
     const katEl = document.getElementById("pKategori");
@@ -891,7 +891,14 @@ function filterProdukAdmin(q){
 function renderOwnerProdukList(){
   const container = document.getElementById("ownerProdukList");
   if(!container) return;
-  const products = getProducts();
+  let products = getProducts();
+
+  if (_produkAdminFilter) {
+      products = products.filter(p => {
+          const searchStr = ((p.n||p.name||"") + " " + (p.sku||"") + " " + (p.k||p.kategori||"")).toLowerCase();
+          return searchStr.includes(_produkAdminFilter);
+      });
+  }
 
   const stat = document.getElementById("totalProduk");
   if(stat) stat.innerText = products.length;
@@ -903,7 +910,7 @@ function renderOwnerProdukList(){
   if(limitInfo) limitInfo.innerText = `${products.length} / ${limit.p>=999999?"∞":limit.p}`;
 
   if(!products.length){
-    container.innerHTML=`<div class="backup-empty">Belum ada produk ditambahkan</div>`;
+    container.innerHTML=`<div class="backup-empty">Belum ada produk ${_produkAdminFilter ? 'ditemukan' : 'ditambahkan'}</div>`;
     return;
   }
 
@@ -963,37 +970,36 @@ function renderOwnerProdukList(){
     const badgeSumber = p.sumber && p.sumber !== "Cash" ? `<span style="font-size:10px; background:#e2e8f0; color:#475569; padding:2px 4px; border-radius:4px; font-weight:bold;">${p.sumber}</span>${tempoWarning}` : "";
 
     div.innerHTML = `
-      <div style="display: flex; gap: 12px; width: 100%; align-items: center;">
-          <img class="owner-produk-img" src="${img||"https://placehold.co/44/1e293b/22c55e?text=P"}" loading="lazy"
-            onerror="this.src='https://placehold.co/44/1e293b/22c55e?text=P'" title="Klik untuk edit" style="width: 56px; height: 56px; flex-shrink: 0; border-radius: 8px; object-fit: cover;">
+      <div style="display: flex; gap: 12px; width: 100%; align-items: flex-start;">
 
-          <div class="owner-produk-info" style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center;">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+              ${p.sku ? `<small style="font-size:9px; color:var(--text3); font-family:monospace; background: var(--surface2); padding: 2px 4px; border-radius: 4px;">${p.sku}</small>` : ""}
+              <img class="owner-produk-img" src="${img||"https://placehold.co/44/1e293b/22c55e?text=P"}" loading="lazy"
+                onerror="this.src='https://placehold.co/44/1e293b/22c55e?text=P'" title="Klik untuk edit" style="width: 56px; height: 56px; flex-shrink: 0; border-radius: 8px; object-fit: cover;">
+              <span class="oprod-stok-badge ${stokCls}" id="oprod-stok-${id}" style="text-align:center; font-size: 10px; padding: 2px 6px; width: 100%;">${stokLabel}</span>
+          </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-                <b style="font-size: 14px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">${name}</b>
+          <div class="owner-produk-info" style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                <b style="font-size: 14px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${name}</b>
                 <button class="owner-produk-del" data-id="${id}" title="Hapus produk" style="background: none; border: none; font-size: 14px; cursor: pointer; padding: 0; flex-shrink:0;">🗑️</button>
             </div>
 
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
-                <div style="display:flex; align-items:center; gap: 6px;">
-                    <small style="font-size: 11px; color: var(--text3);">📂 ${kat}</small>
-                    ${p.sku ? `<small style="font-size:10px; color:var(--text3); font-family:monospace;">${p.sku}</small>` : ""}
-                </div>
-                <div style="display:flex; align-items:center; gap:6px;">
-                    <span style="color:var(--text2); font-size:11px;" title="Harga Modal: Rp ${(p.m || p.modal || 0).toLocaleString('id')}">M: Rp ${(p.m || p.modal || 0).toLocaleString("id")}</span>
-                    <span style="font-weight:700; font-size:12px; color:var(--text1);">J: Rp ${price.toLocaleString("id")}</span>
-                </div>
+            <div style="display:flex; align-items:center; gap: 6px; margin-top: 4px;">
+                <small style="font-size: 11px; color: var(--text3);">📂 ${kat}</small>
+                ${badgeSumber}
             </div>
 
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px;">
-                <div style="display:flex; align-items:center; gap: 6px;">
-                    <span class="oprod-stok-badge ${stokCls}" id="oprod-stok-${id}" style="text-align:center; font-size: 11px; padding: 2px 6px;">${stokLabel}</span>
-                    ${badgeSumber}
+            <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-top: auto; padding-top: 6px;">
+                <div style="display:flex; flex-direction:column; gap:2px;">
+                    <span style="color:var(--text2); font-size:11px;" title="Harga Modal: Rp ${(p.m || p.modal || 0).toLocaleString('id')}">M: Rp ${(p.m || p.modal || 0).toLocaleString("id")}</span>
+                    <span style="font-weight:700; font-size:13px; color:var(--text1);">J: Rp ${price.toLocaleString("id")}</span>
                 </div>
                 <div style="display:flex; gap:2px; align-items:center;">
-                    <button class="opir-stok-btn minus" data-id="${id}" title="Kurang stok" style="width:22px; height:22px; font-size:12px;">−</button>
-                    <input type="number" class="opir-stok-input" data-id="${id}" value="${stokNum !== null ? stokNum : 0}" onclick="event.stopPropagation();" style="width: 40px; height:22px; font-size:12px; padding:0; text-align: center;">
-                    <button class="opir-stok-btn plus" data-id="${id}" title="Tambah stok" style="width:22px; height:22px; font-size:12px;">+</button>
+                    <button class="opir-stok-btn minus" data-id="${id}" title="Kurang stok" style="width:24px; height:24px; font-size:14px;">−</button>
+                    <input type="number" class="opir-stok-input" data-id="${id}" value="${stokNum !== null ? stokNum : 0}" onclick="event.stopPropagation();" style="width: 44px; height:24px; font-size:13px; padding:0; text-align: center;">
+                    <button class="opir-stok-btn plus" data-id="${id}" title="Tambah stok" style="width:24px; height:24px; font-size:14px;">+</button>
                 </div>
             </div>
 

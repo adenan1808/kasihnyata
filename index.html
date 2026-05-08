@@ -573,7 +573,10 @@
       </div>
       <div class="panel-box">
         <div class="panel-box-header"><span class="panel-icon">📋</span><div><div class="panel-title">Daftar Produk</div><div class="panel-desc" id="produkInfo">0 produk tersimpan</div></div></div>
-        <input id="produkSearchAdmin" placeholder="🔍 Cari produk..." oninput="Admin.filterProdukAdmin(this.value)" style="margin-bottom:8px;padding:8px 12px;width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text1);font-size:12px">
+        <div style="display:flex; gap:8px; margin-bottom:8px;">
+            <input id="produkSearchAdmin" placeholder="🔍 Cari produk..." oninput="Admin.filterProdukAdmin(this.value)" style="flex:1; padding:8px 12px; background:var(--surface2); border:1px solid var(--border2); border-radius:8px; color:var(--text1); font-size:12px">
+            <button onclick="document.getElementById('produkSearchAdmin').focus()" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border2); background: var(--surface); color: var(--text1); cursor: pointer; font-size: 12px;">Cari</button>
+        </div>
         <div id="ownerProdukList" class="owner-produk-list"></div>
       </div>
     </div>
