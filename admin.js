@@ -1589,6 +1589,7 @@ function _editProductPrice(id, name, currentPrice){
 
 function _adjustProductStok(id, delta){
   const products = getProducts();
+  showToast(delta > 0 ? "✅ Stok ditambah" : "✅ Stok dikurangi");
   const idx = products.findIndex(p => String(p.i||p.id) === String(id));
   if(idx < 0) return;
   const cur = products[idx].stok !== undefined ? +products[idx].stok : 0;

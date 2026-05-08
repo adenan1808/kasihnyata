@@ -4497,3 +4497,6 @@ input[type=color] {
 .pos-cart-items-wrap { flex: 1; overflow-y: auto; }
 
 .pos-cart-panel { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+.btn-save { transition: transform 0.1s !important; }
+.btn-save:active { transform: scale(0.95) !important; }
