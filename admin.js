@@ -540,11 +540,30 @@ document.addEventListener("DOMContentLoaded",()=>{
     }
     // Klik baris produk mana saja (bukan tombol) → buka form edit
     const row = e.target.closest(".owner-produk-item-rich, .owner-produk-item");
-    if(row && !e.target.closest("button")){
+    if(row && !e.target.closest("button") && !e.target.closest("input")){
       const pid = row.dataset?.prodId;
       if(pid) _editProductForm(pid);
     }
   });
+
+  document.getElementById("ownerProdukList")?.addEventListener("change", e => {
+      if(e.target.classList.contains("opir-stok-input")){
+          const id = e.target.dataset.id;
+          const val = parseInt(e.target.value, 10);
+          if(id && !isNaN(val)) {
+              const products = getProducts();
+              const idx = products.findIndex(p => String(p.i!==undefined?p.i:p.id) === String(id));
+              if(idx >= 0){
+                  products[idx].stok = val;
+                  saveProducts(products);
+                  if(window.App && App.renderFull) App.renderFull();
+                  showToast("✅ Stok diperbarui");
+                  renderOwnerProdukList();
+              }
+          }
+      }
+  });
+
   document.getElementById("tabPromo")?.addEventListener("click", e=>{
     const addSlot = e.target.closest(".promo-slot-add[data-upload-target]");
     if(addSlot){
@@ -927,9 +946,10 @@ function renderOwnerProdukList(){
       </div>
       <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
         <button class="owner-produk-del" data-id="${id}" title="Hapus produk">🗑️</button>
-        <div style="display:flex;gap:2px">
-          <button class="opir-stok-btn" title="Kurang stok">−</button>
-          <button class="opir-stok-btn plus" title="Tambah stok">+</button>
+        <div style="display:flex;gap:2px;align-items:center;">
+          <button class="opir-stok-btn minus" data-id="${id}" title="Kurang stok">−</button>
+          <input type="number" class="opir-stok-input" data-id="${id}" value="${stokNum !== null ? stokNum : 0}" style="width:40px;text-align:center;font-weight:900;font-size:14px;border:1px solid var(--border2);border-radius:4px;background:var(--surface);color:var(--text1);margin:0 4px;" onclick="event.stopPropagation();">
+          <button class="opir-stok-btn plus" data-id="${id}" title="Tambah stok">+</button>
         </div>
       </div>`;
 
@@ -1598,6 +1618,7 @@ function _adjustProductStok(id, delta){
   const el = document.getElementById("opir-stok-"+id);
   if(el) el.textContent = products[idx].stok;
   if(window.App) App.renderFull && App.renderFull();
+  renderOwnerProdukList();
 }
 
 function _changeProductImg(id){
