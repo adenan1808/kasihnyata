@@ -2297,20 +2297,15 @@ input[type=color] {
 }
 
 .pos-card-stok {
-  position: absolute;
-  bottom: 4px;
-  right: 4px;
-  top: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 11px;
-  font-weight: 900;
-  text-align: center;
-  padding: 4px 6px;
-  border-radius: 6px;
-  letter-spacing: 0.02em;
-  z-index: 10;
-  border: 1px solid rgba(255,255,255,0.8);
-  box-shadow: 0 3px 6px rgba(0,0,0,0.8);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 5px;
+  margin: 4px 0;
+  width: max-content;
 }
 
 .pos-card-stok.low { background: #d97706 !important; color: #ffffff !important; }
@@ -3961,19 +3956,43 @@ input[type=color] {
 .opir-stok-label.habis { color: #ef4444; }
 .opir-stok-label.low   { color: #f59e0b; }
 .opir-stok-btn {
-  width: 20px; height: 20px;
-  border: 1px solid var(--border2);
-  border-radius: 4px;
+  width: 24px; height: 24px;
+  border: none;
+  border-radius: 6px;
   background: var(--surface2);
   color: var(--text1);
-  font-size: 13px;
+  font-size: 16px;
+  font-weight: 800;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   line-height: 1;
   padding: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.1s;
 }
-.opir-stok-btn.plus { background: var(--accent); color: #07101f; border-color: var(--accent); }
+.opir-stok-btn:active { transform: scale(0.9); }
+.opir-stok-btn.plus { background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%); color: #000; }
+.opir-stok-btn.minus { background: linear-gradient(135deg, #4b5563 0%, #374151 100%); color: #fff; }
 .opir-stok-num { font-size: 12px; font-weight: 700; min-width: 20px; text-align: center; }
+
+.opir-stok-input {
+  width: 40px;
+  text-align: center;
+  font-weight: 900;
+  font-size: 14px;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text1);
+  margin: 0 4px;
+  height: 24px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+.opir-stok-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
 
 .opir-actions { display: flex; flex-direction: column; gap: 5px; }
 .opir-edit-btn, .opir-del-btn {
@@ -4020,26 +4039,26 @@ input[type=color] {
   box-shadow: 0 3px 6px rgba(0,0,0,0.8);
   text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
-.pos-card-stok.ok { background: #16a34a !important; color: #ffffff !important; }
-.pos-card-stok.low { background: #d97706 !important; color: #ffffff !important; }
-.pos-card-stok.habis { background: #dc2626 !important; color: #ffffff !important; }
+.pos-card-stok.ok { background: rgba(74,222,128,.18) !important; color: #4ade80 !important; border: 1px solid rgba(74,222,128,.35) !important; }
+.pos-card-stok.low { background: rgba(251,191,36,.2) !important; color: #fbbf24 !important; border: 1px solid rgba(251,191,36,.4) !important; }
+.pos-card-stok.habis { background: rgba(239,68,68,.18) !important; color: #f87171 !important; border: 1px solid rgba(239,68,68,.35) !important; }
 .pos-card.out-of-stock { opacity: 0.5; pointer-events: none; }
 
 /* Single + button on POS card when not in cart */
 .pos-card-add-btn {
   width: 100%;
-  height: 38px;
+  height: 28px;
   border: none;
   border-radius: 8px;
   background: var(--accent);
   color: #07101f;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 900;
   cursor: pointer;
   margin-top: auto;
   display: flex; align-items: center; justify-content: center;
   transition: background 0.15s, transform 0.1s;
-  padding: 12px;
+  padding: 4px;
 }
 .pos-card-add-btn:active { transform: scale(0.95); }
 
@@ -4401,27 +4420,28 @@ input[type=color] {
   width: 100% !important;
   justify-content: center;
   align-items: center;
-  border-radius: 30px !important; /* Pill shape */
-  font-weight: 700;
-  font-size: 14px;
+  border-radius: 8px !important;
+  font-weight: 800;
+  font-size: 16px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 10px 0 !important;
+  padding: 6px 0 !important;
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
-  color: #000 !important; /* Usually best contrast for bright gradients */
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  color: #000 !important;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
   border: none;
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  margin-top: auto;
 }
 .pos-card-add-btn:hover, .product-card-add:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.25);
   filter: brightness(1.1);
 }
 .pos-card-add-btn:active, .product-card-add:active {
   transform: scale(0.95) translateY(0);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 .pos-card-stepper, .product-card-stepper {

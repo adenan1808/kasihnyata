@@ -948,7 +948,7 @@ function renderOwnerProdukList(){
         <button class="owner-produk-del" data-id="${id}" title="Hapus produk">🗑️</button>
         <div style="display:flex;gap:2px;align-items:center;">
           <button class="opir-stok-btn minus" data-id="${id}" title="Kurang stok">−</button>
-          <input type="number" class="opir-stok-input" data-id="${id}" value="${stokNum !== null ? stokNum : 0}" style="width:40px;text-align:center;font-weight:900;font-size:14px;border:1px solid var(--border2);border-radius:4px;background:var(--surface);color:var(--text1);margin:0 4px;" onclick="event.stopPropagation();">
+          <input type="number" class="opir-stok-input" data-id="${id}" value="${stokNum !== null ? stokNum : 0}" onclick="event.stopPropagation();">
           <button class="opir-stok-btn plus" data-id="${id}" title="Tambah stok">+</button>
         </div>
       </div>`;
