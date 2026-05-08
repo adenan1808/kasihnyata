@@ -2296,17 +2296,7 @@ input[type=color] {
   margin-top: 2px;
 }
 
-.pos-card-stok {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 800;
-  padding: 2px 7px;
-  border-radius: 5px;
-  margin: 4px 0;
-  width: max-content;
-}
+
 
 .pos-card-stok.low { background: #d97706 !important; color: #ffffff !important; }
 
@@ -3976,7 +3966,7 @@ input[type=color] {
 .opir-stok-num { font-size: 12px; font-weight: 700; min-width: 20px; text-align: center; }
 
 .opir-stok-input {
-  width: 40px;
+  width: 60px;
   text-align: center;
   font-weight: 900;
   font-size: 14px;
@@ -4024,20 +4014,15 @@ input[type=color] {
   font-weight: 700;
 }
 .pos-card-stok {
-  position: absolute;
-  bottom: 4px;
-  right: 4px;
-  top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 11px;
-  font-weight: 900;
-  text-align: center;
-  padding: 4px 6px;
-  border-radius: 6px;
-  letter-spacing: 0.02em;
-  z-index: 10;
-  border: 1px solid rgba(255,255,255,0.8);
-  box-shadow: 0 3px 6px rgba(0,0,0,0.8);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 5px;
+  margin: 4px auto;
+  width: 100%;
 }
 .pos-card-stok.ok { background: rgba(74,222,128,.18) !important; color: #4ade80 !important; border: 1px solid rgba(74,222,128,.35) !important; }
 .pos-card-stok.low { background: rgba(251,191,36,.2) !important; color: #fbbf24 !important; border: 1px solid rgba(251,191,36,.4) !important; }
@@ -4189,26 +4174,8 @@ input[type=color] {
   border: 1px solid rgba(239,68,68,.35);
 }
 
-/* ── POS card stok big + contrast ── */
-.pos-card-stok {
-  position: absolute;
-  bottom: 4px;
-  right: 4px;
-  top: auto;
-  font-size: 11px;
-  font-weight: 900;
-  text-align: center;
-  padding: 4px 6px;
-  border-radius: 6px;
-  letter-spacing: 0.02em;
-  z-index: 10;
-  border: 1px solid rgba(255,255,255,0.8);
-  box-shadow: 0 3px 6px rgba(0,0,0,0.8);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-}
-.pos-card-stok.ok { background: #16a34a !important; color: #ffffff !important; }
-.pos-card-stok.low { background: #d97706 !important; color: #ffffff !important; }
-.pos-card-stok.habis { background: #dc2626 !important; color: #ffffff !important; }
+
+
 
 /* ── Hero image sharper ── */
 .hero.hero-grid { transform: translateZ(0); -webkit-backface-visibility: hidden; }

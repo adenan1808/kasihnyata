@@ -1783,11 +1783,11 @@ async function _posRenderGrid(){
       <div class="pos-card${inCart?" in-cart":""}${stokNum<=0?" out-of-stock":""}" ${stokNum<=0?"style=\"opacity:0.6;pointer-events:none;\"":""} data-pos-id="${id}">
         <div class="pos-card-img">
           ${imgHtml}
-          ${stokHtml}
           ${qty>0?`<div class="pos-card-qty-badge">${qty}</div>`:""}
         </div>
         <div class="pos-card-body">
           <div class="pos-card-name">${name}</div>
+          ${stokHtml}
           ${p.sku ? `<div style="font-size: 10px; color: var(--text3);">${p.sku}</div>` : ""}
           <div class="pos-card-price-wrap">
             ${hasDiskon?`<div class="pos-card-price-ori">Rp ${originalPrice.toLocaleString("id")}</div>`:""}

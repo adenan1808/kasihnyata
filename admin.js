@@ -931,7 +931,34 @@ function renderOwnerProdukList(){
     const stokCls = stokNum === null ? "na" : stokNum <= 0 ? "habis" : stokNum < 5 ? "low" : "ok";
     const stokLabel = stokNum === null ? "—" : stokNum <= 0 ? "Habis" : stokNum;
     div.dataset.prodId = String(id);
-    const badgeSumber = p.sumber && p.sumber !== "Cash" ? `<span style="font-size:10px; background:#e2e8f0; color:#475569; padding:2px 4px; border-radius:4px; font-weight:bold;">${p.sumber}</span>` : "";
+    let tempoWarning = "";
+    if((p.sumber === "Hutang" || p.sumber === "Titip Jual") && p.tempo) {
+        let tempoStr = p.tempo;
+        // Fix for DD-MM-YY parsing (or input type="date" which is YYYY-MM-DD)
+        if (tempoStr.includes('-')) {
+            const parts = tempoStr.split('-');
+            if(parts[0].length === 2 && parts[2].length === 4) {
+               // DD-MM-YYYY -> YYYY-MM-DD
+               tempoStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+            } else if (parts[0].length === 2 && parts[2].length === 2) {
+               // DD-MM-YY -> YYYY-MM-DD
+               tempoStr = `20${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+        }
+        const tempoDate = new Date(tempoStr);
+        const today = new Date();
+        const diffTime = tempoDate - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        if (diffDays <= 7 && diffDays >= 0) {
+            tempoWarning = ` <span style="font-size:10px; background:#fef08a; color:#854d0e; padding:2px 4px; border-radius:4px; font-weight:bold;">⚠️ Tempo ${diffDays} hari</span>`;
+        } else if (diffDays < 0) {
+            tempoWarning = ` <span style="font-size:10px; background:#fca5a5; color:#991b1b; padding:2px 4px; border-radius:4px; font-weight:bold;">❌ Jatuh Tempo</span>`;
+        } else {
+             tempoWarning = ` <span style="font-size:10px; background:#e2e8f0; color:#475569; padding:2px 4px; border-radius:4px; font-weight:bold;">Tempo: ${p.tempo}</span>`;
+        }
+    }
+    const badgeSumber = p.sumber && p.sumber !== "Cash" ? `<span style="font-size:10px; background:#e2e8f0; color:#475569; padding:2px 4px; border-radius:4px; font-weight:bold;">${p.sumber}</span>${tempoWarning}` : "";
+
     div.innerHTML = `
       <img class="owner-produk-img" src="${img||"https://placehold.co/44/1e293b/22c55e?text=P"}" loading="lazy"
         onerror="this.src='https://placehold.co/44/1e293b/22c55e?text=P'" title="Klik untuk edit">
@@ -939,8 +966,9 @@ function renderOwnerProdukList(){
         <small class="owner-produk-kat">📂 ${kat} ${badgeSumber}</small>
         <b>${name}</b>
         ${p.sku ? `<div style="font-size:10px;color:var(--text3);font-family:monospace;margin-top:2px">${p.sku}</div>` : ""}
-        <span style="display:flex;align-items:center;gap:6px;margin-top:2px">
-          <small>Rp ${price.toLocaleString("id")}</small>
+        <span style="display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap;">
+          <small title="Harga Modal: Rp ${(p.m || p.modal || 0).toLocaleString('id')}">Modal: Rp ${(p.m || p.modal || 0).toLocaleString("id")}</small> |
+          <small>Jual: Rp ${price.toLocaleString("id")}</small>
           <span class="oprod-stok-badge ${stokCls}" id="oprod-stok-${id}">${stokLabel}</span>
         </span>
       </div>
