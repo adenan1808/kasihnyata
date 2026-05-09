@@ -497,7 +497,7 @@
       </div>
       <div id="kategoriChipAdmin" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"></div>
     </div>
-    <div class="panel-grid">
+    <div class="panel-grid-products">
       <div class="panel-box">
         <div class="panel-box-header"><span class="panel-icon">➕</span><div><div class="panel-title">Tambah / Edit Produk</div><div class="panel-desc">Isi detail produk</div></div></div>
         <div style="display:flex; gap:8px;">
@@ -590,7 +590,13 @@
       <div class="panel-box">
         <div class="panel-box-header"><span class="panel-icon">📋</span><div><div class="panel-title">Daftar Produk</div><div class="panel-desc" id="produkInfo">0 produk tersimpan</div></div></div>
         <div style="display:flex; gap:8px; margin-bottom:8px;">
-            <input id="produkSearchAdmin" placeholder="🔍 Cari produk..." oninput="Admin.filterProdukAdmin(this.value)" style="flex:1; padding:8px 12px; background:var(--surface2); border:1px solid var(--border2); border-radius:8px; color:var(--text1); font-size:12px">
+            <select id="produkSearchFilterType" onchange="Admin.filterProdukAdmin()" style="padding:8px; background:var(--surface2); border:1px solid var(--border2); border-radius:8px; color:var(--text1); font-size:12px;">
+                <option value="all">Semua</option>
+                <option value="nama">Nama</option>
+                <option value="kategori">Kategori</option>
+                <option value="sku">SKU</option>
+            </select>
+            <input id="produkSearchAdmin" placeholder="🔍 Cari produk..." oninput="Admin.filterProdukAdmin()" style="flex:1; padding:8px 12px; background:var(--surface2); border:1px solid var(--border2); border-radius:8px; color:var(--text1); font-size:12px">
             <button onclick="document.getElementById('produkSearchAdmin').focus()" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border2); background: var(--surface2); color: var(--text1); cursor: pointer; font-size: 12px; transition: background 0.15s; box-shadow: 0 1px 2px rgba(0,0,0,0.1);" onmouseover="this.style.background='var(--border2)'" onmouseout="this.style.background='var(--surface2)'" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">Cari</button>
         </div>
         <div id="ownerProdukList" class="owner-produk-list"></div>

@@ -681,6 +681,7 @@ function _updateExistingProduct(id){
   const modal = +(document.getElementById("pModal")?.value||0);
   const price = +(document.getElementById("pPrice")?.value||0);
   const stok  = +(document.getElementById("pStok")?.value)||0;
+  const minStok = +(document.getElementById("pMinStok")?.value) || 10;
   const kat   = document.getElementById("pKategori")?.value||"Umum";
   const sumber = document.getElementById("pSumber")?.value||"Cash";
   let tempo  = document.getElementById("pTempo")?.value||"";
@@ -887,8 +888,10 @@ function deleteProduct(id){
 /* ================= RENDER OWNER PRODUCT LIST (chunk render) ================= */
 let _produkAdminFilter = "";
 
-function filterProdukAdmin(q){
-  _produkAdminFilter = (q||"").toLowerCase();
+let _produkAdminFilterType = "all";
+function filterProdukAdmin(){
+  _produkAdminFilter = (document.getElementById("produkSearchAdmin")?.value||"").toLowerCase();
+  _produkAdminFilterType = document.getElementById("produkSearchFilterType")?.value||"all";
   renderOwnerProdukList();
 }
 
@@ -899,8 +902,13 @@ function renderOwnerProdukList(){
 
   if (_produkAdminFilter) {
       products = products.filter(p => {
-          const searchStr = ((p.n||p.name||"") + " " + (p.sku||"") + " " + (p.k||p.kategori||"")).toLowerCase();
-          return searchStr.includes(_produkAdminFilter);
+          const n = (p.n||p.name||"").toLowerCase();
+          const k = (p.k||p.kategori||"Umum").toLowerCase();
+          const s = (p.sku||"").toLowerCase();
+          if(_produkAdminFilterType === 'nama') return n.includes(_produkAdminFilter);
+          if(_produkAdminFilterType === 'kategori') return k.includes(_produkAdminFilter);
+          if(_produkAdminFilterType === 'sku') return s.includes(_produkAdminFilter);
+          return (n + " " + s + " " + k).includes(_produkAdminFilter);
       });
   }
 
@@ -988,7 +996,7 @@ function renderOwnerProdukList(){
             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 4px;">
                 <div style="display: flex; flex-direction: column; min-width:0; flex:1;">
                     <b style="font-size: 13px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">${name}</b>
-                    <div style="font-size:9px; color:var(--text3); font-family:monospace; line-height:1; margin-top:2px;">${p.sku || "xxx-xxx-xxxxxx"}</div>
+
                 </div>
                 <button class="owner-produk-del" data-id="${id}" title="Hapus produk" style="width: 24px; height: 24px; flex-shrink: 0; font-size: 12px; border: 1px solid var(--border2); border-radius: 4px; background: var(--surface2); cursor: pointer;">🗑️</button>
             </div>
