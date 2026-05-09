@@ -972,10 +972,9 @@ function renderOwnerProdukList(){
     div.innerHTML = `
       <div style="display: flex; gap: 8px; width: 100%; align-items: stretch;">
 
-          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; width: 44px; flex-shrink: 0;">
-              ${p.sku ? `<div style="font-size:8px; color:var(--text3); font-family:monospace; line-height: 1;">${p.sku}</div>` : `<div style="font-size:8px; line-height:1; visibility:hidden;">-</div>`}
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; width: 44px; flex-shrink: 0; justify-content: center;">
               <img class="owner-produk-img" src="${img||"https://placehold.co/44/1e293b/22c55e?text=P"}" loading="lazy"
-                onerror="this.src='https://placehold.co/44/1e293b/22c55e?text=P'" title="Klik untuk edit" style="width: 44px; height: 44px; border-radius: 6px; object-fit: cover; margin: auto 0;">
+                onerror="this.src='https://placehold.co/44/1e293b/22c55e?text=P'" title="Klik untuk edit" style="width: 44px; height: 44px; border-radius: 6px; object-fit: cover;">
               <span class="oprod-stok-badge ${stokCls}" id="oprod-stok-${id}" style="text-align:center; font-size: 9px; padding: 1px 0; width: 100%; line-height: 1;">${stokLabel}</span>
           </div>
 
@@ -985,10 +984,11 @@ function renderOwnerProdukList(){
                 <b style="font-size: 13px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">${name}</b>
                 <button class="owner-produk-del" data-id="${id}" title="Hapus produk" style="background: none; border: none; font-size: 13px; cursor: pointer; padding: 0; flex-shrink:0;">🗑️</button>
             </div>
+            <div style="font-size:9px; color:var(--text3); font-family:monospace; line-height:1; margin-top:2px;">${p.sku || "xxx-xxx-xxxxxx"}</div>
 
-            <div style="display:flex; align-items:center; justify-content: space-between; gap: 4px; margin-top: 2px;">
+            <div style="display:flex; align-items:center; justify-content: space-between; gap: 4px; margin-top: 4px;">
                 <div style="display:flex; align-items:center; gap: 4px;">
-                   <small style="font-size: 10px; color: var(--text3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:60px;">📂 ${kat}</small>
+                   <small style="font-size: 10px; color: var(--text3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:50px;">📂 ${kat}</small>
                    ${badgeSumber}
                 </div>
                 <div style="display:flex; flex-direction:column; align-items:flex-end; gap: 1px;">
@@ -1000,7 +1000,7 @@ function renderOwnerProdukList(){
             <div style="display: flex; align-items: center; justify-content: flex-end; margin-top: auto; padding-top: 4px;">
                 <div style="display:flex; gap:2px; align-items:center;">
                     <button class="opir-stok-btn minus" data-id="${id}" title="Kurang stok" style="width:22px; height:22px; font-size:14px;">−</button>
-                    <input type="number" class="opir-stok-input" data-id="${id}" value="${stokNum !== null ? stokNum : 0}" onclick="event.stopPropagation();" style="width: 36px; height:22px; font-size:12px; padding:0; text-align: center;">
+                    <input type="number" class="opir-stok-input" data-id="${id}" value="${stokNum !== null ? stokNum : 0}" onclick="event.stopPropagation();" style="width: 44px; height:22px; font-size:12px; padding:0; text-align: center;">
                     <button class="opir-stok-btn plus" data-id="${id}" title="Tambah stok" style="width:22px; height:22px; font-size:14px;">+</button>
                 </div>
             </div>

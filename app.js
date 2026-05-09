@@ -2029,11 +2029,15 @@ async function posBayar(){
   const dibayar = dibayarInput ? (parseFloat(dibayarInput.value.replace(/\D/g, '')) || 0) : 0;
   const rawPayMethod = document.getElementById("posPayMethod")?.value || "Tunai";
   if (rawPayMethod === "Tunai" && dibayar < total) {
-      showToast("⚠️ KURANG BAYAR: " + "Rp " + Math.abs(dibayar - total).toLocaleString("id"));
       const kembalianEl = document.getElementById("posKembalian");
+      const kembalianLabelEl = document.getElementById("posKembalianLabel");
       if(kembalianEl) {
          kembalianEl.classList.add('blink-warning');
-         setTimeout(() => kembalianEl.classList.remove('blink-warning'), 2000);
+         if(kembalianLabelEl) kembalianLabelEl.classList.add('blink-warning');
+         setTimeout(() => {
+             kembalianEl.classList.remove('blink-warning');
+             if(kembalianLabelEl) kembalianLabelEl.classList.remove('blink-warning');
+         }, 2000);
       }
       return;
   }
@@ -2546,24 +2550,34 @@ function calcKembalian() {
   }
 
   const kembalianEl = document.getElementById("posKembalian");
+  const kembalianLabelEl = document.getElementById("posKembalianLabel");
   const bayarBtn = document.getElementById("posBayarBtn");
   const isTunai = document.getElementById("posPayMethod")?.value === "Tunai";
 
   let kembalian = dibayar - total;
 
-  if (kembalianEl) {
+  if (kembalianEl && kembalianLabelEl) {
     if (dibayar === 0) {
+       kembalianLabelEl.innerText = "Kembalian";
+       kembalianLabelEl.style.color = "var(--text2)";
        kembalianEl.innerText = "Rp 0";
        kembalianEl.style.color = "var(--text2)";
        kembalianEl.classList.remove('blink-warning');
+       kembalianLabelEl.classList.remove('blink-warning');
     } else if (kembalian < 0 && isTunai) {
-       kembalianEl.innerText = "⚠️ Kurang Rp " + Math.abs(kembalian).toLocaleString("id");
+       kembalianLabelEl.innerText = "Kurang";
+       kembalianLabelEl.style.color = "#f87171";
+       kembalianEl.innerText = "Rp " + Math.abs(kembalian).toLocaleString("id");
        kembalianEl.style.color = "#f87171";
        kembalianEl.classList.add('blink-warning');
+       kembalianLabelEl.classList.add('blink-warning');
     } else {
+       kembalianLabelEl.innerText = "Kembalian";
+       kembalianLabelEl.style.color = "var(--text2)";
        kembalianEl.innerText = "Rp " + kembalian.toLocaleString("id");
        kembalianEl.style.color = "#4ade80";
        kembalianEl.classList.remove('blink-warning');
+       kembalianLabelEl.classList.remove('blink-warning');
     }
   }
 

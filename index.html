@@ -197,10 +197,11 @@
           <div class="pos-payment-block" style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <div style="font-size:16px; font-weight:800; color:var(--text1); text-transform:uppercase;">Dibayar</div>
-              <div style="display:flex; align-items:center; background:var(--bg); border:1px solid var(--border1); border-radius:6px; padding-left:8px; width: 60%;">
+              <div style="display:flex; align-items:center; background:var(--bg); border:1px solid var(--border1); border-radius:6px; padding-left:8px; width: 65%;">
                   <span style="font-weight:bold; color:#10b981;">Rp</span>
-                  <input type="text" id="posDibayar" placeholder="0" style="width:100%; text-align:right; font-size:18px; font-weight:bold; color:#10b981; padding:4px 8px; border:none; background:transparent; outline:none;" oninput="
+                  <input type="text" id="posDibayar" placeholder="0" maxlength="16" style="width:100%; text-align:right; font-size:18px; font-weight:bold; color:#10b981; padding:4px 8px; border:none; background:transparent; outline:none;" oninput="
                       let val = this.value.replace(/\D/g, '');
+                      if (val.length > 12) val = val.substring(0, 12);
                       this.value = val ? parseInt(val, 10).toLocaleString('id') : '';
                       if(window.App && typeof App.calcKembalian === 'function') App.calcKembalian();
                   ">
@@ -233,8 +234,8 @@
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface2); padding:6px 10px; border-radius:6px;">
-              <div style="font-size:13px; font-weight:600; color:var(--text2);">Kembalian</div>
-              <div id="posKembalian" style="font-size:15px; font-weight:bold; color:#4ade80;">Rp 0</div>
+              <div id="posKembalianLabel" style="font-size:16px; font-weight:800; color:var(--text2);">Kembalian</div>
+              <div id="posKembalian" style="font-size:18px; font-weight:bold; color:#4ade80;">Rp 0</div>
             </div>
           </div>
           <div class="pos-total-block">
