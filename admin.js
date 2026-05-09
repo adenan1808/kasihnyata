@@ -986,6 +986,7 @@ function renderOwnerProdukList(){
       <div style="display: flex; gap: 10px; width: 100%; align-items: stretch;">
 
           <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; width: 48px; flex-shrink: 0; justify-content: center;">
+              <small style="font-size: 11px; font-weight:700; color: var(--text2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; text-align:center; line-height: 1; margin-bottom: 2px;">${kat}</small>
               <img class="owner-produk-img" src="${img||"https://placehold.co/44/1e293b/22c55e?text=P"}" loading="lazy"
                 onerror="this.src='https://placehold.co/44/1e293b/22c55e?text=P'" title="Klik untuk edit" style="width: 48px; height: 48px; border-radius: 6px; object-fit: cover;">
               <span class="oprod-stok-badge ${stokCls}" id="oprod-stok-${id}" style="text-align:center; font-size: 10px; padding: 2px 0; width: 100%; line-height: 1;">${stokLabel}</span>
@@ -995,9 +996,8 @@ function renderOwnerProdukList(){
 
             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 4px;">
                 <div style="display: flex; flex-direction: column; min-width:0; flex:1;">
-                    <small style="font-size: 11px; font-weight:600; color: var(--text3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom: 2px;">📂 ${kat}</small>
                     <b style="font-size: 14px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">${name}</b>
-                    ${p.sku ? `<div style="font-size:11px; font-weight: bold; color:var(--accent); font-family:monospace; line-height: 1; margin-top: 3px;">${p.sku}</div>` : `<div style="font-size:11px; font-weight: bold; color:var(--text3); font-family:monospace; line-height: 1; margin-top: 3px;">xxx-xxx-xxxxxx</div>`}
+                    ${p.sku ? `<div style="font-size:13px; font-weight: bold; color:var(--accent); font-family:monospace; line-height: 1; margin-top: 3px;">${p.sku}</div>` : `<div style="font-size:13px; font-weight: bold; color:var(--text3); font-family:monospace; line-height: 1; margin-top: 3px;">xxx-xxx-xxxxxx</div>`}
                 </div>
                 <button class="owner-produk-del" data-id="${id}" title="Hapus produk" style="width: 28px; height: 28px; flex-shrink: 0; font-size: 14px; border: 1px solid var(--border2); border-radius: 4px; background: var(--surface2); cursor: pointer; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">🗑️</button>
             </div>
@@ -1007,16 +1007,16 @@ function renderOwnerProdukList(){
                    ${badgeSumber}
                 </div>
                 <div style="display:flex; flex-direction:column; align-items:flex-end; gap: 2px;">
-                   <span style="font-weight:800; font-size:13px; color:var(--text1); line-height:1;">Rp ${price.toLocaleString("id")}<span style="font-size:10px; color:var(--text3); font-weight:normal;">/${satuan}</span></span>
-                   ${p.m ? `<span style="color:var(--text3); font-size:11px; line-height:1;" title="Harga Modal">M: Rp ${(p.m || p.modal || 0).toLocaleString("id")}</span>` : ''}
+                   <span style="font-weight:800; font-size:15px; color:var(--text1); line-height:1;">Rp ${price.toLocaleString("id")}<span style="font-size:11px; color:var(--text3); font-weight:normal;">/${satuan}</span></span>
+                   ${p.m ? `<span style="color:var(--text3); font-size:13px; line-height:1;" title="Harga Modal">M: Rp ${(p.m || p.modal || 0).toLocaleString("id")}</span>` : ''}
                 </div>
             </div>
 
             <div style="display: flex; align-items: center; justify-content: flex-end; margin-top: auto; padding-top: 6px;">
                 <div style="display:flex; gap:2px; align-items:center;">
-                    <button class="opir-stok-btn minus" data-id="${id}" title="Kurang stok" style="width:26px; height:26px; font-size:16px;">−</button>
-                    <input type="number" class="opir-stok-input" data-id="${id}" value="${stokNum !== null ? stokNum : 0}" onclick="event.stopPropagation();" style="width: 64px; height:26px; font-size:14px; font-weight:bold; padding:0; text-align: center;">
-                    <button class="opir-stok-btn plus" data-id="${id}" title="Tambah stok" style="width:26px; height:26px; font-size:16px;">+</button>
+                    <button class="opir-stok-btn minus" data-id="${id}" title="Kurang stok" style="width:28px; height:28px; font-size:18px; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">−</button>
+                    <input type="number" class="opir-stok-input" data-id="${id}" value="${stokNum !== null ? stokNum : 0}" onclick="event.stopPropagation();" style="width: 72px; height:28px; font-size:16px; font-weight:bold; padding:0; text-align: center;">
+                    <button class="opir-stok-btn plus" data-id="${id}" title="Tambah stok" style="width:28px; height:28px; font-size:18px; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">+</button>
                 </div>
             </div>
 

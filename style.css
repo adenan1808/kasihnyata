@@ -653,7 +653,7 @@ a { color: var(--accent); text-decoration: none; }
 }
 
 @media (min-width: 900px) {
-  .panel-grid-products { grid-template-columns: 280px 1fr; }
+  .panel-grid-products { grid-template-columns: 320px 1fr; }
 }
 
 /* ─────────────────────────────────────────────
