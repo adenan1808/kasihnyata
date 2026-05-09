@@ -986,6 +986,7 @@ function renderOwnerProdukList(){
       <div style="display: flex; gap: 8px; width: 100%; align-items: stretch;">
 
           <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; width: 44px; flex-shrink: 0; justify-content: center;">
+              ${p.sku ? `<div style="font-size:10px; font-weight: bold; color:var(--accent); font-family:monospace; line-height: 1;">${p.sku}</div>` : `<div style="font-size:10px; font-weight: bold; color:var(--text3); font-family:monospace; line-height: 1;">xxx-xxx-xxxxxx</div>`}
               <img class="owner-produk-img" src="${img||"https://placehold.co/44/1e293b/22c55e?text=P"}" loading="lazy"
                 onerror="this.src='https://placehold.co/44/1e293b/22c55e?text=P'" title="Klik untuk edit" style="width: 44px; height: 44px; border-radius: 6px; object-fit: cover;">
               <span class="oprod-stok-badge ${stokCls}" id="oprod-stok-${id}" style="text-align:center; font-size: 9px; padding: 1px 0; width: 100%; line-height: 1;">${stokLabel}</span>
@@ -997,7 +998,6 @@ function renderOwnerProdukList(){
                 <div style="display: flex; flex-direction: column; min-width:0; flex:1;">
                     <small style="font-size: 10px; color: var(--text3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom: 2px;">📂 ${kat}</small>
                     <b style="font-size: 13px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">${name}</b>
-                    ${p.sku ? `<div style="font-size:12px; font-weight: 600; color:var(--accent); font-family:monospace; line-height: 1; margin-top: 4px;">${p.sku}</div>` : `<div style="font-size:12px; font-weight: 600; color:var(--text3); font-family:monospace; line-height: 1; margin-top: 4px;">xxx-xxx-xxxxxx</div>`}
                 </div>
                 <button class="owner-produk-del" data-id="${id}" title="Hapus produk" style="width: 24px; height: 24px; flex-shrink: 0; font-size: 12px; border: 1px solid var(--border2); border-radius: 4px; background: var(--surface2); cursor: pointer;">🗑️</button>
             </div>
