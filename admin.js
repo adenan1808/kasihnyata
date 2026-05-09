@@ -970,36 +970,38 @@ function renderOwnerProdukList(){
     const badgeSumber = p.sumber && p.sumber !== "Cash" ? `<span style="font-size:10px; background:#e2e8f0; color:#475569; padding:2px 4px; border-radius:4px; font-weight:bold;">${p.sumber}</span>${tempoWarning}` : "";
 
     div.innerHTML = `
-      <div style="display: flex; gap: 12px; width: 100%; align-items: flex-start;">
+      <div style="display: flex; gap: 8px; width: 100%; align-items: stretch;">
 
-          <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-              ${p.sku ? `<small style="font-size:9px; color:var(--text3); font-family:monospace; background: var(--surface2); padding: 2px 4px; border-radius: 4px;">${p.sku}</small>` : ""}
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; width: 44px; flex-shrink: 0;">
+              ${p.sku ? `<div style="font-size:8px; color:var(--text3); font-family:monospace; line-height: 1;">${p.sku}</div>` : `<div style="font-size:8px; line-height:1; visibility:hidden;">-</div>`}
               <img class="owner-produk-img" src="${img||"https://placehold.co/44/1e293b/22c55e?text=P"}" loading="lazy"
-                onerror="this.src='https://placehold.co/44/1e293b/22c55e?text=P'" title="Klik untuk edit" style="width: 56px; height: 56px; flex-shrink: 0; border-radius: 8px; object-fit: cover;">
-              <span class="oprod-stok-badge ${stokCls}" id="oprod-stok-${id}" style="text-align:center; font-size: 10px; padding: 2px 6px; width: 100%;">${stokLabel}</span>
+                onerror="this.src='https://placehold.co/44/1e293b/22c55e?text=P'" title="Klik untuk edit" style="width: 44px; height: 44px; border-radius: 6px; object-fit: cover; margin: auto 0;">
+              <span class="oprod-stok-badge ${stokCls}" id="oprod-stok-${id}" style="text-align:center; font-size: 9px; padding: 1px 0; width: 100%; line-height: 1;">${stokLabel}</span>
           </div>
 
-          <div class="owner-produk-info" style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+          <div class="owner-produk-info" style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between;">
 
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
-                <b style="font-size: 14px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${name}</b>
-                <button class="owner-produk-del" data-id="${id}" title="Hapus produk" style="background: none; border: none; font-size: 14px; cursor: pointer; padding: 0; flex-shrink:0;">🗑️</button>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 4px;">
+                <b style="font-size: 13px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">${name}</b>
+                <button class="owner-produk-del" data-id="${id}" title="Hapus produk" style="background: none; border: none; font-size: 13px; cursor: pointer; padding: 0; flex-shrink:0;">🗑️</button>
             </div>
 
-            <div style="display:flex; align-items:center; gap: 6px; margin-top: 4px;">
-                <small style="font-size: 11px; color: var(--text3);">📂 ${kat}</small>
-                ${badgeSumber}
-            </div>
-
-            <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-top: auto; padding-top: 6px;">
-                <div style="display:flex; flex-direction:column; gap:2px;">
-                    <span style="color:var(--text2); font-size:11px;" title="Harga Modal: Rp ${(p.m || p.modal || 0).toLocaleString('id')}">M: Rp ${(p.m || p.modal || 0).toLocaleString("id")}</span>
-                    <span style="font-weight:700; font-size:13px; color:var(--text1);">J: Rp ${price.toLocaleString("id")}</span>
+            <div style="display:flex; align-items:center; justify-content: space-between; gap: 4px; margin-top: 2px;">
+                <div style="display:flex; align-items:center; gap: 4px;">
+                   <small style="font-size: 10px; color: var(--text3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:60px;">📂 ${kat}</small>
+                   ${badgeSumber}
                 </div>
+                <div style="display:flex; flex-direction:column; align-items:flex-end; gap: 1px;">
+                   <span style="font-weight:700; font-size:11px; color:var(--text1); line-height:1;">Rp ${price.toLocaleString("id")}</span>
+                   ${p.m ? `<span style="color:var(--text3); font-size:9px; line-height:1;" title="Harga Modal">M: Rp ${(p.m || p.modal || 0).toLocaleString("id")}</span>` : ''}
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: flex-end; margin-top: auto; padding-top: 4px;">
                 <div style="display:flex; gap:2px; align-items:center;">
-                    <button class="opir-stok-btn minus" data-id="${id}" title="Kurang stok" style="width:24px; height:24px; font-size:14px;">−</button>
-                    <input type="number" class="opir-stok-input" data-id="${id}" value="${stokNum !== null ? stokNum : 0}" onclick="event.stopPropagation();" style="width: 44px; height:24px; font-size:13px; padding:0; text-align: center;">
-                    <button class="opir-stok-btn plus" data-id="${id}" title="Tambah stok" style="width:24px; height:24px; font-size:14px;">+</button>
+                    <button class="opir-stok-btn minus" data-id="${id}" title="Kurang stok" style="width:22px; height:22px; font-size:14px;">−</button>
+                    <input type="number" class="opir-stok-input" data-id="${id}" value="${stokNum !== null ? stokNum : 0}" onclick="event.stopPropagation();" style="width: 36px; height:22px; font-size:12px; padding:0; text-align: center;">
+                    <button class="opir-stok-btn plus" data-id="${id}" title="Tambah stok" style="width:22px; height:22px; font-size:14px;">+</button>
                 </div>
             </div>
 
