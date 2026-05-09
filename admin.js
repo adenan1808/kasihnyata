@@ -677,6 +677,7 @@ function _updateExistingProduct(id){
   const idx = products.findIndex(p => String(p.i!==undefined?p.i:p.id) === String(id));
   if(idx < 0){ showToast("Produk tidak ditemukan"); return; }
   const name  = (document.getElementById("pName")?.value||"").trim();
+  const satuan = document.getElementById("pSatuan")?.value||"pcs";
   const modal = +(document.getElementById("pModal")?.value||0);
   const price = +(document.getElementById("pPrice")?.value||0);
   const stok  = +(document.getElementById("pStok")?.value)||0;
@@ -697,6 +698,7 @@ function _updateExistingProduct(id){
   if(!name){ showToast("Nama produk wajib diisi"); return; }
   if(price <= 0){ showToast("Harga jual harus > 0"); return; }
   if(products[idx].n !== undefined) products[idx].n = name; else products[idx].name = name;
+  products[idx].satuan = satuan;
   if(products[idx].p !== undefined) products[idx].p = price; else products[idx].price = price;
   if(products[idx].m !== undefined) products[idx].m = modal; else products[idx].modal = modal;
   if(products[idx].k !== undefined) products[idx].k = kat;   else products[idx].kategori = kat;
@@ -828,12 +830,14 @@ function addProduct(){
     pSupplierAlamat = '';
   }
   const minStok = +(document.getElementById("pMinStok")?.value) || 10;
-  const newProduct = { i: Date.now(), n: name, p: price, m: modal, k: kat, g: img, thumb: thumb, sku: sku, stok: stok, minStok: minStok, sumber: sumber, tempo: tempo, supplierName: pSupplierName, supplierWA: pSupplierWA, supplierAlamat: pSupplierAlamat };
+  const satuan = document.getElementById("pSatuan")?.value || "pcs";
+  const newProduct = { i: Date.now(), n: name, p: price, m: modal, k: kat, g: img, thumb: thumb, sku: sku, stok: stok, minStok: minStok, satuan: satuan, sumber: sumber, tempo: tempo, supplierName: pSupplierName, supplierWA: pSupplierWA, supplierAlamat: pSupplierAlamat };
 
   function _resetForm(){
     const katEl = document.getElementById("pKategori");
     if(katEl) katEl.value = kat; // pertahankan kategori terakhir
     ["pName","pPrice","pModal","pStok","pTempo","pSupplierName","pSupplierWA","pSupplierAlamat"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=""; });
+  const elSat = document.getElementById("pSatuan"); if(elSat) elSat.value="pcs";
     // Reset tempo default
     const tempoEl = document.getElementById('pTempo');
     if(tempoEl) {
@@ -927,6 +931,7 @@ function renderOwnerProdukList(){
     const p = products[idx];
     const id   = p.i !== undefined ? p.i : p.id;
     const name = p.n !== undefined ? p.n : p.name;
+    const satuan = p.satuan || "pcs";
     const price= p.p !== undefined ? p.p : p.price;
     const kat  = p.k !== undefined ? p.k : (p.kategori||"Umum");
     const img  = p.g !== undefined ? p.g : (p.img||"");
@@ -985,7 +990,7 @@ function renderOwnerProdukList(){
                     <b style="font-size: 13px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">${name}</b>
                     <div style="font-size:9px; color:var(--text3); font-family:monospace; line-height:1; margin-top:2px;">${p.sku || "xxx-xxx-xxxxxx"}</div>
                 </div>
-                <button class="owner-produk-del" data-id="${id}" title="Hapus produk" style="width: 24px; height: 24px; flex-shrink: 0; font-size: 11px;">🗑️</button>
+                <button class="owner-produk-del" data-id="${id}" title="Hapus produk" style="width: 24px; height: 24px; flex-shrink: 0; font-size: 12px; border: 1px solid var(--border2); border-radius: 4px; background: var(--surface2); cursor: pointer;">🗑️</button>
             </div>
 
             <div style="display:flex; align-items:center; justify-content: space-between; gap: 4px; margin-top: 2px;">
@@ -994,7 +999,7 @@ function renderOwnerProdukList(){
                    ${badgeSumber}
                 </div>
                 <div style="display:flex; flex-direction:column; align-items:flex-end; gap: 1px;">
-                   <span style="font-weight:700; font-size:11px; color:var(--text1); line-height:1;">Rp ${price.toLocaleString("id")}</span>
+                   <span style="font-weight:700; font-size:11px; color:var(--text1); line-height:1;">Rp ${price.toLocaleString("id")}<span style="font-size:9px; color:var(--text3); font-weight:normal;">/${satuan}</span></span>
                    ${p.m ? `<span style="color:var(--text3); font-size:9px; line-height:1;" title="Harga Modal">M: Rp ${(p.m || p.modal || 0).toLocaleString("id")}</span>` : ''}
                 </div>
             </div>
@@ -1002,7 +1007,7 @@ function renderOwnerProdukList(){
             <div style="display: flex; align-items: center; justify-content: flex-end; margin-top: auto; padding-top: 4px;">
                 <div style="display:flex; gap:2px; align-items:center;">
                     <button class="opir-stok-btn minus" data-id="${id}" title="Kurang stok" style="width:22px; height:22px; font-size:14px;">−</button>
-                    <input type="number" class="opir-stok-input" data-id="${id}" value="${stokNum !== null ? stokNum : 0}" onclick="event.stopPropagation();" style="width: 50px; height:22px; font-size:12px; padding:0; text-align: center;">
+                    <input type="number" class="opir-stok-input" data-id="${id}" value="${stokNum !== null ? stokNum : 0}" onclick="event.stopPropagation();" style="width: 56px; height:22px; font-size:12px; padding:0; text-align: center;">
                     <button class="opir-stok-btn plus" data-id="${id}" title="Tambah stok" style="width:22px; height:22px; font-size:14px;">+</button>
                 </div>
             </div>
@@ -1708,6 +1713,7 @@ function _editProductForm(id){
   // Populate form fields
   const set = (elId, val) => { const el = document.getElementById(elId); if(el) el.value = val; };
   set("pName",  p.n||p.name||"");
+  set("pSatuan", p.satuan||"pcs");
   set("pSku", p.sku||"");
   set("pModal", p.m||p.modal||0);
   set("pPrice", p.p||p.price||0);

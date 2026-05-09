@@ -1108,7 +1108,7 @@ function _productCardHTML(p){
         <div class="product-card-kat">${kat}</div>
         <div class="product-card-name">${name}</div>
         ${p.sku ? `<div style="font-size: 10px; color: var(--text3);">${p.sku}</div>` : ""}
-        <div class="product-card-price">Rp ${harga.toLocaleString("id")}</div>
+        <div class="product-card-price">Rp ${harga.toLocaleString("id")}<span style="font-size:9px; color:var(--text3); font-weight:normal;">/${p.satuan||'pcs'}</span></div>
         ${diskon?`<div class="product-card-ori">Rp ${price.toLocaleString("id")}</div>`:""}
         ${stokHtml}
         ${qtyControls}
@@ -1804,7 +1804,7 @@ async function _posRenderGrid(){
           ${p.sku ? `<div style="font-size: 10px; color: var(--text3);">${p.sku}</div>` : ""}
           <div class="pos-card-price-wrap">
             ${hasDiskon?`<div class="pos-card-price-ori">Rp ${originalPrice.toLocaleString("id")}</div>`:""}
-            <div class="pos-card-price">Rp ${price.toLocaleString("id")}</div>
+            <div class="pos-card-price">Rp ${price.toLocaleString("id")}<span style="font-size:9px; color:var(--text3); font-weight:normal;">/${p.satuan||'pcs'}</span></div>
             ${hasDiskon?`<span class="pos-card-diskon-badge">-${diskonGPos}%</span>`:""}
           </div>
           ${qtyCtrl}

@@ -500,8 +500,23 @@
     <div class="panel-grid">
       <div class="panel-box">
         <div class="panel-box-header"><span class="panel-icon">➕</span><div><div class="panel-title">Tambah / Edit Produk</div><div class="panel-desc">Isi detail produk</div></div></div>
-        <label class="field-label">Nama Produk</label>
-        <input id="pName" placeholder="Nama produk...">
+        <div style="display:flex; gap:8px;">
+          <div style="flex:2;">
+            <label class="field-label">Nama Produk</label>
+            <input id="pName" placeholder="Nama produk...">
+          </div>
+          <div style="flex:1;">
+            <label class="field-label">Satuan</label>
+            <select id="pSatuan" class="select-field">
+              <option value="pcs">pcs</option>
+              <option value="kg">kg</option>
+              <option value="liter">liter</option>
+              <option value="box">box</option>
+              <option value="pack">pack</option>
+              <option value="botol">botol</option>
+            </select>
+          </div>
+        </div>
         <label class="field-label" style="margin-top:10px">SKU (Otomatis / Manual)</label>
         <div style="display:flex;gap:8px;">
           <input id="pSku" placeholder="AAA-BBB-123456" style="flex:1;text-transform:uppercase;">
