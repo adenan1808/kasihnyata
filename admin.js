@@ -981,12 +981,14 @@ function renderOwnerProdukList(){
           <div class="owner-produk-info" style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between;">
 
             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 4px;">
-                <b style="font-size: 13px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">${name}</b>
-                <button class="owner-produk-del" data-id="${id}" title="Hapus produk" style="background: none; border: none; font-size: 13px; cursor: pointer; padding: 0; flex-shrink:0;">🗑️</button>
+                <div style="display: flex; flex-direction: column; min-width:0; flex:1;">
+                    <b style="font-size: 13px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">${name}</b>
+                    <div style="font-size:9px; color:var(--text3); font-family:monospace; line-height:1; margin-top:2px;">${p.sku || "xxx-xxx-xxxxxx"}</div>
+                </div>
+                <button class="owner-produk-del" data-id="${id}" title="Hapus produk" style="width: 24px; height: 24px; flex-shrink: 0; font-size: 11px;">🗑️</button>
             </div>
-            <div style="font-size:9px; color:var(--text3); font-family:monospace; line-height:1; margin-top:2px;">${p.sku || "xxx-xxx-xxxxxx"}</div>
 
-            <div style="display:flex; align-items:center; justify-content: space-between; gap: 4px; margin-top: 4px;">
+            <div style="display:flex; align-items:center; justify-content: space-between; gap: 4px; margin-top: 2px;">
                 <div style="display:flex; align-items:center; gap: 4px;">
                    <small style="font-size: 10px; color: var(--text3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:50px;">📂 ${kat}</small>
                    ${badgeSumber}
@@ -1000,7 +1002,7 @@ function renderOwnerProdukList(){
             <div style="display: flex; align-items: center; justify-content: flex-end; margin-top: auto; padding-top: 4px;">
                 <div style="display:flex; gap:2px; align-items:center;">
                     <button class="opir-stok-btn minus" data-id="${id}" title="Kurang stok" style="width:22px; height:22px; font-size:14px;">−</button>
-                    <input type="number" class="opir-stok-input" data-id="${id}" value="${stokNum !== null ? stokNum : 0}" onclick="event.stopPropagation();" style="width: 44px; height:22px; font-size:12px; padding:0; text-align: center;">
+                    <input type="number" class="opir-stok-input" data-id="${id}" value="${stokNum !== null ? stokNum : 0}" onclick="event.stopPropagation();" style="width: 50px; height:22px; font-size:12px; padding:0; text-align: center;">
                     <button class="opir-stok-btn plus" data-id="${id}" title="Tambah stok" style="width:22px; height:22px; font-size:14px;">+</button>
                 </div>
             </div>
