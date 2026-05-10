@@ -487,115 +487,134 @@
 
   <!-- TAB PRODUK -->
   <div id="tabProduk" class="tab-panel">
-    <!-- KATEGORI di atas Produk -->
-    <div class="panel-box" style="margin-bottom:14px">
-      <div class="panel-box-header"><span class="panel-icon">📂</span><div><div class="panel-title">Kategori</div><div class="panel-desc">Kelola kategori produk</div></div></div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <select id="pKategori" class="select-field" style="flex:1;min-width:140px"></select>
-        <button onclick="App.openTambahKategoriModal()" class="btn-sm">+ Tambah Kategori</button>
-        <button onclick="Admin.deleteSelectedKategori()" class="btn-sm" style="background:#450a0a;color:#f87171">🗑️ Hapus Dipilih</button>
+
+    <!-- Form Tambah/Edit Produk Compact -->
+    <div class="panel-box" style="margin-bottom:14px; padding:12px;">
+      <div class="panel-box-header" style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border1);">
+        <span class="panel-icon">➕</span>
+        <div><div class="panel-title">Edit Produk</div><div class="panel-desc">Gunakan Scanner atau Import Excel untuk mass upload</div></div>
       </div>
-      <div id="kategoriChipAdmin" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"></div>
-    </div>
-    <!-- Form diubah jadi full width -->
-    <div style="display:flex; flex-direction:column; gap:14px;">
-      <div class="panel-box">
-        <div class="panel-box-header"><span class="panel-icon">➕</span><div><div class="panel-title">Tambah / Edit Produk</div><div class="panel-desc">Isi detail produk</div></div></div>
-        <div style="display:flex; gap:8px;">
-          <div style="flex:2;">
-            <label class="field-label">Nama Produk</label>
-            <input id="pName" placeholder="Nama produk...">
+
+      <div style="display:flex; flex-direction:column; gap:10px;">
+
+        <!-- Baris 1: Kategori | Tambah/Hapus | Impor Excel | Scanner -->
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div style="flex:1; display:flex; gap:8px; align-items:center;">
+            <select id="pKategori" class="select-field" style="flex:1; padding:6px; font-size:12px;"></select>
+            <button onclick="App.openTambahKategoriModal()" class="btn-sm" style="padding:6px 10px; font-size:12px;">+ Kat</button>
+            <button onclick="Admin.deleteSelectedKategori()" class="btn-sm" style="padding:6px 10px; font-size:12px; background:#450a0a; color:#f87171;" title="Hapus Kategori">🗑️</button>
           </div>
-          <div style="flex:1;">
-            <label class="field-label">Satuan</label>
-            <select id="pSatuan" class="select-field">
-              <option value="pcs">pcs</option>
-              <option value="kg">kg</option>
-              <option value="liter">liter</option>
-              <option value="box">box</option>
-              <option value="pack">pack</option>
-              <option value="botol">botol</option>
+          <div style="display:flex; gap:8px;">
+            <button onclick="alert('Fitur Impor Excel belum diimplementasi')" class="btn-sm" style="background:var(--surface2); padding:6px 12px; font-size:12px;" title="Impor Excel">📄 Excel</button>
+            <button onclick="alert('Fitur Scanner belum diimplementasi')" class="btn-sm" style="background:var(--surface2); padding:6px 12px; font-size:12px;" title="Gunakan Scanner">📷 Scanner</button>
+          </div>
+        </div>
+        <div id="kategoriChipAdmin" style="display:flex; gap:4px; flex-wrap:wrap; margin-bottom: 4px;"></div>
+
+        <!-- Baris 2: Nama Produk | Satuan | SKU | Generate -->
+        <div style="display:flex; gap:8px; align-items:flex-end;">
+          <div style="flex:2;">
+            <label class="field-label" style="font-size:11px; margin-bottom:4px;">Nama Produk</label>
+            <input id="pName" placeholder="Nama..." style="padding:6px; font-size:12px; width:100%;">
+          </div>
+          <div style="flex:0.6;">
+            <label class="field-label" style="font-size:11px; margin-bottom:4px;">Satuan</label>
+            <select id="pSatuan" class="select-field" style="padding:6px; font-size:12px; width:100%;">
+              <option value="pcs">pcs</option><option value="kg">kg</option><option value="liter">liter</option>
+              <option value="box">box</option><option value="pack">pack</option><option value="botol">botol</option>
             </select>
           </div>
-        </div>
-        <label class="field-label" style="margin-top:10px">SKU (Otomatis / Manual)</label>
-        <div style="display:flex;gap:4px;align-items:center;">
-          <input id="pSku1" placeholder="AAA" style="width:50px;text-transform:uppercase;text-align:center;" maxlength="3">
-          <span style="color:var(--text3)">-</span>
-          <input id="pSku2" placeholder="BBB" style="width:50px;text-transform:uppercase;text-align:center;" maxlength="3">
-          <span style="color:var(--text3)">-</span>
-          <input id="pSku3" placeholder="123456" style="flex:1;text-transform:uppercase;text-align:center;" maxlength="6">
-          <button type="button" onclick="Admin.generateAndSetSKU()" class="btn-sm" style="margin-left:4px;">Generate</button>
-        </div>
-        <input type="hidden" id="pSku">
-        <label class="field-label">Harga Modal (Rp)</label>
-        <input id="pModal" type="number" placeholder="0" oninput="autoHargaJual()">
-        <label class="field-label">Harga Jual (Rp)</label>
-        <input id="pPrice" type="number" placeholder="0">
-        <label class="field-label">Stok</label>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input id="pStok" type="number" placeholder="0" min="0" style="flex:1">
-          <button onclick="Admin.adjustStok(1)" class="btn-sm">+</button>
-          <button onclick="Admin.adjustStok(-1)" class="btn-sm" style="background:#450a0a;color:#f87171">−</button>
-        </div>
-        <label class="field-label" style="margin-top:10px">Peringatan Stok Rendah</label>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input id="pMinStok" type="number" placeholder="10" min="0" value="10" style="flex:1">
+          <div style="flex:1.5;">
+            <label class="field-label" style="font-size:11px; margin-bottom:4px;">SKU (Auto/Manual)</label>
+            <div style="display:flex; gap:2px; align-items:center;">
+              <input id="pSku1" placeholder="AAA" style="width:40px; padding:6px 2px; font-size:11px; text-transform:uppercase; text-align:center;" maxlength="3">
+              <span style="color:var(--text3)">-</span>
+              <input id="pSku2" placeholder="BBB" style="width:40px; padding:6px 2px; font-size:11px; text-transform:uppercase; text-align:center;" maxlength="3">
+              <span style="color:var(--text3)">-</span>
+              <input id="pSku3" placeholder="123456" style="flex:1; padding:6px; font-size:11px; text-transform:uppercase; text-align:center;" maxlength="6">
+              <button type="button" onclick="Admin.generateAndSetSKU()" class="btn-sm" style="padding:6px 8px; font-size:11px; margin-left:4px;">Gen</button>
+            </div>
+            <input type="hidden" id="pSku">
+          </div>
         </div>
 
-        <label class="field-label" style="margin-top:10px">Sumber Produk</label>
-        <div style="display:flex;gap:8px;">
-          <select id="pSumber" class="select-field" style="flex:1" onchange="document.getElementById('pTempoWrap').style.display = (this.value==='Hutang' || this.value==='Titip Jual') ? 'block' : 'none'">
-            <option value="Cash">Cash</option>
-            <option value="Hutang">Hutang</option>
-            <option value="Titip Jual">Titip Jual</option>
-          </select>
+        <!-- Baris 3: Harga Modal | Margin | Harga Jual | Stok | Stok Kritis -->
+        <div style="display:flex; gap:8px; align-items:flex-end;">
+          <div style="flex:1.2;">
+            <label class="field-label" style="font-size:11px; margin-bottom:4px;">Modal (Rp)</label>
+            <input id="pModal" type="number" placeholder="0" oninput="autoHargaJual()" style="padding:6px; font-size:12px; width:100%;">
+          </div>
+          <div style="flex:0.6;">
+            <label class="field-label" style="font-size:11px; margin-bottom:4px;">Mrgn(%)</label>
+            <div style="display:flex; gap:2px;">
+              <input id="defaultMargin" type="number" placeholder="30" style="padding:6px; font-size:12px; width:100%; text-align:center;" oninput="autoHargaJual()">
+            </div>
+          </div>
+          <div style="flex:1.2;">
+            <label class="field-label" style="font-size:11px; margin-bottom:4px;">Jual (Rp)</label>
+            <input id="pPrice" type="number" placeholder="0" style="padding:6px; font-size:12px; width:100%; font-weight:bold; color:var(--text1);">
+          </div>
+          <div style="flex:0.8;">
+            <label class="field-label" style="font-size:11px; margin-bottom:4px;">Stok</label>
+            <div style="display:flex; gap:2px;">
+              <input id="pStok" type="number" placeholder="0" min="0" style="padding:6px; font-size:12px; width:100%; text-align:center;">
+            </div>
+          </div>
+          <div style="flex:0.6;">
+            <label class="field-label" style="font-size:11px; margin-bottom:4px;">Kritis</label>
+            <input id="pMinStok" type="number" placeholder="10" min="0" value="10" style="padding:6px; font-size:12px; width:100%; text-align:center;">
+          </div>
         </div>
-        <div id="pTempoWrap" style="display:none; margin-top:8px;">
-          <label class="field-label">Tanggal Jatuh Tempo (DD-MM-YY)</label>
-          <input id="pTempo" type="text" placeholder="DD-MM-YY" style="width:100%">
 
-          <label class="field-label" style="margin-top:10px">Nama Supplier</label>
-          <input id="pSupplierName" type="text" placeholder="Nama Supplier" style="width:100%">
+        <!-- Baris 4: Sumber Produk | Upload Foto | Actions -->
+        <div style="display:flex; gap:12px; align-items:flex-start; margin-top:4px;">
+          <!-- Col 1: Sumber -->
+          <div style="flex:1.5;">
+            <label class="field-label" style="font-size:11px; margin-bottom:4px;">Sumber</label>
+            <select id="pSumber" class="select-field" style="padding:6px; font-size:12px; width:100%;" onchange="document.getElementById('pTempoWrap').style.display = (this.value==='Hutang' || this.value==='Titip Jual') ? 'block' : 'none'">
+              <option value="Cash">Cash</option><option value="Hutang">Hutang</option><option value="Titip Jual">Titip Jual</option>
+            </select>
+            <div id="pTempoWrap" style="display:none; margin-top:6px; background:var(--surface2); padding:8px; border-radius:6px; font-size:11px;">
+              <input id="pTempo" type="text" placeholder="Tempo (DD-MM-YY)" style="width:100%; padding:4px 6px; font-size:11px; margin-bottom:4px;">
+              <input id="pSupplierName" type="text" placeholder="Nama Supplier" style="width:100%; padding:4px 6px; font-size:11px; margin-bottom:4px;">
+              <input id="pSupplierWA" type="text" placeholder="WA Supplier" style="width:100%; padding:4px 6px; font-size:11px; margin-bottom:4px;">
+              <input id="pSupplierAlamat" type="text" placeholder="Alamat Supplier" style="width:100%; padding:4px 6px; font-size:11px;">
+            </div>
+            <script>
+                const tempoEl = document.getElementById('pTempo');
+                if(tempoEl && !tempoEl.value) {
+                    const d = new Date(); d.setDate(d.getDate() + 90);
+                    tempoEl.value = String(d.getDate()).padStart(2, '0') + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getFullYear()).slice(-2);
+                }
+            </script>
+          </div>
 
-          <label class="field-label" style="margin-top:10px">No. WA Supplier</label>
-          <input id="pSupplierWA" type="text" placeholder="08..." style="width:100%">
+          <!-- Col 2: Image -->
+          <div style="flex:1;">
+            <label class="field-label" style="font-size:11px; margin-bottom:4px;">Foto</label>
+            <div class="upload-area" onclick="document.getElementById('pImg').click()" style="height: 40px; min-height:40px; padding:4px; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+              <div id="pImgPrev" class="upload-preview" style="display:flex; align-items:center; justify-content:center; gap:4px; width:100%; height:100%;">
+                <span style="font-size:11px;">📷 Upload</span>
+              </div>
+            </div>
+            <input type="file" id="pImg" accept="image/*" style="display:none">
+          </div>
 
-          <label class="field-label" style="margin-top:10px">Alamat Supplier</label>
-          <input id="pSupplierAlamat" type="text" placeholder="Alamat Supplier" style="width:100%">
+          <!-- Col 3: Actions -->
+          <div style="flex:1.5; display:flex; flex-direction:column; justify-content:flex-end; gap:6px; align-self:stretch;">
+            <div style="flex:1;"></div>
+            <button onclick="Admin.addProduct()" class="btn-save" style="padding:8px; font-size:13px;">💾 Simpan</button>
+            <div style="display:flex; gap:6px;">
+               <button onclick="Admin.clearProductForm()" class="btn-sm" style="flex:1; background:var(--surface2); padding:6px; font-size:11px;">✕ Baru</button>
+               <button onclick="Admin.deleteEditedProduct()" class="btn-sm" style="flex:1; background:#450a0a; color:#f87171; padding:6px; font-size:11px;">🗑️ Hapus</button>
+            </div>
+          </div>
         </div>
-        <script>
-            // Set default 90 hari
-            const tempoEl = document.getElementById('pTempo');
-            if(tempoEl && !tempoEl.value) {
-                const d = new Date();
-                d.setDate(d.getDate() + 90);
-                const dd = String(d.getDate()).padStart(2, '0');
-                const mm = String(d.getMonth() + 1).padStart(2, '0');
-                const yy = String(d.getFullYear()).slice(-2);
-                tempoEl.value = dd + '-' + mm + '-' + yy;
-            }
-        </script>
 
-        <label class="field-label">Margin Default (%)</label>
-        <div class="margin-row">
-          <input id="defaultMargin" type="number" placeholder="30" style="flex:1">
-          <span class="field-hint">%</span>
-          <button onclick="Admin.saveMargin()" class="btn-sm">Simpan</button>
-        </div>
-        <label class="field-label" style="margin-top:10px">Foto Produk</label>
-        <div class="upload-area" onclick="document.getElementById('pImg').click()">
-          <div id="pImgPrev" class="upload-preview"><span>📷 Klik upload foto</span></div>
-        </div>
-        <input type="file" id="pImg" accept="image/*" style="display:none">
-        <div style="display:flex;gap:8px;margin-top:10px">
-          <button onclick="Admin.addProduct()" class="btn-save" style="flex:1">💾 Simpan Produk</button>
-          <button onclick="Admin.clearProductForm()" class="btn-sm" style="background:var(--surface2)">✕ Bersihkan Form</button>
-          <button onclick="alert('Fitur Scanner belum diimplementasi')" class="btn-sm" style="background:var(--surface2)" title="Gunakan Scanner">📷 Scanner</button>
-          <button onclick="alert('Fitur Impor Excel belum diimplementasi')" class="btn-sm" style="background:var(--surface2)" title="Impor Excel">📄 Excel</button>
-        </div>
       </div>
-      <div class="panel-box">
+    </div>
+
+    <div class="panel-box">
         <div class="panel-box-header"><span class="panel-icon">📋</span><div><div class="panel-title">Daftar Produk</div><div class="panel-desc" id="produkInfo">0 produk tersimpan</div></div></div>
         <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:8px;">
             <div style="display:flex; gap:8px;">

@@ -878,6 +878,28 @@ function addProduct(){
 }
 
 /* ================= DELETE PRODUCT (IDB) ================= */
+function deleteEditedProduct() {
+  if(!window._editingProductId) {
+    showToast("Pilih produk dari daftar di bawah untuk dihapus");
+    return;
+  }
+  const id = window._editingProductId;
+  if(!confirm("Hapus produk yang sedang diedit ini?")) return;
+
+  const products = getProducts().filter(p=>(p.i||p.id) !== id && String(p.i||p.id) !== String(id));
+  saveProducts(products); // sync + IDB background
+  if(window.Core && Core.idbDelete){
+    Core.idbDelete("products", id).catch(()=>{});
+  }
+  invalidateProductCache();
+  renderOwnerProdukList();
+  if(window.App) App.renderFull();
+
+  clearProductForm();
+  window._editingProductId = null;
+  showToast("✅ Produk dihapus");
+}
+
 function deleteProduct(id){
   if(!confirm("Hapus produk ini?")) return;
   const products = getProducts().filter(p=>(p.i||p.id) !== id);
@@ -2415,7 +2437,7 @@ function loadHeroOverlaySettings(){
 window.Admin = {
   saveToko, savePin, saveMargin,
   saveKasirPin,
-  addProduct, deleteProduct, generateAndSetSKU,
+  addProduct, deleteProduct, deleteEditedProduct, generateAndSetSKU,
   savePromo, doBackup, importData, resetData,
   saveAccSettings, clearTransaksi,
   renderAkuntansi, generateInvoiceId, getAccSettings,
