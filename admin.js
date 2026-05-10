@@ -165,7 +165,7 @@ function showTab(id, btn){
   if(id==="tabTable")     { renderTable(); renderPelangganList(); }
   if(id==="tabHistory")   renderHistory();
   if(id==="tabPelanggan") renderPelangganList();
-  if(id==="tabProduk")    renderKategoriChipAdmin();
+
   if(id==="tabToko")      renderKasirList();
 }
 
@@ -1601,7 +1601,7 @@ function initAdmin(){
   loadPromoEditor();
   _initAdminKeyboard();  // ⭐ keyboard ENTER flow
   loadHeroOverlaySettings();
-  renderKategoriChipAdmin();
+
   renderKasirList();
   if(window.App && App.renderOwnerKategoriSelect) App.renderOwnerKategoriSelect();
 
@@ -1884,18 +1884,8 @@ function deleteSelectedKategori(){
   cats = cats.filter(c => c !== kat);
   localStorage.setItem("kategoriList", JSON.stringify(cats));
   if(window.App && App.renderOwnerKategoriSelect) App.renderOwnerKategoriSelect();
-  renderKategoriChipAdmin();
-  showToast("🗑️ Kategori dihapus");
-}
 
-function renderKategoriChipAdmin(){
-  const el = document.getElementById("kategoriChipAdmin"); if(!el) return;
-  let cats = [];
-  try{ cats = JSON.parse(localStorage.getItem("kategoriList")||"[]"); }catch(e){}
-  if(!cats.length){ el.innerHTML = '<span style="color:var(--text3);font-size:12px">Belum ada kategori</span>'; return; }
-  el.innerHTML = cats.map(c =>
-    `<div style="background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;">${c}</div>`
-  ).join('');
+  showToast("🗑️ Kategori dihapus");
 }
 
 function adjustStok(delta){
@@ -2452,7 +2442,7 @@ window.Admin = {
   renderTable, renderTxListTable, renderPelangganList, renderHistory, setTableSort,
   showTxDetail, updateTxStatus, updateProductStatus, hapusSeluruhData, showHistoryPelanggan,
   applyHeroOverlay, loadHeroOverlaySettings,
-  renderKategoriChipAdmin,
+
   // Kasir
   addKasir, deleteKasir, renderKasirList,
   // Product inline edit
