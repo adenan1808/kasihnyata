@@ -889,6 +889,20 @@ function deleteProduct(id){
 let _produkAdminFilter = "";
 
 let _produkAdminFilterType = "all";
+let _produkAdminSortCol = "";
+let _produkAdminSortDir = "asc";
+
+window.sortProdukAdmin = sortProdukAdmin;
+function sortProdukAdmin(col) {
+  if (_produkAdminSortCol === col) {
+    _produkAdminSortDir = _produkAdminSortDir === "asc" ? "desc" : "asc";
+  } else {
+    _produkAdminSortCol = col;
+    _produkAdminSortDir = "asc";
+  }
+  renderOwnerProdukList();
+}
+
 function filterProdukAdmin(){
   _produkAdminFilter = (document.getElementById("produkSearchAdmin")?.value||"").toLowerCase();
   _produkAdminFilterType = document.getElementById("produkSearchFilterType")?.value||"all";
@@ -911,6 +925,29 @@ function renderOwnerProdukList(){
           return (n + " " + s + " " + k).includes(_produkAdminFilter);
       });
   }
+  if (_produkAdminSortCol) {
+      products.sort((a, b) => {
+          let valA = a[_produkAdminSortCol];
+          let valB = b[_produkAdminSortCol];
+
+          if(_produkAdminSortCol === 'k') { valA = a.k||a.kategori||""; valB = b.k||b.kategori||""; }
+          if(_produkAdminSortCol === 'n') { valA = a.n||a.name||""; valB = b.n||b.name||""; }
+          if(_produkAdminSortCol === 'm') { valA = a.m||a.modal||0; valB = b.m||b.modal||0; }
+          if(_produkAdminSortCol === 'p') { valA = a.p||a.price||0; valB = b.p||b.price||0; }
+          if(_produkAdminSortCol === 'stok') { valA = a.stok||0; valB = b.stok||0; }
+          if(_produkAdminSortCol === 'sku') { valA = a.sku||""; valB = b.sku||""; }
+          if(_produkAdminSortCol === 'sumber') { valA = a.sumber||""; valB = b.sumber||""; }
+          if(_produkAdminSortCol === 'tempo') { valA = a.tempo||""; valB = b.tempo||""; }
+
+          if (typeof valA === 'string') valA = valA.toLowerCase();
+          if (typeof valB === 'string') valB = valB.toLowerCase();
+
+          if (valA < valB) return _produkAdminSortDir === "asc" ? -1 : 1;
+          if (valA > valB) return _produkAdminSortDir === "asc" ? 1 : -1;
+          return 0;
+      });
+  }
+
 
   const stat = document.getElementById("totalProduk");
   if(stat) stat.innerText = products.length;
@@ -932,8 +969,33 @@ function renderOwnerProdukList(){
   const CHUNK = 30;
   let idx = 0;
 
+  if (idx === 0) {
+      container.innerHTML = `<table class="admin-product-table">
+        <thead>
+            <tr>
+                <th onclick="sortProdukAdmin('g')" style="width:50px;">Gambar<div class="table-resizer"></div></th>
+                <th onclick="sortProdukAdmin('k')" style="width:100px;">Kategori<div class="table-resizer"></div></th>
+                <th onclick="sortProdukAdmin('n')" style="width:140px;">Nama<div class="table-resizer"></div></th>
+                <th onclick="sortProdukAdmin('sku')" style="width:100px;">SKU<div class="table-resizer"></div></th>
+                <th onclick="sortProdukAdmin('stok')" style="width:120px;">Stok<div class="table-resizer"></div></th>
+                <th onclick="sortProdukAdmin('m')" style="width:90px;">Modal<div class="table-resizer"></div></th>
+                <th onclick="sortProdukAdmin('p')" style="width:90px;">Jual<div class="table-resizer"></div></th>
+                <th onclick="sortProdukAdmin('sumber')" style="width:80px;">Status<div class="table-resizer"></div></th>
+                <th onclick="sortProdukAdmin('tempo')" style="width:80px;">Tempo<div class="table-resizer"></div></th>
+                <th style="width:80px;">Supplier<div class="table-resizer"></div></th>
+                <th style="width:80px;">No WA<div class="table-resizer"></div></th>
+                <th style="width:40px; text-align:center;">Hapus</th>
+            </tr>
+        </thead>
+        <tbody id="adminTableBody"></tbody>
+      </table>`;
+      setTimeout(makeTableResizable, 100);
+  }
+
   function renderChunk(){
   const end = Math.min(idx + CHUNK, products.length);
+  const tbody = document.getElementById("adminTableBody");
+  if(!tbody && idx > 0) return;
 
   for(; idx < end; idx++){
     const p = products[idx];
@@ -941,113 +1003,89 @@ function renderOwnerProdukList(){
     const name = p.n !== undefined ? p.n : p.name;
     const satuan = p.satuan || "pcs";
     const price= p.p !== undefined ? p.p : p.price;
+    const modal = p.m !== undefined ? p.m : (p.modal||0);
     const kat  = p.k !== undefined ? p.k : (p.kategori||"Umum");
     const img  = p.g !== undefined ? p.g : (p.img||"");
 
-    const div = document.createElement("div");
-    div.className = "owner-produk-item";
+    const tr = document.createElement("tr");
+    tr.className = "owner-produk-item-tr";
 
     // 🔐 HANDLE PRODUK INVALID (POSISI BENAR)
 
     const stokNum = p.stok !== undefined ? +p.stok : null;
     const minStokLimit = p.minStok !== undefined ? p.minStok : 10;
     const stokCls = stokNum === null ? "na" : stokNum <= 0 ? "habis" : stokNum <= minStokLimit ? "low" : "ok";
-    const stokLabel = stokNum === null ? "—" : stokNum <= 0 ? "Habis" : stokNum;
-    div.dataset.prodId = String(id);
+    tr.dataset.prodId = String(id);
+    tr.style.cursor = "pointer";
+
     let tempoWarning = "";
     if((p.sumber === "Hutang" || p.sumber === "Titip Jual") && p.tempo) {
         let tempoStr = p.tempo;
-        // Fix for DD-MM-YY parsing (or input type="date" which is YYYY-MM-DD)
         if (tempoStr.includes('-')) {
             const parts = tempoStr.split('-');
             if(parts[0].length === 2 && parts[2].length === 4) {
-               // DD-MM-YYYY -> YYYY-MM-DD
                tempoStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
             } else if (parts[0].length === 2 && parts[2].length === 2) {
-               // DD-MM-YY -> YYYY-MM-DD
                tempoStr = `20${parts[2]}-${parts[1]}-${parts[0]}`;
             }
         }
         const tempoDate = new Date(tempoStr);
-        const today = new Date();
-        const diffTime = tempoDate - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const diffDays = Math.ceil((tempoDate - new Date()) / (1000 * 60 * 60 * 24));
         if (diffDays <= 7 && diffDays >= 0) {
-            tempoWarning = ` <span style="font-size:10px; background:#fef08a; color:#854d0e; padding:2px 4px; border-radius:4px; font-weight:bold;">⚠️ Tempo ${diffDays} hari</span>`;
+            tempoWarning = `<span style="color:#854d0e; font-weight:bold;">⚠️ ${diffDays}h</span>`;
         } else if (diffDays < 0) {
-            tempoWarning = ` <span style="font-size:10px; background:#fca5a5; color:#991b1b; padding:2px 4px; border-radius:4px; font-weight:bold;">❌ Jatuh Tempo</span>`;
+            tempoWarning = `<span style="color:#991b1b; font-weight:bold;">❌ Exp</span>`;
         } else {
-             tempoWarning = ` <span style="font-size:10px; background:#e2e8f0; color:#475569; padding:2px 4px; border-radius:4px; font-weight:bold;">Tempo: ${p.tempo}</span>`;
+             tempoWarning = `${p.tempo}`;
         }
     }
-    const badgeSumber = p.sumber && p.sumber !== "Cash" ? `<span style="font-size:10px; background:#e2e8f0; color:#475569; padding:2px 4px; border-radius:4px; font-weight:bold;">${p.sumber}</span>${tempoWarning}` : "";
 
-    div.innerHTML = `
-      <div style="display: flex; gap: 10px; width: 100%; align-items: stretch;">
+    const skuDisplay = p.sku || "xxx-xxx-xxxxxx";
+    const statusDisp = p.sumber || "Cash";
 
-          <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; width: 48px; flex-shrink: 0; justify-content: center;">
-              <small style="font-size: 11px; font-weight:700; color: var(--text2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; text-align:center; line-height: 1; margin-bottom: 2px;">${kat}</small>
-              <img class="owner-produk-img" src="${img||"https://placehold.co/44/1e293b/22c55e?text=P"}" loading="lazy"
-                onerror="this.src='https://placehold.co/44/1e293b/22c55e?text=P'" title="Klik untuk edit" style="width: 48px; height: 48px; border-radius: 6px; object-fit: cover;">
-              <span class="oprod-stok-badge ${stokCls}" id="oprod-stok-${id}" style="text-align:center; font-size: 10px; padding: 2px 0; width: 100%; line-height: 1;">${stokLabel}</span>
-          </div>
+    tr.innerHTML = `
+      <td><img src="${img||"https://placehold.co/44/1e293b/22c55e?text=P"}" loading="lazy" style="width:36px; height:36px; border-radius:4px; object-fit:cover; display:block; margin:auto;" onerror="this.src='https://placehold.co/44/1e293b/22c55e?text=P'"></td>
+      <td><div style="width:100%; overflow:hidden; text-overflow:ellipsis;">${kat}</div></td>
+      <td style="font-weight:bold;" title="${name}"><div style="width:100%; overflow:hidden; text-overflow:ellipsis;">${name}</div></td>
+      <td style="font-family:monospace; color:var(--accent);"><div style="width:100%; overflow:hidden; text-overflow:ellipsis;">${skuDisplay}</div></td>
+      <td>
+        <div style="display:flex; gap:2px; align-items:center;">
+          <button class="opir-stok-btn minus" data-id="${id}" title="Kurang stok" style="width:22px; height:22px; font-size:14px; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">−</button>
+          <input type="number" class="opir-stok-input" data-id="${id}" value="${stokNum !== null ? stokNum : 0}" onclick="event.stopPropagation();" style="width: 56px; height:22px; font-size:12px; font-weight:bold; padding:0; text-align: center;">
+          <button class="opir-stok-btn plus" data-id="${id}" title="Tambah stok" style="width:22px; height:22px; font-size:14px; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">+</button>
+        </div>
+      </td>
+      <td>Rp ${modal.toLocaleString("id")}</td>
+      <td style="font-weight:bold; color:var(--text1);">Rp ${price.toLocaleString("id")}<span style="font-size:9px; color:var(--text3); font-weight:normal;">/${satuan}</span></td>
+      <td>${statusDisp}</td>
+      <td>${tempoWarning}</td>
+      <td title="${p.supplierName||''}"><div style="width:100%; overflow:hidden; text-overflow:ellipsis;">${p.supplierName||'-'}</div></td>
+      <td title="${p.supplierWA||''}"><div style="width:100%; overflow:hidden; text-overflow:ellipsis;">${p.supplierWA||'-'}</div></td>
+      <td style="text-align:center;">
+        <button class="owner-produk-del" data-id="${id}" title="Hapus produk" style="width: 24px; height: 24px; font-size: 13px; border: none; background: transparent; cursor: pointer; transition: transform 0.1s; margin:auto;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">🗑️</button>
+      </td>
+    `;
 
-          <div class="owner-produk-info" style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between;">
+    if(p._invalid){
+      tr.style.opacity = "0.4";
+      tr.style.border = "1px solid red";
+      tr.title = "⚠️ Produk rusak / diubah";
 
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 4px;">
-                <div style="display: flex; flex-direction: column; min-width:0; flex:1;">
-                    <b style="font-size: 14px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">${name}</b>
-                    ${p.sku ? `<div style="font-size:13px; font-weight: bold; color:var(--accent); font-family:monospace; line-height: 1; margin-top: 3px;">${p.sku}</div>` : `<div style="font-size:13px; font-weight: bold; color:var(--text3); font-family:monospace; line-height: 1; margin-top: 3px;">xxx-xxx-xxxxxx</div>`}
-                </div>
-                <button class="owner-produk-del" data-id="${id}" title="Hapus produk" style="width: 28px; height: 28px; flex-shrink: 0; font-size: 14px; border: 1px solid var(--border2); border-radius: 4px; background: var(--surface2); cursor: pointer; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">🗑️</button>
-            </div>
+      const btn = tr.querySelector(".owner-produk-del");
+      if(btn){
+        btn.disabled = true;
+        btn.title = "Data rusak";
+        btn.style.opacity = "0.2";
+        btn.style.cursor = "not-allowed";
+      }
+    }
 
-            <div style="display:flex; align-items:center; justify-content: space-between; gap: 4px; margin-top: 6px;">
-                <div style="display:flex; align-items:center; gap: 4px;">
-                   ${badgeSumber}
-                </div>
-                <div style="display:flex; flex-direction:column; align-items:flex-end; gap: 2px;">
-                   <span style="font-weight:800; font-size:15px; color:var(--text1); line-height:1;">Rp ${price.toLocaleString("id")}<span style="font-size:11px; color:var(--text3); font-weight:normal;">/${satuan}</span></span>
-                   ${p.m ? `<span style="color:var(--text3); font-size:13px; line-height:1;" title="Harga Modal">M: Rp ${(p.m || p.modal || 0).toLocaleString("id")}</span>` : ''}
-                </div>
-            </div>
-
-            <div style="display: flex; align-items: center; justify-content: flex-end; margin-top: auto; padding-top: 6px;">
-                <div style="display:flex; gap:2px; align-items:center;">
-                    <button class="opir-stok-btn minus" data-id="${id}" title="Kurang stok" style="width:28px; height:28px; font-size:18px; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">−</button>
-                    <input type="number" class="opir-stok-input" data-id="${id}" value="${stokNum !== null ? stokNum : 0}" onclick="event.stopPropagation();" style="width: 72px; height:28px; font-size:16px; font-weight:bold; padding:0; text-align: center;">
-                    <button class="opir-stok-btn plus" data-id="${id}" title="Tambah stok" style="width:28px; height:28px; font-size:18px; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">+</button>
-                </div>
-            </div>
-
-          </div>
-      </div>`;
-
-	  // 🔐 TARUH DI SINI (SETELAH innerHTML)
-if(p._invalid){
-  div.style.opacity = "0.4";
-  div.style.border = "1px solid red"; // 🔥 tambah ini
-  div.title = "⚠️ Produk rusak / diubah";
-
-  const btn = div.querySelector(".owner-produk-del");
-  if(btn){
-    btn.disabled = true;
-    btn.title = "Data rusak";
+    frag.appendChild(tr);
   }
 
-  div.style.pointerEvents = "none";
-
-  // 🔥 tambah label warning
-  const warn = document.createElement("small");
-warn.style.color = "red";
-warn.textContent = "⚠️ Data tidak valid";
-div.appendChild(warn);
-}
-
-    frag.appendChild(div);
-  }
-
-  container.appendChild(frag);
+  const tbody = document.getElementById("adminTableBody");
+  if(tbody) tbody.appendChild(frag);
+  else container.appendChild(frag);
 
   // clear fragment
 
@@ -1439,6 +1477,50 @@ function checkAutoBackup(){
 
 /* ================= KEYBOARD ENTER FLOW (admin product form) ================= */
 // Order: Kategori → Nama → Modal → Harga → Stok → (Gambar skip) → ENTER=Save
+window.makeTableResizable = makeTableResizable;
+function makeTableResizable() {
+    const ths = document.querySelectorAll('.admin-product-table th');
+    if (!ths.length) return;
+
+    let isResizing = false;
+    let currentTh = null;
+    let startX = 0;
+    let startWidth = 0;
+
+    ths.forEach(th => {
+        const resizer = th.querySelector('.table-resizer');
+        if(!resizer) return;
+
+        resizer.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            currentTh = th;
+            startX = e.pageX;
+            startWidth = th.offsetWidth;
+            resizer.classList.add('resizing');
+            e.stopPropagation(); // prevent sorting trigger
+        });
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isResizing || !currentTh) return;
+        const newWidth = startWidth + (e.pageX - startX);
+        if (newWidth > 30) {
+            currentTh.style.width = newWidth + 'px';
+        }
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (isResizing) {
+            isResizing = false;
+            if(currentTh) {
+               const r = currentTh.querySelector('.table-resizer');
+               if(r) r.classList.remove('resizing');
+            }
+            currentTh = null;
+        }
+    });
+}
+
 function _initAdminKeyboard(){
   const flow = ["pKategori","pName","pModal","pPrice","pStok"];
 
