@@ -889,16 +889,17 @@ function deleteProduct(id){
 let _produkAdminFilter = "";
 
 let _produkAdminFilterType = "all";
-let _produkAdminSortCol = "";
-let _produkAdminSortDir = "asc";
+// Declare globally
+window._produkAdminSortCol = "";
+window._produkAdminSortDir = "asc";
 
 window.sortProdukAdmin = sortProdukAdmin;
 function sortProdukAdmin(col) {
-  if (_produkAdminSortCol === col) {
-    _produkAdminSortDir = _produkAdminSortDir === "asc" ? "desc" : "asc";
+  if (window._produkAdminSortCol === col) {
+    window._produkAdminSortDir = window._produkAdminSortDir === "asc" ? "desc" : "asc";
   } else {
-    _produkAdminSortCol = col;
-    _produkAdminSortDir = "asc";
+    window._produkAdminSortCol = col;
+    window._produkAdminSortDir = "asc";
   }
   renderOwnerProdukList();
 }
@@ -925,25 +926,25 @@ function renderOwnerProdukList(){
           return (n + " " + s + " " + k).includes(_produkAdminFilter);
       });
   }
-  if (_produkAdminSortCol) {
+  if (window._produkAdminSortCol) {
       products.sort((a, b) => {
-          let valA = a[_produkAdminSortCol];
-          let valB = b[_produkAdminSortCol];
+          let valA = a[window._produkAdminSortCol];
+          let valB = b[window._produkAdminSortCol];
 
-          if(_produkAdminSortCol === 'k') { valA = a.k||a.kategori||""; valB = b.k||b.kategori||""; }
-          if(_produkAdminSortCol === 'n') { valA = a.n||a.name||""; valB = b.n||b.name||""; }
-          if(_produkAdminSortCol === 'm') { valA = a.m||a.modal||0; valB = b.m||b.modal||0; }
-          if(_produkAdminSortCol === 'p') { valA = a.p||a.price||0; valB = b.p||b.price||0; }
-          if(_produkAdminSortCol === 'stok') { valA = a.stok||0; valB = b.stok||0; }
-          if(_produkAdminSortCol === 'sku') { valA = a.sku||""; valB = b.sku||""; }
-          if(_produkAdminSortCol === 'sumber') { valA = a.sumber||""; valB = b.sumber||""; }
-          if(_produkAdminSortCol === 'tempo') { valA = a.tempo||""; valB = b.tempo||""; }
+          if(window._produkAdminSortCol === 'k') { valA = a.k||a.kategori||""; valB = b.k||b.kategori||""; }
+          if(window._produkAdminSortCol === 'n') { valA = a.n||a.name||""; valB = b.n||b.name||""; }
+          if(window._produkAdminSortCol === 'm') { valA = a.m||a.modal||0; valB = b.m||b.modal||0; }
+          if(window._produkAdminSortCol === 'p') { valA = a.p||a.price||0; valB = b.p||b.price||0; }
+          if(window._produkAdminSortCol === 'stok') { valA = a.stok||0; valB = b.stok||0; }
+          if(window._produkAdminSortCol === 'sku') { valA = a.sku||""; valB = b.sku||""; }
+          if(window._produkAdminSortCol === 'sumber') { valA = a.sumber||""; valB = b.sumber||""; }
+          if(window._produkAdminSortCol === 'tempo') { valA = a.tempo||""; valB = b.tempo||""; }
 
           if (typeof valA === 'string') valA = valA.toLowerCase();
           if (typeof valB === 'string') valB = valB.toLowerCase();
 
-          if (valA < valB) return _produkAdminSortDir === "asc" ? -1 : 1;
-          if (valA > valB) return _produkAdminSortDir === "asc" ? 1 : -1;
+          if (valA < valB) return window._produkAdminSortDir === "asc" ? -1 : 1;
+          if (valA > valB) return window._produkAdminSortDir === "asc" ? 1 : -1;
           return 0;
       });
   }
@@ -1083,8 +1084,8 @@ function renderOwnerProdukList(){
     frag.appendChild(tr);
   }
 
-  const tbody = document.getElementById("adminTableBody");
-  if(tbody) tbody.appendChild(frag);
+  let tbodyEl = document.getElementById("adminTableBody");
+  if(tbodyEl) tbodyEl.appendChild(frag);
   else container.appendChild(frag);
 
   // clear fragment

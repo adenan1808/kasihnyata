@@ -1047,14 +1047,24 @@ function _updateProductCards(){
   });
 }
 
+
+// Helper to escape HTML
+window.escapeHTML = (str) => {
+  if (typeof str !== 'string') return str;
+  return str.replace(/[&<>'"]/g,
+    tag => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    }[tag] || tag));
+};
+
 /*  Product card HTML  */
 function _productCardHTML(p){
   const cart=getCart();
   const id    = pField(p,"id")||p.i;
-  const name  = pField(p,"name")||p.n||"";
+  const name  = window.escapeHTML(pField(p,"name")||p.n||"");
   const price = pField(p,"price")||p.p||0;
-  const kat   = pField(p,"kategori")||p.k||"Umum";
-  const img   = p.thumb || pField(p,"img")||p.g||"";
+  const kat   = window.escapeHTML(pField(p,"kategori")||p.k||"Umum");
+  const img   = window.escapeHTML(p.thumb || pField(p,"img")||p.g||"");
   const item  = cart.find(x=>(x.id||x.i)===id);
   const qty   = item?item.qty:0;
   const cfg   = getConfig();
@@ -1107,7 +1117,7 @@ function _productCardHTML(p){
       <div class="product-card-body">
         <div class="product-card-kat">${kat}</div>
         <div class="product-card-name">${name}</div>
-        ${p.sku ? `<div style="font-size: 10px; color: var(--text3);">${p.sku}</div>` : ""}
+        ${p.sku ? `<div style="font-size: 10px; color: var(--text3);">${window.escapeHTML(p.sku)}</div>` : ""}
         <div class="product-card-price">Rp ${harga.toLocaleString("id")}<span style="font-size:9px; color:var(--text3); font-weight:normal;">/${p.satuan||'pcs'}</span></div>
         ${diskon?`<div class="product-card-ori">Rp ${price.toLocaleString("id")}</div>`:""}
         ${stokHtml}
@@ -1510,7 +1520,7 @@ function renderOwnerKategoriSelect(selected=""){
   const sel=document.getElementById("pKategori"); if(!sel) return;
   const list=getKategoriList();
   const current=selected||sel.value||"";
-  sel.innerHTML='<option value="">Pilih kategori...</option>'+list.map(k=>`<option value="${k}">${k}</option>`).join("");
+  sel.innerHTML='<option value="">Pilih kategori...</option>'+list.map(k=>`<option value="${window.escapeHTML(k)}">${window.escapeHTML(k)}</option>`).join("");
   if(current&&list.includes(current)) sel.value=current;
 }
 
@@ -1755,9 +1765,9 @@ async function _posRenderGrid(){
 
   el.innerHTML = filtered.map(p=>{
     const id    = pField(p,"id")||p.i;
-    const name  = pField(p,"name")||p.n||"";
+    const name  = window.escapeHTML(pField(p,"name")||p.n||"");
     const price = getHarga(p);
-    const img = p.thumb || pField(p,"img")||p.g||"";
+    const img   = window.escapeHTML(p.thumb || pField(p,"img")||p.g||"");
     const stok  = p.stok;
     const cartItem = cart.find(x=>x.id===id);
     const qty = cartItem?cartItem.qty:0;
@@ -1801,7 +1811,7 @@ async function _posRenderGrid(){
         <div class="pos-card-body">
           <div class="pos-card-name">${name}</div>
           ${stokHtml}
-          ${p.sku ? `<div style="font-size: 10px; color: var(--text3);">${p.sku}</div>` : ""}
+          ${p.sku ? `<div style="font-size: 10px; color: var(--text3);">${window.escapeHTML(p.sku)}</div>` : ""}
           <div class="pos-card-price-wrap">
             ${hasDiskon?`<div class="pos-card-price-ori">Rp ${originalPrice.toLocaleString("id")}</div>`:""}
             <div class="pos-card-price">Rp ${price.toLocaleString("id")}<span style="font-size:9px; color:var(--text3); font-weight:normal;">/${p.satuan||'pcs'}</span></div>
