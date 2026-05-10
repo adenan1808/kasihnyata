@@ -4517,3 +4517,30 @@ input[type=color] {
     grid-template-columns: 1fr;
   }
 }
+
+/* Tweak admin table style for full width */
+.admin-product-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.admin-product-table th, .admin-product-table td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.admin-product-table th {
+  background: var(--surface2);
+  color: var(--text2);
+  font-weight: 600;
+  cursor: pointer;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.admin-product-table tbody tr:hover {
+  background: var(--surface2);
+}

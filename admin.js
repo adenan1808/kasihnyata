@@ -539,7 +539,7 @@ document.addEventListener("DOMContentLoaded",()=>{
       return;
     }
     // Klik baris produk mana saja (bukan tombol) → buka form edit
-    const row = e.target.closest(".owner-produk-item-rich, .owner-produk-item");
+    const row = e.target.closest(".owner-produk-item-rich, .owner-produk-item, .owner-produk-item-tr");
     if(row && !e.target.closest("button") && !e.target.closest("input")){
       const pid = row.dataset?.prodId;
       if(pid) _editProductForm(pid);
@@ -688,12 +688,13 @@ function _updateExistingProduct(id){
   let pSupplierName = document.getElementById("pSupplierName")?.value||"";
   let pSupplierWA = document.getElementById("pSupplierWA")?.value||"";
   let pSupplierAlamat = document.getElementById("pSupplierAlamat")?.value||"";
-  let sku = (document.getElementById("pSku")?.value||"").trim().toUpperCase();
+  let sku = ((document.getElementById("pSku1")?.value||"") + "-" + (document.getElementById("pSku2")?.value||"") + "-" + (document.getElementById("pSku3")?.value||"")).trim().toUpperCase();
+  if (sku === "--") sku = "";
   if(!sku) { sku = generateSKU(kat, pSupplierName, products); }
   const duplicate = products.find((p, i) => i !== idx && p.sku === sku);
   if(duplicate) {
      showToast("❌ SKU sudah digunakan produk lain!");
-     document.getElementById("pSku")?.focus();
+     document.getElementById("pSku1")?.focus();
      return;
   }
   if(!name){ showToast("Nama produk wajib diisi"); return; }
@@ -761,8 +762,12 @@ function generateAndSetSKU() {
     const sup = document.getElementById("pSupplierName")?.value || "";
     const products = getProducts();
     const newSku = generateSKU(kat, sup, products);
-    const skuEl = document.getElementById("pSku");
-    if(skuEl) skuEl.value = newSku;
+    const parts = newSku.split("-");
+    if(parts.length===3) {
+      document.getElementById("pSku1").value = parts[0];
+      document.getElementById("pSku2").value = parts[1];
+      document.getElementById("pSku3").value = parts[2];
+    }
 }
 window.generateAndSetSKU = generateAndSetSKU;
 
@@ -788,7 +793,8 @@ function addProduct(){
   let pSupplierName = document.getElementById("pSupplierName")?.value||"";
   let pSupplierWA = document.getElementById("pSupplierWA")?.value||"";
   let pSupplierAlamat = document.getElementById("pSupplierAlamat")?.value||"";
-  let sku = (document.getElementById("pSku")?.value||"").trim().toUpperCase();
+  let sku = ((document.getElementById("pSku1")?.value||"") + "-" + (document.getElementById("pSku2")?.value||"") + "-" + (document.getElementById("pSku3")?.value||"")).trim().toUpperCase();
+  if (sku === "--") sku = "";
   const imgEl = document.getElementById("pImgPrev")?.querySelector("img");
   const img   = imgEl ? imgEl.src : "";
   const thumb = imgEl ? imgEl.dataset.thumb : "";
@@ -811,7 +817,7 @@ function addProduct(){
   // duplicate check
   if(products.find(p => p.sku === sku)) {
      showToast("❌ SKU sudah ada! Gunakan SKU lain.");
-     document.getElementById("pSku")?.focus();
+     document.getElementById("pSku1")?.focus();
      return;
   }
   if(!name){
@@ -1805,11 +1811,20 @@ function _editProductForm(id){
   const set = (elId, val) => { const el = document.getElementById(elId); if(el) el.value = val; };
   set("pName",  p.n||p.name||"");
   set("pSatuan", p.satuan||"pcs");
-  set("pSku", p.sku||"");
+  const skuVal = p.sku||"";
+  const parts = skuVal.split("-");
+  if(parts.length===3){
+    set("pSku1", parts[0]); set("pSku2", parts[1]); set("pSku3", parts[2]);
+  } else {
+    set("pSku1", ""); set("pSku2", ""); set("pSku3", "");
+  }
   set("pModal", p.m||p.modal||0);
   set("pPrice", p.p||p.price||0);
   set("pStok",  p.stok !== undefined ? p.stok : "");
   set("pMinStok", p.minStok !== undefined ? p.minStok : 10);
+
+  // Scroll ke form
+  document.getElementById("pName")?.scrollIntoView({ behavior: "smooth", block: "center" });
   // Sumber & Tempo
   set("pSumber", p.sumber || "Cash");
   set("pTempo", p.tempo || "");
@@ -1869,7 +1884,7 @@ function adjustStok(delta){
 }
 
 function clearProductForm(){
-  ["pName","pModal","pPrice","pStok","pTempo","pSupplierName","pSupplierWA","pSupplierAlamat"].forEach(id=>{
+  ["pName","pModal","pPrice","pStok","pTempo","pSupplierName","pSupplierWA","pSupplierAlamat","pSku1","pSku2","pSku3"].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value="";
   });
   const elS = document.getElementById("pSumber"); if(elS) elS.value="Cash";

@@ -497,7 +497,8 @@
       </div>
       <div id="kategoriChipAdmin" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"></div>
     </div>
-    <div class="panel-grid-products">
+    <!-- Form diubah jadi full width -->
+    <div style="display:flex; flex-direction:column; gap:14px;">
       <div class="panel-box">
         <div class="panel-box-header"><span class="panel-icon">➕</span><div><div class="panel-title">Tambah / Edit Produk</div><div class="panel-desc">Isi detail produk</div></div></div>
         <div style="display:flex; gap:8px;">
@@ -518,10 +519,15 @@
           </div>
         </div>
         <label class="field-label" style="margin-top:10px">SKU (Otomatis / Manual)</label>
-        <div style="display:flex;gap:8px;">
-          <input id="pSku" placeholder="AAA-BBB-123456" style="flex:1;text-transform:uppercase;">
-          <button type="button" onclick="Admin.generateAndSetSKU()" class="btn-sm">Generate</button>
+        <div style="display:flex;gap:4px;align-items:center;">
+          <input id="pSku1" placeholder="AAA" style="width:50px;text-transform:uppercase;text-align:center;" maxlength="3">
+          <span style="color:var(--text3)">-</span>
+          <input id="pSku2" placeholder="BBB" style="width:50px;text-transform:uppercase;text-align:center;" maxlength="3">
+          <span style="color:var(--text3)">-</span>
+          <input id="pSku3" placeholder="123456" style="flex:1;text-transform:uppercase;text-align:center;" maxlength="6">
+          <button type="button" onclick="Admin.generateAndSetSKU()" class="btn-sm" style="margin-left:4px;">Generate</button>
         </div>
+        <input type="hidden" id="pSku">
         <label class="field-label">Harga Modal (Rp)</label>
         <input id="pModal" type="number" placeholder="0" oninput="autoHargaJual()">
         <label class="field-label">Harga Jual (Rp)</label>
@@ -584,7 +590,9 @@
         <input type="file" id="pImg" accept="image/*" style="display:none">
         <div style="display:flex;gap:8px;margin-top:10px">
           <button onclick="Admin.addProduct()" class="btn-save" style="flex:1">💾 Simpan Produk</button>
-          <button onclick="Admin.clearProductForm()" class="btn-sm" style="background:var(--surface2)">✕ Batal</button>
+          <button onclick="Admin.clearProductForm()" class="btn-sm" style="background:var(--surface2)">✕ Bersihkan Form</button>
+          <button onclick="alert('Fitur Scanner belum diimplementasi')" class="btn-sm" style="background:var(--surface2)" title="Gunakan Scanner">📷 Scanner</button>
+          <button onclick="alert('Fitur Impor Excel belum diimplementasi')" class="btn-sm" style="background:var(--surface2)" title="Impor Excel">📄 Excel</button>
         </div>
       </div>
       <div class="panel-box">
