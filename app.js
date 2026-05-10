@@ -1109,18 +1109,19 @@ function _productCardHTML(p){
 
   return `
     <div class="product-card" data-id="${id}" ${stok<=0?'style="opacity:.6"':''}>
-      <div class="product-card-img-wrap">
+      <div class="product-card-img-wrap" style="position:relative;">
         ${imgHtml}
-        ${diskon?`<span class="badge-diskon">-${diskon}%</span>`:""}
+        ${diskon?`<span class="badge-diskon" style="position:absolute; bottom:4px; right:4px;">-${diskon}%</span>`:""}
         ${qty>0?`<span class="badge-qty-cart">${qty}</span>`:""}
+        ${stok<=0?`<div class="product-card-stok habis" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%) rotate(-30deg); background:rgba(220,38,38,0.9); color:white; padding:4px 12px; border-radius:6px; font-weight:900; font-size:16px; letter-spacing:1px; z-index:10; white-space:nowrap; border:2px solid #fff;">HABIS</div>` : ''}
       </div>
       <div class="product-card-body">
         <div class="product-card-kat">${kat}</div>
         <div class="product-card-name">${name}</div>
-        ${p.sku ? `<div style="font-size: 10px; color: var(--text3);">${window.escapeHTML(p.sku)}</div>` : ""}
-        <div class="product-card-price">Rp ${harga.toLocaleString("id")}<span style="font-size:9px; color:var(--text3); font-weight:normal;">/${p.satuan||'pcs'}</span></div>
-        ${diskon?`<div class="product-card-ori">Rp ${price.toLocaleString("id")}</div>`:""}
-        ${stokHtml}
+        <div style="font-size: 10px; color: var(--text3); margin-top:-2px;">${window.escapeHTML(p.sku || 'SKU_AUTO_GEN')}</div>
+        <div class="product-card-price" style="margin-top:2px;">Rp ${harga.toLocaleString("id")}<span style="font-size:9px; color:var(--text3); font-weight:normal;">/${p.satuan||'pcs'}</span></div>
+        ${diskon?`<div class="product-card-ori" style="margin-top:-2px;">Rp ${price.toLocaleString("id")}</div>`:""}
+        ${stok>0 ? stokHtml : ''}
         ${qtyControls}
       </div>
     </div>`;
@@ -1599,6 +1600,7 @@ window.numpadPress = numpadPress;
 
 /* ================= EXPORT ================= */
 window.App = {
+  openSatuanModal: () => { if(window.openSatuanModal) window.openSatuanModal(); },
   render: renderFull,
   renderFull,
   changeQty,
@@ -1787,7 +1789,7 @@ async function _posRenderGrid(){
     const minStokLimit = p.minStok !== undefined ? p.minStok : 10;
     const stokHtml = stokNum !== null
       ? stokNum <= 0
-        ? `<div class="pos-card-stok habis">❌ Habis</div>`
+        ? `<div class="pos-card-stok habis" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%) rotate(-30deg); background:rgba(220,38,38,0.9); color:white; padding:4px 12px; border-radius:6px; font-weight:900; font-size:16px; letter-spacing:1px; z-index:10; white-space:nowrap; border:2px solid #fff;">HABIS</div>`
         : stokNum <= minStokLimit
           ? `<div class=\"pos-card-stok low\">⚠️ ${stokNum}</div>`
           : `<div class="pos-card-stok ok">Stok ${stokNum}</div>`

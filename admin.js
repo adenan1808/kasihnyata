@@ -165,7 +165,7 @@ function showTab(id, btn){
   if(id==="tabTable")     { renderTable(); renderPelangganList(); }
   if(id==="tabHistory")   renderHistory();
   if(id==="tabPelanggan") renderPelangganList();
-
+  if(id==="tabProduk")    renderKategoriChipAdmin();
   if(id==="tabToko")      renderKasirList();
 }
 
@@ -690,7 +690,7 @@ function _updateExistingProduct(id){
   let pSupplierAlamat = document.getElementById("pSupplierAlamat")?.value||"";
   let sku = ((document.getElementById("pSku1")?.value||"") + "-" + (document.getElementById("pSku2")?.value||"") + "-" + (document.getElementById("pSku3")?.value||"")).trim().toUpperCase();
   if (sku === "--") sku = "";
-  if(!sku) { sku = generateSKU(kat, pSupplierName, products); }
+  if(!sku) { sku = generateSKU(kat, pSupplierName, products, name); }
   const duplicate = products.find((p, i) => i !== idx && p.sku === sku);
   if(duplicate) {
      showToast("❌ SKU sudah digunakan produk lain!");
@@ -761,7 +761,7 @@ function generateAndSetSKU() {
     const kat = document.getElementById("pKategori")?.value || "";
     const sup = document.getElementById("pSupplierName")?.value || "";
     const products = getProducts();
-    const newSku = generateSKU(kat, sup, products);
+    const newSku = generateSKU(kat, sup, products, document.getElementById("pName")?.value || "");
     const parts = newSku.split("-");
     if(parts.length===3) {
       document.getElementById("pSku1").value = parts[0];
@@ -810,7 +810,7 @@ function addProduct(){
   }
 
   if(!sku) {
-    sku = generateSKU(kat, pSupplierName, products);
+    sku = generateSKU(kat, pSupplierName, products, name);
     document.getElementById("pSku").value = sku;
   }
 
@@ -878,28 +878,6 @@ function addProduct(){
 }
 
 /* ================= DELETE PRODUCT (IDB) ================= */
-function deleteEditedProduct() {
-  if(!window._editingProductId) {
-    showToast("Pilih produk dari daftar di bawah untuk dihapus");
-    return;
-  }
-  const id = window._editingProductId;
-  if(!confirm("Hapus produk yang sedang diedit ini?")) return;
-
-  const products = getProducts().filter(p=>(p.i||p.id) !== id && String(p.i||p.id) !== String(id));
-  saveProducts(products); // sync + IDB background
-  if(window.Core && Core.idbDelete){
-    Core.idbDelete("products", id).catch(()=>{});
-  }
-  invalidateProductCache();
-  renderOwnerProdukList();
-  if(window.App) App.renderFull();
-
-  clearProductForm();
-  window._editingProductId = null;
-  showToast("✅ Produk dihapus");
-}
-
 function deleteProduct(id){
   if(!confirm("Hapus produk ini?")) return;
   const products = getProducts().filter(p=>(p.i||p.id) !== id);
@@ -1590,6 +1568,80 @@ function checkTierAndMenus(){
 }
 
 
+
+// ================= SATUAN CRUD =================
+function renderSatuanSelect() {
+  let list = ["pcs", "kg", "liter", "box", "pack", "botol"];
+  try {
+    const saved = localStorage.getItem("satuanList");
+    if (saved) list = JSON.parse(saved);
+  } catch (e) {}
+
+  const sel = document.getElementById("pSatuan");
+  if (!sel) return;
+  const currentVal = sel.value;
+  sel.innerHTML = list.map(s => `<option value="${window.escapeHTML(s)}">${window.escapeHTML(s)}</option>`).join('');
+  if (list.includes(currentVal)) sel.value = currentVal;
+}
+
+window.openSatuanModal = openSatuanModal;
+function openSatuanModal() {
+  document.getElementById("satuanModal").style.display = "flex";
+  renderSatuanList();
+}
+
+function renderSatuanList() {
+  let list = ["pcs", "kg", "liter", "box", "pack", "botol"];
+  try {
+    const saved = localStorage.getItem("satuanList");
+    if (saved) list = JSON.parse(saved);
+  } catch (e) {}
+
+  const el = document.getElementById("satuanList");
+  if (!el) return;
+  el.innerHTML = list.map((s, idx) =>
+    `<div style="display:flex; justify-content:space-between; padding:8px; background:var(--surface2); border-radius:6px;">
+      <span>${window.escapeHTML(s)}</span>
+      <button onclick="Admin.deleteSatuan(${idx})" style="background:transparent; border:none; color:var(--danger); cursor:pointer;">🗑️</button>
+    </div>`
+  ).join('');
+}
+
+function addSatuan() {
+  const input = document.getElementById("newSatuanInput");
+  const val = (input.value || "").trim().toLowerCase();
+  if (!val) return;
+
+  let list = ["pcs", "kg", "liter", "box", "pack", "botol"];
+  try {
+    const saved = localStorage.getItem("satuanList");
+    if (saved) list = JSON.parse(saved);
+  } catch (e) {}
+
+  if (!list.includes(val)) {
+    list.push(val);
+    localStorage.setItem("satuanList", JSON.stringify(list));
+    renderSatuanSelect();
+    renderSatuanList();
+    input.value = "";
+  } else {
+    showToast("Satuan sudah ada");
+  }
+}
+
+function deleteSatuan(idx) {
+  let list = ["pcs", "kg", "liter", "box", "pack", "botol"];
+  try {
+    const saved = localStorage.getItem("satuanList");
+    if (saved) list = JSON.parse(saved);
+  } catch (e) {}
+
+  list.splice(idx, 1);
+  localStorage.setItem("satuanList", JSON.stringify(list));
+  renderSatuanSelect();
+  renderSatuanList();
+}
+
 function initAdmin(){
   checkTierAndMenus();
   initStore();
@@ -1600,8 +1652,9 @@ function initAdmin(){
   renderLicenseUI();
   loadPromoEditor();
   _initAdminKeyboard();  // ⭐ keyboard ENTER flow
+  renderSatuanSelect();
   loadHeroOverlaySettings();
-
+  renderKategoriChipAdmin();
   renderKasirList();
   if(window.App && App.renderOwnerKategoriSelect) App.renderOwnerKategoriSelect();
 
@@ -1884,8 +1937,18 @@ function deleteSelectedKategori(){
   cats = cats.filter(c => c !== kat);
   localStorage.setItem("kategoriList", JSON.stringify(cats));
   if(window.App && App.renderOwnerKategoriSelect) App.renderOwnerKategoriSelect();
-
+  renderKategoriChipAdmin();
   showToast("🗑️ Kategori dihapus");
+}
+
+function renderKategoriChipAdmin(){
+  const el = document.getElementById("kategoriChipAdmin"); if(!el) return;
+  let cats = [];
+  try{ cats = JSON.parse(localStorage.getItem("kategoriList")||"[]"); }catch(e){}
+  if(!cats.length){ el.innerHTML = '<span style="color:var(--text3);font-size:12px">Belum ada kategori</span>'; return; }
+  el.innerHTML = cats.map(c =>
+    `<div style="background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;">${c}</div>`
+  ).join('');
 }
 
 function adjustStok(delta){
@@ -2055,9 +2118,9 @@ function renderTable(){
       return `<tr>
         <td><b>${s.nama}</b></td>
         <td>${s.terjual}</td>
-        <td>${s.supplierName}</td>
-        <td>${s.supplierWA}</td>
-        <td>${s.supplierAlamat}</td>
+        <td style="cursor:pointer; color:var(--accent); text-decoration:underline;" onclick="alert('Nama: ' + '${window.escapeHTML(s.supplierName||'-')}' + '\nWA: ' + '${window.escapeHTML(s.supplierWA||'-')}' + '\nAlamat: ' + '${window.escapeHTML(s.supplierAlamat||'-')}')">${window.escapeHTML(s.supplierName||'-')}</td>
+        <td style="display:none;">${window.escapeHTML(s.supplierWA||'-')}</td>
+        <td style="display:none;">${window.escapeHTML(s.supplierAlamat||'-')}</td>
         <td>${stokStr}</td>
         <td>${rp(modalAvg)}</td>
         <td>${rp(s.omzet)}</td>
@@ -2427,7 +2490,7 @@ function loadHeroOverlaySettings(){
 window.Admin = {
   saveToko, savePin, saveMargin,
   saveKasirPin,
-  addProduct, deleteProduct, deleteEditedProduct, generateAndSetSKU,
+  addProduct, deleteProduct, generateAndSetSKU,
   savePromo, doBackup, importData, resetData,
   saveAccSettings, clearTransaksi,
   renderAkuntansi, generateInvoiceId, getAccSettings,
@@ -2442,12 +2505,13 @@ window.Admin = {
   renderTable, renderTxListTable, renderPelangganList, renderHistory, setTableSort,
   showTxDetail, updateTxStatus, updateProductStatus, hapusSeluruhData, showHistoryPelanggan,
   applyHeroOverlay, loadHeroOverlaySettings,
-
+  renderKategoriChipAdmin,
   // Kasir
   addKasir, deleteKasir, renderKasirList,
   // Product inline edit
   _editProductPrice, _adjustProductStok, _changeProductImg, _editProductForm,
   filterProdukAdmin,
+  addSatuan, deleteSatuan,
   _updateExistingProduct,
   _restoreStockForTx
 };
