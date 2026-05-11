@@ -165,7 +165,7 @@ function showTab(id, btn){
   if(id==="tabTable")     { renderTable(); renderPelangganList(); }
   if(id==="tabHistory")   renderHistory();
   if(id==="tabPelanggan") renderPelangganList();
-  if(id==="tabProduk")    renderKategoriChipAdmin();
+
   if(id==="tabToko")      renderKasirList();
 }
 
@@ -228,7 +228,7 @@ function compressImage(file, callback){
 function autoHargaJual(){
   const modal = +document.getElementById("pModal").value;
   if(!modal) return;
-  const margin = +(localStorage.getItem("defaultMargin")||"30");
+  const margin = +(document.getElementById("defaultMargin")?.value || "20");
   document.getElementById("pPrice").value = Math.round(modal * (1 + margin/100));
 }
 
@@ -677,6 +677,8 @@ function _updateExistingProduct(id){
   const idx = products.findIndex(p => String(p.i!==undefined?p.i:p.id) === String(id));
   if(idx < 0){ showToast("Produk tidak ditemukan"); return; }
   const name  = (document.getElementById("pName")?.value||"").trim();
+  const brand = document.getElementById("pBrand")?.value.trim();
+  const barcode = document.getElementById("pBarcode")?.value.trim();
   const satuan = document.getElementById("pSatuan")?.value||"pcs";
   const modal = +(document.getElementById("pModal")?.value||0);
   const price = +(document.getElementById("pPrice")?.value||0);
@@ -688,18 +690,19 @@ function _updateExistingProduct(id){
   let pSupplierName = document.getElementById("pSupplierName")?.value||"";
   let pSupplierWA = document.getElementById("pSupplierWA")?.value||"";
   let pSupplierAlamat = document.getElementById("pSupplierAlamat")?.value||"";
-  let sku = ((document.getElementById("pSku1")?.value||"") + "-" + (document.getElementById("pSku2")?.value||"") + "-" + (document.getElementById("pSku3")?.value||"")).trim().toUpperCase();
-  if (sku === "--") sku = "";
-  if(!sku) { sku = generateSKU(kat, pSupplierName, products, name); }
+  let sku = (document.getElementById("pSku")?.value || "").trim().toUpperCase();
+  if(!sku) { sku = generateSKU(kat, brand, products, name); document.getElementById("pSku").value = sku; }
   const duplicate = products.find((p, i) => i !== idx && p.sku === sku);
   if(duplicate) {
      showToast("❌ SKU sudah digunakan produk lain!");
-     document.getElementById("pSku1")?.focus();
+     document.getElementById("pSku")?.focus();
      return;
   }
   if(!name){ showToast("Nama produk wajib diisi"); return; }
   if(price <= 0){ showToast("Harga jual harus > 0"); return; }
   if(products[idx].n !== undefined) products[idx].n = name; else products[idx].name = name;
+  products[idx].brand = brand;
+  products[idx].barcode = barcode;
   products[idx].satuan = satuan;
   if(products[idx].p !== undefined) products[idx].p = price; else products[idx].price = price;
   if(products[idx].m !== undefined) products[idx].m = modal; else products[idx].modal = modal;
@@ -727,6 +730,7 @@ function _updateExistingProduct(id){
   clearProductForm && clearProductForm();
   window._editingProductId = null;
   showToast("✅ Produk diperbarui!");
+  closeProductModal();
 }
 
 
@@ -758,16 +762,13 @@ function generateSKU(kategori, supplier, existingProducts) {
 }
 
 function generateAndSetSKU() {
-    const kat = document.getElementById("pKategori")?.value || "";
-    const sup = document.getElementById("pSupplierName")?.value || "";
+    let kat = document.getElementById("pKatBaru")?.value.trim();
+    if(!kat) kat = document.getElementById("pKategori")?.value || "";
+    const name = document.getElementById("pName")?.value || "";
+    const brand = document.getElementById("pBrand")?.value || "";
     const products = getProducts();
-    const newSku = generateSKU(kat, sup, products, document.getElementById("pName")?.value || "");
-    const parts = newSku.split("-");
-    if(parts.length===3) {
-      document.getElementById("pSku1").value = parts[0];
-      document.getElementById("pSku2").value = parts[1];
-      document.getElementById("pSku3").value = parts[2];
-    }
+    const newSku = generateSKU(kat, brand, products, name);
+    document.getElementById("pSku").value = newSku;
 }
 window.generateAndSetSKU = generateAndSetSKU;
 
@@ -793,8 +794,7 @@ function addProduct(){
   let pSupplierName = document.getElementById("pSupplierName")?.value||"";
   let pSupplierWA = document.getElementById("pSupplierWA")?.value||"";
   let pSupplierAlamat = document.getElementById("pSupplierAlamat")?.value||"";
-  let sku = ((document.getElementById("pSku1")?.value||"") + "-" + (document.getElementById("pSku2")?.value||"") + "-" + (document.getElementById("pSku3")?.value||"")).trim().toUpperCase();
-  if (sku === "--") sku = "";
+  let sku = (document.getElementById("pSku")?.value || "").trim().toUpperCase();
   const imgEl = document.getElementById("pImgPrev")?.querySelector("img");
   const img   = imgEl ? imgEl.src : "";
   const thumb = imgEl ? imgEl.dataset.thumb : "";
@@ -810,14 +810,14 @@ function addProduct(){
   }
 
   if(!sku) {
-    sku = generateSKU(kat, pSupplierName, products, name);
+    sku = generateSKU(kat, brand, products, name);
     document.getElementById("pSku").value = sku;
   }
 
   // duplicate check
   if(products.find(p => p.sku === sku)) {
      showToast("❌ SKU sudah ada! Gunakan SKU lain.");
-     document.getElementById("pSku1")?.focus();
+     document.getElementById("pSku")?.focus();
      return;
   }
   if(!name){
@@ -838,7 +838,7 @@ function addProduct(){
   }
   const minStok = +(document.getElementById("pMinStok")?.value) || 10;
   const satuan = document.getElementById("pSatuan")?.value || "pcs";
-  const newProduct = { i: Date.now(), n: name, p: price, m: modal, k: kat, g: img, thumb: thumb, sku: sku, stok: stok, minStok: minStok, satuan: satuan, sumber: sumber, tempo: tempo, supplierName: pSupplierName, supplierWA: pSupplierWA, supplierAlamat: pSupplierAlamat };
+  const newProduct = { i: Date.now(), n: name, brand: brand, barcode: barcode, p: price, m: modal, k: kat, g: img, thumb: thumb, sku: sku, stok: stok, minStok: minStok, satuan: satuan, sumber: sumber, tempo: tempo, supplierName: pSupplierName, supplierWA: pSupplierWA, supplierAlamat: pSupplierAlamat };
 
   function _resetForm(){
     const katEl = document.getElementById("pKategori");
@@ -870,6 +870,7 @@ function addProduct(){
     renderOwnerProdukList();
     if(window.App && window.App.renderFull) App.renderFull();
     _resetForm();
+    closeProductModal();
   }
 
   signProduct(newProduct)
@@ -912,7 +913,8 @@ function sortProdukAdmin(col) {
 
 function filterProdukAdmin(){
   _produkAdminFilter = (document.getElementById("produkSearchAdmin")?.value||"").toLowerCase();
-  _produkAdminFilterType = document.getElementById("produkSearchFilterType")?.value||"all";
+  _produkAdminFilterType = "all";
+  _produkAdminKategoriFilter = document.getElementById("pKategoriFilter")?.value||"all";
   renderOwnerProdukList();
 }
 
@@ -977,21 +979,18 @@ function renderOwnerProdukList(){
   let idx = 0;
 
   if (idx === 0) {
-      container.innerHTML = `<table class="admin-product-table">
-        <thead>
+      container.innerHTML = `<table class="admin-product-table" style="width:100%; border-collapse:collapse; background:#1a202c; border-radius:8px; overflow:hidden;">
+        <thead style="background:#2d3748; color:#a0aec0; font-size:12px; font-weight:normal; text-align:left;">
             <tr>
-                <th onclick="sortProdukAdmin('g')" style="width:50px;">Gambar<div class="table-resizer"></div></th>
-                <th onclick="sortProdukAdmin('k')" style="width:100px;">Kategori<div class="table-resizer"></div></th>
-                <th onclick="sortProdukAdmin('n')" style="width:140px;">Nama<div class="table-resizer"></div></th>
-                <th onclick="sortProdukAdmin('sku')" style="width:100px;">SKU<div class="table-resizer"></div></th>
-                <th onclick="sortProdukAdmin('stok')" style="width:120px;">Stok<div class="table-resizer"></div></th>
-                <th onclick="sortProdukAdmin('m')" style="width:90px;">Modal<div class="table-resizer"></div></th>
-                <th onclick="sortProdukAdmin('p')" style="width:90px;">Jual<div class="table-resizer"></div></th>
-                <th onclick="sortProdukAdmin('sumber')" style="width:80px;">Status<div class="table-resizer"></div></th>
-                <th onclick="sortProdukAdmin('tempo')" style="width:80px;">Tempo<div class="table-resizer"></div></th>
-                <th style="width:80px;">Supplier<div class="table-resizer"></div></th>
-                <th style="width:80px;">No WA<div class="table-resizer"></div></th>
-                <th style="width:40px; text-align:center;">Hapus</th>
+                <th style="padding:12px 16px;">Img</th>
+                <th style="padding:12px 16px;">SKU</th>
+                <th onclick="sortProdukAdmin('n')" style="padding:12px 16px; cursor:pointer;">Nama Produk &#8593;</th>
+                <th onclick="sortProdukAdmin('k')" style="padding:12px 16px; cursor:pointer;">Kategori &#8593;</th>
+                <th onclick="sortProdukAdmin('m')" style="padding:12px 16px; cursor:pointer;">H. Modal</th>
+                <th onclick="sortProdukAdmin('p')" style="padding:12px 16px; cursor:pointer;">H. Jual &#8593;</th>
+                <th onclick="sortProdukAdmin('stok')" style="padding:12px 16px; cursor:pointer;">Stok &#8593;</th>
+                <th style="padding:12px 16px;">Status</th>
+                <th style="padding:12px 16px;">Aksi</th>
             </tr>
         </thead>
         <tbody id="adminTableBody"></tbody>
@@ -1096,6 +1095,7 @@ function renderOwnerProdukList(){
 
   // clear fragment
 
+  const countEl = document.getElementById("produkCountDisplay"); if(countEl) countEl.textContent = products.length + " produk";
   if(idx < products.length){
     requestAnimationFrame(renderChunk);
   }
@@ -1654,7 +1654,7 @@ function initAdmin(){
   _initAdminKeyboard();  // ⭐ keyboard ENTER flow
   renderSatuanSelect();
   loadHeroOverlaySettings();
-  renderKategoriChipAdmin();
+
   renderKasirList();
   if(window.App && App.renderOwnerKategoriSelect) App.renderOwnerKategoriSelect();
 
@@ -1878,6 +1878,20 @@ function _changeProductImg(id){
   input.click();
 }
 
+
+window.openProductModal = openProductModal;
+window.closeProductModal = closeProductModal;
+
+function openProductModal() {
+  document.getElementById("productModal").style.display = "flex";
+  document.getElementById("productModalTitle").textContent = window._editingProductId ? "Edit Produk" : "Tambah Produk Baru";
+}
+
+function closeProductModal() {
+  document.getElementById("productModal").style.display = "none";
+  clearProductForm();
+}
+
 function _editProductForm(id){
   const products = getProducts();
   const p = products.find(px => String(px.i||px.id) === String(id));
@@ -1885,44 +1899,47 @@ function _editProductForm(id){
   // Populate form fields
   const set = (elId, val) => { const el = document.getElementById(elId); if(el) el.value = val; };
   set("pName",  p.n||p.name||"");
+  set("pBrand", p.brand||"");
+  set("pBarcode", p.barcode||"");
   set("pSatuan", p.satuan||"pcs");
-  const skuVal = p.sku||"";
-  const parts = skuVal.split("-");
-  if(parts.length===3){
-    set("pSku1", parts[0]); set("pSku2", parts[1]); set("pSku3", parts[2]);
-  } else {
-    set("pSku1", ""); set("pSku2", ""); set("pSku3", "");
-  }
+  set("pSku", p.sku||"");
   set("pModal", p.m||p.modal||0);
   set("pPrice", p.p||p.price||0);
   set("pStok",  p.stok !== undefined ? p.stok : "");
   set("pMinStok", p.minStok !== undefined ? p.minStok : 10);
 
-  // Scroll ke form
-  document.getElementById("pName")?.scrollIntoView({ behavior: "smooth", block: "center" });
-  // Sumber & Tempo
-  set("pSumber", p.sumber || "Cash");
-  set("pTempo", p.tempo || "");
-  set("pSupplierName", p.supplierName || "");
-  set("pSupplierWA", p.supplierWA || "");
-  set("pSupplierAlamat", p.supplierAlamat || "");
-  const wrap = document.getElementById("pTempoWrap");
-  if(wrap) wrap.style.display = (p.sumber==="Hutang" || p.sumber==="Titip Jual") ? "block" : "none";
+  // Calculate margin
+  const m = p.m||p.modal||0;
+  const pr = p.p||p.price||0;
+  if(m > 0) {
+     set("defaultMargin", Math.round(((pr - m) / m) * 100));
+  } else {
+     set("defaultMargin", "20");
+  }
 
   // Kategori
   const katSel = document.getElementById("pKategori");
   if(katSel && (p.k||p.kategori)){
     katSel.value = p.k||p.kategori;
   }
+  set("pKatBaru", "");
+
   // Preview img
   const prev = document.getElementById("pImgPrev");
   const imgVal = p.g||p.img||"";
-  if(prev && imgVal) prev.innerHTML = `<img src="${imgVal}" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px">`;
+  if(prev && imgVal) {
+    prev.innerHTML = `<img src="${imgVal}" style="height:24px; border-radius:4px;" data-thumb="${p.thumb||""}">`;
+    prev.style.display = 'block';
+    document.getElementById("pImgText").textContent = "Gambar Tersimpan";
+  } else {
+    prev.innerHTML = '';
+    prev.style.display = 'none';
+    document.getElementById("pImgText").textContent = "No file chosen";
+  }
+
   // Store editing id
   window._editingProductId = String(id);
-  showToast("✏️ Edit produk loaded — ubah lalu Simpan");
-  // Scroll to form
-  document.getElementById("pName")?.scrollIntoView({ behavior:"smooth", block:"center" });
+  openProductModal();
 }
 
 
@@ -1937,18 +1954,8 @@ function deleteSelectedKategori(){
   cats = cats.filter(c => c !== kat);
   localStorage.setItem("kategoriList", JSON.stringify(cats));
   if(window.App && App.renderOwnerKategoriSelect) App.renderOwnerKategoriSelect();
-  renderKategoriChipAdmin();
-  showToast("🗑️ Kategori dihapus");
-}
 
-function renderKategoriChipAdmin(){
-  const el = document.getElementById("kategoriChipAdmin"); if(!el) return;
-  let cats = [];
-  try{ cats = JSON.parse(localStorage.getItem("kategoriList")||"[]"); }catch(e){}
-  if(!cats.length){ el.innerHTML = '<span style="color:var(--text3);font-size:12px">Belum ada kategori</span>'; return; }
-  el.innerHTML = cats.map(c =>
-    `<div style="background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;">${c}</div>`
-  ).join('');
+  showToast("🗑️ Kategori dihapus");
 }
 
 function adjustStok(delta){
@@ -1959,13 +1966,12 @@ function adjustStok(delta){
 }
 
 function clearProductForm(){
-  ["pName","pModal","pPrice","pStok","pTempo","pSupplierName","pSupplierWA","pSupplierAlamat","pSku1","pSku2","pSku3"].forEach(id=>{
+  ["pName","pBrand","pKatBaru","pBarcode","pModal","pPrice","pStok","pMinStok","pSku"].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value="";
   });
-  const elS = document.getElementById("pSumber"); if(elS) elS.value="Cash";
-  const wT = document.getElementById("pTempoWrap"); if(wT) wT.style.display="none";
-  document.getElementById("pImgPrev").innerHTML = '<span>📷 Klik upload foto</span>';
-  // Keep kategori as last selected
+  document.getElementById("pImgPrev").innerHTML = '';
+  document.getElementById("pImgPrev").style.display = 'none';
+  document.getElementById("pImgText").textContent = 'No file chosen';
 }
 
 /* ================= TABLE TAB ================= */
@@ -2505,12 +2511,13 @@ window.Admin = {
   renderTable, renderTxListTable, renderPelangganList, renderHistory, setTableSort,
   showTxDetail, updateTxStatus, updateProductStatus, hapusSeluruhData, showHistoryPelanggan,
   applyHeroOverlay, loadHeroOverlaySettings,
-  renderKategoriChipAdmin,
+
   // Kasir
   addKasir, deleteKasir, renderKasirList,
   // Product inline edit
   _editProductPrice, _adjustProductStok, _changeProductImg, _editProductForm,
   filterProdukAdmin,
+  openProductModal, closeProductModal,
   addSatuan, deleteSatuan,
   _updateExistingProduct,
   _restoreStockForTx

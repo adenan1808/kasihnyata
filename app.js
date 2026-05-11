@@ -1518,11 +1518,19 @@ function getKategoriList(){
 }
 
 function renderOwnerKategoriSelect(selected=""){
-  const sel=document.getElementById("pKategori"); if(!sel) return;
+  const sel=document.getElementById("pKategori");
+  const filterSel=document.getElementById("pKategoriFilter");
   const list=getKategoriList();
-  const current=selected||sel.value||"";
-  sel.innerHTML='<option value="">Pilih kategori...</option>'+list.map(k=>`<option value="${window.escapeHTML(k)}">${window.escapeHTML(k)}</option>`).join("");
-  if(current&&list.includes(current)) sel.value=current;
+  if(sel) {
+    const current=selected||sel.value||"";
+    sel.innerHTML='<option value="">Pilih kategori...</option>'+list.map(k=>`<option value="${window.escapeHTML(k)}">${window.escapeHTML(k)}</option>`).join("");
+    if(current&&list.includes(current)) sel.value=current;
+  }
+  if(filterSel) {
+    const currentFilter=filterSel.value||"all";
+    filterSel.innerHTML='<option value="all">Semua Kategori</option>'+list.map(k=>`<option value="${window.escapeHTML(k)}">${window.escapeHTML(k)}</option>`).join("");
+    if(list.includes(currentFilter)) filterSel.value=currentFilter;
+  }
 }
 
 function openTambahKategoriModal(){
