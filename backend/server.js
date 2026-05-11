@@ -19,7 +19,11 @@ app.use('/uploads/products', express.static(UPLOADS_DIR));
 
 // Configure multer
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+// Add file size limit to prevent DoS via large uploads (e.g. 5MB)
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB max
+});
 
 app.post('/api/upload', upload.single('image'), async (req, res) => {
   if (!req.file) {

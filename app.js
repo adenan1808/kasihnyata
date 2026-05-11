@@ -1041,7 +1041,7 @@ function _updateProductCards(){
       if(qty>0){
         qtyWrap.innerHTML=`<div class="stepper-row"><button class="stepper-btn stepper-min qty-btn" data-id="${id}" data-delta="-1">-</button><span class="stepper-num">${qty}</span><button class="stepper-btn stepper-plus qty-btn" data-id="${id}" data-delta="1">+</button></div>`;
       } else {
-        qtyWrap.innerHTML=`<button class="buyer-add-btn qty-btn" data-id="${id}" data-delta="1">+</button>`;
+        qtyWrap.innerHTML=`<button class="buyer-add-btn qty-btn" data-id="${id}" data-delta="1" style="display:block; width:100%; border-radius:6px; font-weight:bold; padding:8px 0; background:var(--accent); color:#1e293b;">+</button>`;
       }
     }
   });
@@ -1085,7 +1085,7 @@ function _productCardHTML(p){
         </div>
        </div>`
     : `<div class="product-card-qty">
-        <button class="buyer-add-btn qty-btn" data-id="${id}" data-delta="1">+</button>
+        <button class="buyer-add-btn qty-btn" data-id="${id}" data-delta="1" style="display:block; width:100%; border-radius:6px; font-weight:bold; padding:8px 0; background:var(--accent); color:#1e293b;">+</button>
        </div>`;
 
   const stokRaw = p.stok;
@@ -1093,7 +1093,7 @@ function _productCardHTML(p){
   const minStokLimit = p.minStok !== undefined ? p.minStok : 10;
   const stokHtml = stok !== undefined
     ? stok <= 0
-      ? `<div class="product-card-stok habis">❌ Habis</div>`
+      ? `<div class="product-card-stok habis" style="position:absolute; top:-6px; right:-6px; background:#dc2626; color:white; padding:4px 8px; border-radius:6px; font-weight:bold; transform:rotate(15deg); border:2px solid white; z-index:10; font-size:12px; box-shadow:0 2px 4px rgba(0,0,0,0.3);">HABIS</div>`
       : stok <= minStokLimit
         ? `<div class="product-card-stok low">⚠️ Stok: ${stok}</div>`
         : `<div class="product-card-stok">Stok: ${stok}</div>`
@@ -1109,19 +1109,18 @@ function _productCardHTML(p){
 
   return `
     <div class="product-card" data-id="${id}" ${stok<=0?'style="opacity:.6"':''}>
-      <div class="product-card-img-wrap" style="position:relative;">
+      <div class="product-card-img-wrap">
         ${imgHtml}
-        ${diskon?`<span class="badge-diskon" style="position:absolute; bottom:4px; right:4px;">-${diskon}%</span>`:""}
+        ${diskon?`<span class="badge-diskon">-${diskon}%</span>`:""}
         ${qty>0?`<span class="badge-qty-cart">${qty}</span>`:""}
-        ${stok<=0?`<div class="product-card-stok habis" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%) rotate(-30deg); background:rgba(220,38,38,0.9); color:white; padding:4px 12px; border-radius:6px; font-weight:900; font-size:16px; letter-spacing:1px; z-index:10; white-space:nowrap; border:2px solid #fff;">HABIS</div>` : ''}
       </div>
       <div class="product-card-body">
         <div class="product-card-kat">${kat}</div>
         <div class="product-card-name">${name}</div>
-        <div style="font-size: 10px; color: var(--text3); margin-top:-2px;">${window.escapeHTML(p.sku || 'SKU_AUTO_GEN')}</div>
-        <div class="product-card-price" style="margin-top:2px;">Rp ${harga.toLocaleString("id")}<span style="font-size:9px; color:var(--text3); font-weight:normal;">/${p.satuan||'pcs'}</span></div>
-        ${diskon?`<div class="product-card-ori" style="margin-top:-2px;">Rp ${price.toLocaleString("id")}</div>`:""}
-        ${stok>0 ? stokHtml : ''}
+        ${p.sku ? `<div style="font-size: 10px; color: var(--text3);">${window.escapeHTML(p.sku)}</div>` : ""}
+        <div class="product-card-price">Rp ${harga.toLocaleString("id")}<span style="font-size:9px; color:var(--text3); font-weight:normal;">/${p.satuan||'pcs'}</span></div>
+        ${diskon?`<div class="product-card-ori">Rp ${price.toLocaleString("id")}</div>`:""}
+        ${stokHtml}
         ${qtyControls}
       </div>
     </div>`;
@@ -1518,19 +1517,11 @@ function getKategoriList(){
 }
 
 function renderOwnerKategoriSelect(selected=""){
-  const sel=document.getElementById("pKategori");
-  const filterSel=document.getElementById("pKategoriFilter");
+  const sel=document.getElementById("pKategori"); if(!sel) return;
   const list=getKategoriList();
-  if(sel) {
-    const current=selected||sel.value||"";
-    sel.innerHTML='<option value="">Pilih kategori...</option>'+list.map(k=>`<option value="${window.escapeHTML(k)}">${window.escapeHTML(k)}</option>`).join("");
-    if(current&&list.includes(current)) sel.value=current;
-  }
-  if(filterSel) {
-    const currentFilter=filterSel.value||"all";
-    filterSel.innerHTML='<option value="all">Semua Kategori</option>'+list.map(k=>`<option value="${window.escapeHTML(k)}">${window.escapeHTML(k)}</option>`).join("");
-    if(list.includes(currentFilter)) filterSel.value=currentFilter;
-  }
+  const current=selected||sel.value||"";
+  sel.innerHTML='<option value="">Pilih kategori...</option>'+list.map(k=>`<option value="${window.escapeHTML(k)}">${window.escapeHTML(k)}</option>`).join("");
+  if(current&&list.includes(current)) sel.value=current;
 }
 
 function openTambahKategoriModal(){
@@ -1797,7 +1788,7 @@ async function _posRenderGrid(){
     const minStokLimit = p.minStok !== undefined ? p.minStok : 10;
     const stokHtml = stokNum !== null
       ? stokNum <= 0
-        ? `<div class="pos-card-stok habis" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%) rotate(-30deg); background:rgba(220,38,38,0.9); color:white; padding:4px 12px; border-radius:6px; font-weight:900; font-size:16px; letter-spacing:1px; z-index:10; white-space:nowrap; border:2px solid #fff;">HABIS</div>`
+        ? `<div class="pos-card-stok habis" style="position:absolute; top:-6px; right:-6px; background:#dc2626; color:white; padding:4px 8px; border-radius:6px; font-weight:bold; transform:rotate(15deg); border:2px solid white; z-index:10; font-size:12px; box-shadow:0 2px 4px rgba(0,0,0,0.3);">HABIS</div>`
         : stokNum <= minStokLimit
           ? `<div class=\"pos-card-stok low\">⚠️ ${stokNum}</div>`
           : `<div class="pos-card-stok ok">Stok ${stokNum}</div>`

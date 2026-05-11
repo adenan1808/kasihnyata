@@ -175,7 +175,9 @@ async function uploadToBackend(file) {
     const formData = new FormData();
     formData.append('image', file);
     try {
-        const res = await fetch('http://localhost:3000/api/upload', {
+        // Use relative URL or fallback to localhost if running directly from file://
+        const uploadUrl = window.location.protocol === 'file:' ? 'http://localhost:3000/api/upload' : '/api/upload';
+        const res = await fetch(uploadUrl, {
             method: 'POST',
             body: formData
         });
@@ -228,7 +230,7 @@ function compressImage(file, callback){
 function autoHargaJual(){
   const modal = +document.getElementById("pModal").value;
   if(!modal) return;
-  const margin = +(document.getElementById("defaultMargin")?.value || "20");
+  const margin = +(localStorage.getItem("defaultMargin")||"30");
   document.getElementById("pPrice").value = Math.round(modal * (1 + margin/100));
 }
 
@@ -677,8 +679,6 @@ function _updateExistingProduct(id){
   const idx = products.findIndex(p => String(p.i!==undefined?p.i:p.id) === String(id));
   if(idx < 0){ showToast("Produk tidak ditemukan"); return; }
   const name  = (document.getElementById("pName")?.value||"").trim();
-  const brand = document.getElementById("pBrand")?.value.trim();
-  const barcode = document.getElementById("pBarcode")?.value.trim();
   const satuan = document.getElementById("pSatuan")?.value||"pcs";
   const modal = +(document.getElementById("pModal")?.value||0);
   const price = +(document.getElementById("pPrice")?.value||0);
@@ -690,19 +690,18 @@ function _updateExistingProduct(id){
   let pSupplierName = document.getElementById("pSupplierName")?.value||"";
   let pSupplierWA = document.getElementById("pSupplierWA")?.value||"";
   let pSupplierAlamat = document.getElementById("pSupplierAlamat")?.value||"";
-  let sku = (document.getElementById("pSku")?.value || "").trim().toUpperCase();
-  if(!sku) { sku = generateSKU(kat, brand, products, name); document.getElementById("pSku").value = sku; }
+  let sku = ((document.getElementById("pSku1")?.value||"") + "-" + (document.getElementById("pSku2")?.value||"") + "-" + (document.getElementById("pSku3")?.value||"")).trim().toUpperCase();
+  if (sku === "--") sku = "";
+  if(!sku) { sku = generateSKU(kat, pSupplierName, products); }
   const duplicate = products.find((p, i) => i !== idx && p.sku === sku);
   if(duplicate) {
      showToast("❌ SKU sudah digunakan produk lain!");
-     document.getElementById("pSku")?.focus();
+     document.getElementById("pSku1")?.focus();
      return;
   }
   if(!name){ showToast("Nama produk wajib diisi"); return; }
   if(price <= 0){ showToast("Harga jual harus > 0"); return; }
   if(products[idx].n !== undefined) products[idx].n = name; else products[idx].name = name;
-  products[idx].brand = brand;
-  products[idx].barcode = barcode;
   products[idx].satuan = satuan;
   if(products[idx].p !== undefined) products[idx].p = price; else products[idx].price = price;
   if(products[idx].m !== undefined) products[idx].m = modal; else products[idx].modal = modal;
@@ -730,7 +729,6 @@ function _updateExistingProduct(id){
   clearProductForm && clearProductForm();
   window._editingProductId = null;
   showToast("✅ Produk diperbarui!");
-  closeProductModal();
 }
 
 
@@ -762,13 +760,16 @@ function generateSKU(kategori, supplier, existingProducts) {
 }
 
 function generateAndSetSKU() {
-    let kat = document.getElementById("pKatBaru")?.value.trim();
-    if(!kat) kat = document.getElementById("pKategori")?.value || "";
-    const name = document.getElementById("pName")?.value || "";
-    const brand = document.getElementById("pBrand")?.value || "";
+    const kat = document.getElementById("pKategori")?.value || "";
+    const sup = document.getElementById("pSupplierName")?.value || "";
     const products = getProducts();
-    const newSku = generateSKU(kat, brand, products, name);
-    document.getElementById("pSku").value = newSku;
+    const newSku = generateSKU(kat, sup, products);
+    const parts = newSku.split("-");
+    if(parts.length===3) {
+      document.getElementById("pSku1").value = parts[0];
+      document.getElementById("pSku2").value = parts[1];
+      document.getElementById("pSku3").value = parts[2];
+    }
 }
 window.generateAndSetSKU = generateAndSetSKU;
 
@@ -794,7 +795,8 @@ function addProduct(){
   let pSupplierName = document.getElementById("pSupplierName")?.value||"";
   let pSupplierWA = document.getElementById("pSupplierWA")?.value||"";
   let pSupplierAlamat = document.getElementById("pSupplierAlamat")?.value||"";
-  let sku = (document.getElementById("pSku")?.value || "").trim().toUpperCase();
+  let sku = ((document.getElementById("pSku1")?.value||"") + "-" + (document.getElementById("pSku2")?.value||"") + "-" + (document.getElementById("pSku3")?.value||"")).trim().toUpperCase();
+  if (sku === "--") sku = "";
   const imgEl = document.getElementById("pImgPrev")?.querySelector("img");
   const img   = imgEl ? imgEl.src : "";
   const thumb = imgEl ? imgEl.dataset.thumb : "";
@@ -810,14 +812,14 @@ function addProduct(){
   }
 
   if(!sku) {
-    sku = generateSKU(kat, brand, products, name);
+    sku = generateSKU(kat, pSupplierName, products);
     document.getElementById("pSku").value = sku;
   }
 
   // duplicate check
   if(products.find(p => p.sku === sku)) {
      showToast("❌ SKU sudah ada! Gunakan SKU lain.");
-     document.getElementById("pSku")?.focus();
+     document.getElementById("pSku1")?.focus();
      return;
   }
   if(!name){
@@ -838,7 +840,7 @@ function addProduct(){
   }
   const minStok = +(document.getElementById("pMinStok")?.value) || 10;
   const satuan = document.getElementById("pSatuan")?.value || "pcs";
-  const newProduct = { i: Date.now(), n: name, brand: brand, barcode: barcode, p: price, m: modal, k: kat, g: img, thumb: thumb, sku: sku, stok: stok, minStok: minStok, satuan: satuan, sumber: sumber, tempo: tempo, supplierName: pSupplierName, supplierWA: pSupplierWA, supplierAlamat: pSupplierAlamat };
+  const newProduct = { i: Date.now(), n: name, p: price, m: modal, k: kat, g: img, thumb: thumb, sku: sku, stok: stok, minStok: minStok, satuan: satuan, sumber: sumber, tempo: tempo, supplierName: pSupplierName, supplierWA: pSupplierWA, supplierAlamat: pSupplierAlamat };
 
   function _resetForm(){
     const katEl = document.getElementById("pKategori");
@@ -870,7 +872,6 @@ function addProduct(){
     renderOwnerProdukList();
     if(window.App && window.App.renderFull) App.renderFull();
     _resetForm();
-    closeProductModal();
   }
 
   signProduct(newProduct)
@@ -879,6 +880,28 @@ function addProduct(){
 }
 
 /* ================= DELETE PRODUCT (IDB) ================= */
+function deleteEditedProduct() {
+  if(!window._editingProductId) {
+    showToast("Pilih produk dari daftar di bawah untuk dihapus");
+    return;
+  }
+  const id = window._editingProductId;
+  if(!confirm("Hapus produk yang sedang diedit ini?")) return;
+
+  const products = getProducts().filter(p=>(p.i||p.id) !== id && String(p.i||p.id) !== String(id));
+  saveProducts(products); // sync + IDB background
+  if(window.Core && Core.idbDelete){
+    Core.idbDelete("products", id).catch(()=>{});
+  }
+  invalidateProductCache();
+  renderOwnerProdukList();
+  if(window.App) App.renderFull();
+
+  clearProductForm();
+  window._editingProductId = null;
+  showToast("✅ Produk dihapus");
+}
+
 function deleteProduct(id){
   if(!confirm("Hapus produk ini?")) return;
   const products = getProducts().filter(p=>(p.i||p.id) !== id);
@@ -913,8 +936,7 @@ function sortProdukAdmin(col) {
 
 function filterProdukAdmin(){
   _produkAdminFilter = (document.getElementById("produkSearchAdmin")?.value||"").toLowerCase();
-  _produkAdminFilterType = "all";
-  _produkAdminKategoriFilter = document.getElementById("pKategoriFilter")?.value||"all";
+  _produkAdminFilterType = document.getElementById("produkSearchFilterType")?.value||"all";
   renderOwnerProdukList();
 }
 
@@ -979,18 +1001,20 @@ function renderOwnerProdukList(){
   let idx = 0;
 
   if (idx === 0) {
-      container.innerHTML = `<table class="admin-product-table" style="width:100%; border-collapse:collapse; background:#1a202c; border-radius:8px; overflow:hidden;">
-        <thead style="background:#2d3748; color:#a0aec0; font-size:12px; font-weight:normal; text-align:left;">
+      container.innerHTML = `<table class="admin-product-table">
+        <thead>
             <tr>
-                <th style="padding:12px 16px;">Img</th>
-                <th style="padding:12px 16px;">SKU</th>
-                <th onclick="sortProdukAdmin('n')" style="padding:12px 16px; cursor:pointer;">Nama Produk &#8593;</th>
-                <th onclick="sortProdukAdmin('k')" style="padding:12px 16px; cursor:pointer;">Kategori &#8593;</th>
-                <th onclick="sortProdukAdmin('m')" style="padding:12px 16px; cursor:pointer;">H. Modal</th>
-                <th onclick="sortProdukAdmin('p')" style="padding:12px 16px; cursor:pointer;">H. Jual &#8593;</th>
-                <th onclick="sortProdukAdmin('stok')" style="padding:12px 16px; cursor:pointer;">Stok &#8593;</th>
-                <th style="padding:12px 16px;">Status</th>
-                <th style="padding:12px 16px;">Aksi</th>
+                <th style="width:50px;">Img</th>
+                <th onclick="sortProdukAdmin('sku')" style="width:110px;">SKU<div class="table-resizer"></div></th>
+                <th onclick="sortProdukAdmin('n')" style="width:150px;">Nama Produk<div class="table-resizer"></div></th>
+                <th onclick="sortProdukAdmin('k')" style="width:90px;">Kategori<div class="table-resizer"></div></th>
+                <th onclick="sortProdukAdmin('m')" style="width:80px;">Modal<div class="table-resizer"></div></th>
+                <th onclick="sortProdukAdmin('p')" style="width:80px;">Jual<div class="table-resizer"></div></th>
+                <th onclick="sortProdukAdmin('stok')" style="width:60px;">Stok<div class="table-resizer"></div></th>
+                <th onclick="sortProdukAdmin('sumber')" style="width:70px;">Status<div class="table-resizer"></div></th>
+                <th style="width:100px;">Supplier<div class="table-resizer"></div></th>
+                <th onclick="sortProdukAdmin('tempo')" style="width:80px;">Tempo<div class="table-resizer"></div></th>
+                <th style="width:60px; text-align:center;">Aksi</th>
             </tr>
         </thead>
         <tbody id="adminTableBody"></tbody>
@@ -1095,7 +1119,6 @@ function renderOwnerProdukList(){
 
   // clear fragment
 
-  const countEl = document.getElementById("produkCountDisplay"); if(countEl) countEl.textContent = products.length + " produk";
   if(idx < products.length){
     requestAnimationFrame(renderChunk);
   }
@@ -1625,7 +1648,7 @@ function addSatuan() {
     renderSatuanList();
     input.value = "";
   } else {
-    showToast("Satuan sudah ada");
+    if(window.showToast) window.showToast("Satuan sudah ada");
   }
 }
 
@@ -1641,6 +1664,17 @@ function deleteSatuan(idx) {
   renderSatuanSelect();
   renderSatuanList();
 }
+
+
+function openProductModal() {
+  document.getElementById('productModal').style.display = 'flex';
+}
+function closeProductModal() {
+  document.getElementById('productModal').style.display = 'none';
+  clearProductForm();
+}
+window.Admin.openProductModal = openProductModal;
+window.Admin.closeProductModal = closeProductModal;
 
 function initAdmin(){
   checkTierAndMenus();
@@ -1878,20 +1912,6 @@ function _changeProductImg(id){
   input.click();
 }
 
-
-window.openProductModal = openProductModal;
-window.closeProductModal = closeProductModal;
-
-function openProductModal() {
-  document.getElementById("productModal").style.display = "flex";
-  document.getElementById("productModalTitle").textContent = window._editingProductId ? "Edit Produk" : "Tambah Produk Baru";
-}
-
-function closeProductModal() {
-  document.getElementById("productModal").style.display = "none";
-  clearProductForm();
-}
-
 function _editProductForm(id){
   const products = getProducts();
   const p = products.find(px => String(px.i||px.id) === String(id));
@@ -1899,47 +1919,44 @@ function _editProductForm(id){
   // Populate form fields
   const set = (elId, val) => { const el = document.getElementById(elId); if(el) el.value = val; };
   set("pName",  p.n||p.name||"");
-  set("pBrand", p.brand||"");
-  set("pBarcode", p.barcode||"");
   set("pSatuan", p.satuan||"pcs");
-  set("pSku", p.sku||"");
+  const skuVal = p.sku||"";
+  const parts = skuVal.split("-");
+  if(parts.length===3){
+    set("pSku1", parts[0]); set("pSku2", parts[1]); set("pSku3", parts[2]);
+  } else {
+    set("pSku1", ""); set("pSku2", ""); set("pSku3", "");
+  }
   set("pModal", p.m||p.modal||0);
   set("pPrice", p.p||p.price||0);
   set("pStok",  p.stok !== undefined ? p.stok : "");
   set("pMinStok", p.minStok !== undefined ? p.minStok : 10);
 
-  // Calculate margin
-  const m = p.m||p.modal||0;
-  const pr = p.p||p.price||0;
-  if(m > 0) {
-     set("defaultMargin", Math.round(((pr - m) / m) * 100));
-  } else {
-     set("defaultMargin", "20");
-  }
+  // Scroll ke form
+  document.getElementById("pName")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  // Sumber & Tempo
+  set("pSumber", p.sumber || "Cash");
+  set("pTempo", p.tempo || "");
+  set("pSupplierName", p.supplierName || "");
+  set("pSupplierWA", p.supplierWA || "");
+  set("pSupplierAlamat", p.supplierAlamat || "");
+  const wrap = document.getElementById("pTempoWrap");
+  if(wrap) wrap.style.display = (p.sumber==="Hutang" || p.sumber==="Titip Jual") ? "block" : "none";
 
   // Kategori
   const katSel = document.getElementById("pKategori");
   if(katSel && (p.k||p.kategori)){
     katSel.value = p.k||p.kategori;
   }
-  set("pKatBaru", "");
-
   // Preview img
   const prev = document.getElementById("pImgPrev");
   const imgVal = p.g||p.img||"";
-  if(prev && imgVal) {
-    prev.innerHTML = `<img src="${imgVal}" style="height:24px; border-radius:4px;" data-thumb="${p.thumb||""}">`;
-    prev.style.display = 'block';
-    document.getElementById("pImgText").textContent = "Gambar Tersimpan";
-  } else {
-    prev.innerHTML = '';
-    prev.style.display = 'none';
-    document.getElementById("pImgText").textContent = "No file chosen";
-  }
-
+  if(prev && imgVal) prev.innerHTML = `<img src="${imgVal}" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px">`;
   // Store editing id
   window._editingProductId = String(id);
-  openProductModal();
+  showToast("✏️ Edit produk loaded — ubah lalu Simpan");
+  // Scroll to form
+  document.getElementById("pName")?.scrollIntoView({ behavior:"smooth", block:"center" });
 }
 
 
@@ -1966,12 +1983,13 @@ function adjustStok(delta){
 }
 
 function clearProductForm(){
-  ["pName","pBrand","pKatBaru","pBarcode","pModal","pPrice","pStok","pMinStok","pSku"].forEach(id=>{
+  ["pName","pModal","pPrice","pStok","pTempo","pSupplierName","pSupplierWA","pSupplierAlamat","pSku1","pSku2","pSku3"].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value="";
   });
-  document.getElementById("pImgPrev").innerHTML = '';
-  document.getElementById("pImgPrev").style.display = 'none';
-  document.getElementById("pImgText").textContent = 'No file chosen';
+  const elS = document.getElementById("pSumber"); if(elS) elS.value="Cash";
+  const wT = document.getElementById("pTempoWrap"); if(wT) wT.style.display="none";
+  document.getElementById("pImgPrev").innerHTML = '<span>📷 Klik upload foto</span>';
+  // Keep kategori as last selected
 }
 
 /* ================= TABLE TAB ================= */
@@ -2124,9 +2142,9 @@ function renderTable(){
       return `<tr>
         <td><b>${s.nama}</b></td>
         <td>${s.terjual}</td>
-        <td style="cursor:pointer; color:var(--accent); text-decoration:underline;" onclick="alert('Nama: ' + '${window.escapeHTML(s.supplierName||'-')}' + '\nWA: ' + '${window.escapeHTML(s.supplierWA||'-')}' + '\nAlamat: ' + '${window.escapeHTML(s.supplierAlamat||'-')}')">${window.escapeHTML(s.supplierName||'-')}</td>
-        <td style="display:none;">${window.escapeHTML(s.supplierWA||'-')}</td>
-        <td style="display:none;">${window.escapeHTML(s.supplierAlamat||'-')}</td>
+        <td>${s.supplierName}</td>
+        <td>${s.supplierWA}</td>
+        <td>${s.supplierAlamat}</td>
         <td>${stokStr}</td>
         <td>${rp(modalAvg)}</td>
         <td>${rp(s.omzet)}</td>
@@ -2496,7 +2514,7 @@ function loadHeroOverlaySettings(){
 window.Admin = {
   saveToko, savePin, saveMargin,
   saveKasirPin,
-  addProduct, deleteProduct, generateAndSetSKU,
+  addProduct, deleteProduct, deleteEditedProduct, generateAndSetSKU,
   savePromo, doBackup, importData, resetData,
   saveAccSettings, clearTransaksi,
   renderAkuntansi, generateInvoiceId, getAccSettings,
@@ -2517,7 +2535,6 @@ window.Admin = {
   // Product inline edit
   _editProductPrice, _adjustProductStok, _changeProductImg, _editProductForm,
   filterProdukAdmin,
-  openProductModal, closeProductModal,
   addSatuan, deleteSatuan,
   _updateExistingProduct,
   _restoreStockForTx
