@@ -1075,24 +1075,22 @@ function renderOwnerProdukList(){
 
     tr.innerHTML = `
       <td><img src="${img||"https://placehold.co/44/1e293b/22c55e?text=P"}" loading="lazy" style="width:36px; height:36px; border-radius:4px; object-fit:cover; display:block; margin:auto;" onerror="this.src='https://placehold.co/44/1e293b/22c55e?text=P'"></td>
-      <td><div style="width:100%; overflow:hidden; text-overflow:ellipsis;">${kat}</div></td>
-      <td style="font-weight:bold;" title="${name}"><div style="width:100%; overflow:hidden; text-overflow:ellipsis;">${name}</div></td>
       <td style="font-family:monospace; color:var(--accent);"><div style="width:100%; overflow:hidden; text-overflow:ellipsis;">${skuDisplay}</div></td>
-      <td>
-        <div style="display:flex; gap:2px; align-items:center;">
-          <button class="opir-stok-btn minus" data-id="${id}" title="Kurang stok" style="width:22px; height:22px; font-size:14px; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">−</button>
-          <input type="number" class="opir-stok-input" data-id="${id}" value="${stokNum !== null ? stokNum : 0}" onclick="event.stopPropagation();" style="width: 56px; height:22px; font-size:12px; font-weight:bold; padding:0; text-align: center;">
-          <button class="opir-stok-btn plus" data-id="${id}" title="Tambah stok" style="width:22px; height:22px; font-size:14px; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">+</button>
-        </div>
-      </td>
+      <td style="font-weight:bold;" title="${name}"><div style="width:100%; overflow:hidden; text-overflow:ellipsis;">${name}</div></td>
+      <td><div style="width:100%; overflow:hidden; text-overflow:ellipsis;">${kat}</div></td>
       <td>Rp ${modal.toLocaleString("id")}</td>
       <td style="font-weight:bold; color:var(--text1);">Rp ${price.toLocaleString("id")}<span style="font-size:9px; color:var(--text3); font-weight:normal;">/${satuan}</span></td>
+      <td style="text-align:center; font-weight:bold;">
+        <span class="${stokCls}">${stokNum !== null ? stokNum : 0}</span>
+      </td>
       <td>${statusDisp}</td>
-      <td>${tempoWarning}</td>
       <td title="${p.supplierName||''}"><div style="width:100%; overflow:hidden; text-overflow:ellipsis;">${p.supplierName||'-'}</div></td>
-      <td title="${p.supplierWA||''}"><div style="width:100%; overflow:hidden; text-overflow:ellipsis;">${p.supplierWA||'-'}</div></td>
+      <td>${tempoWarning}</td>
       <td style="text-align:center;">
-        <button class="owner-produk-del" data-id="${id}" title="Hapus produk" style="width: 24px; height: 24px; font-size: 13px; border: none; background: transparent; cursor: pointer; transition: transform 0.1s; margin:auto;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">🗑️</button>
+        <div style="display:flex; gap:4px; align-items:center; justify-content:center;">
+          <button class="opir-edit-btn" data-id="${id}" title="Edit produk" style="background:transparent; border:none; cursor:pointer;">📝</button>
+          <button class="owner-produk-del" data-id="${id}" title="Hapus produk" style="background:transparent; border:none; cursor:pointer;">🗑️</button>
+        </div>
       </td>
     `;
 
@@ -1913,6 +1911,8 @@ function _changeProductImg(id){
 }
 
 function _editProductForm(id){
+  if (window.Admin && window.Admin.openProductModal) window.Admin.openProductModal(); else if (typeof openProductModal === "function") openProductModal();
+
   const products = getProducts();
   const p = products.find(px => String(px.i||px.id) === String(id));
   if(!p){ showToast("Produk tidak ditemukan"); return; }
@@ -2536,6 +2536,7 @@ window.Admin = {
   _editProductPrice, _adjustProductStok, _changeProductImg, _editProductForm,
   filterProdukAdmin,
   addSatuan, deleteSatuan,
+  openProductModal, closeProductModal,
   _updateExistingProduct,
   _restoreStockForTx
 };
