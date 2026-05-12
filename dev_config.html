@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Config - Toko WA</title>
+    <style>
+        body { font-family: sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; }
+        .card { background: #1e293b; padding: 20px; border-radius: 10px; max-width: 400px; margin: 0 auto; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #334155; }
+        .row:last-child { border: none; margin-bottom: 0; padding-bottom: 0; }
+        h2 { text-align: center; margin-top: 0; color: #38bdf8; }
+        .btn { background: #38bdf8; color: #0f172a; border: none; padding: 10px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 15px;}
+        .btn:hover { background: #7dd3fc; }
+
+        .toggle-switch { position: relative; display: inline-block; width: 40px; height: 24px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #475569; transition: .4s; border-radius: 24px; }
+        .toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .toggle-slider { background-color: #38bdf8; }
+        input:checked + .toggle-slider:before { transform: translateX(16px); }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>🛠️ Developer Config</h2>
+        <p style="font-size:12px;text-align:center;color:#94a3b8;">Aktifkan untuk MENYEMBUNYIKAN menu di Admin.</p>
+
+        <div class="row">
+            <span>Sembunyikan Akuntansi</span>
+            <label class="toggle-switch"><input type="checkbox" id="hideAkuntansi"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="row">
+            <span>Sembunyikan Table</span>
+            <label class="toggle-switch"><input type="checkbox" id="hideTable"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="row">
+            <span>Sembunyikan History</span>
+            <label class="toggle-switch"><input type="checkbox" id="hideHistory"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="row">
+            <span>Sembunyikan Pelanggan</span>
+            <label class="toggle-switch"><input type="checkbox" id="hidePelanggan"><span class="toggle-slider"></span></label>
+        </div>
+
+        <button class="btn" onclick="saveConfig()">Simpan & Kembali ke App</button>
+    </div>
+
+    <script>
+        // Load current
+        document.getElementById('hideAkuntansi').checked = localStorage.getItem('dev_hide_akuntansi') === 'true';
+        document.getElementById('hideTable').checked = localStorage.getItem('dev_hide_table') === 'true';
+        document.getElementById('hideHistory').checked = localStorage.getItem('dev_hide_history') === 'true';
+        document.getElementById('hidePelanggan').checked = localStorage.getItem('dev_hide_pelanggan') === 'true';
+
+        function saveConfig() {
+            localStorage.setItem('dev_hide_akuntansi', document.getElementById('hideAkuntansi').checked ? 'true' : 'false');
+            localStorage.setItem('dev_hide_table', document.getElementById('hideTable').checked ? 'true' : 'false');
+            localStorage.setItem('dev_hide_history', document.getElementById('hideHistory').checked ? 'true' : 'false');
+            localStorage.setItem('dev_hide_pelanggan', document.getElementById('hidePelanggan').checked ? 'true' : 'false');
+            alert('Konfigurasi Developer Disimpan!');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
