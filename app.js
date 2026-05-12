@@ -1090,7 +1090,7 @@ function _productCardHTML(p){
 
   const stokRaw = p.stok;
   const stok = stokRaw !== undefined ? stokRaw - qty : undefined;
-  const minStokLimit = p.minStok !== undefined ? p.minStok : 10;
+  const minStokLimit = p.minStok ? p.minStok : 10;
   const stokHtml = stok !== undefined
     ? stok <= 0
       ? `<div class="product-card-stok habis">❌ Habis</div>`
@@ -1108,7 +1108,7 @@ function _productCardHTML(p){
       : `<button class="product-card-add" onclick="event.stopPropagation();App.addKranjang('${id}',event)">+ Beli</button>`;
 
   return `
-    <div class="product-card" data-id="${id}" ${stok<=0?'style="opacity:.6"':''}>
+    <div class="product-card" data-id="${id}" ${stok<=0?'style="opacity:.6; pointer-events:none;"':''}>
       <div class="product-card-img-wrap" style="position:relative;">
         ${imgHtml}
         ${diskon?`<span class="badge-diskon" style="position:absolute; bottom:4px; right:4px;">-${diskon}%</span>`:""}
@@ -1794,7 +1794,7 @@ async function _posRenderGrid(){
 
     const stokNumRaw = typeof stok === "number" ? stok : null;
     const stokNum = stokNumRaw !== null ? stokNumRaw - qty : null;
-    const minStokLimit = p.minStok !== undefined ? p.minStok : 10;
+    const minStokLimit = p.minStok ? p.minStok : 10;
     const stokHtml = stokNum !== null
       ? stokNum <= 0
         ? `<div class="pos-card-stok habis" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%) rotate(-30deg); background:rgba(220,38,38,0.9); color:white; padding:4px 12px; border-radius:6px; font-weight:900; font-size:16px; letter-spacing:1px; z-index:10; white-space:nowrap; border:2px solid #fff;">HABIS</div>`

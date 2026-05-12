@@ -858,8 +858,6 @@ function addProduct(){
     pSupplierWA = '';
     pSupplierAlamat = '';
   }
-  const minStok = +(document.getElementById("pMinStok")?.value) || 10;
-  const satuan = document.getElementById("pSatuan")?.value || "pcs";
   const newProduct = { i: Date.now(), n: name, brand: brand, barcode: barcode, p: price, m: modal, k: kat, g: img, thumb: thumb, sku: sku, stok: stok, minStok: minStok, satuan: satuan, sumber: sumber, tempo: tempo, supplierName: pSupplierName, supplierWA: pSupplierWA, supplierAlamat: pSupplierAlamat };
 
   function _resetForm(){
