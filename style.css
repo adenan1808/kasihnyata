@@ -1672,15 +1672,16 @@ input[type=color] {
 ───────────────────────────────────────────── */
 .badge-diskon {
   position: absolute;
-  top: 8px;
-  left: 8px;
+  bottom: 4px;
+  right: 4px;
   background: var(--red);
   color: #fff;
   font-size: 10px;
   font-weight: 800;
-  padding: 2px 7px;
-  border-radius: 6px;
+  padding: 2px 4px;
+  border-radius: 4px;
   letter-spacing: .03em;
+  z-index: 10;
 }
 
 .badge-qty-cart {
@@ -4012,12 +4013,16 @@ input[type=color] {
   text-decoration: line-through;
 }
 .pos-card-diskon-badge {
-  font-size: 9px;
-  background: #7f1d1d;
-  color: #fca5a5;
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  font-size: 8px;
+  background: var(--red);
+  color: #fff;
   border-radius: 4px;
-  padding: 1px 4px;
-  font-weight: 700;
+  padding: 2px 4px;
+  font-weight: 800;
+  z-index: 10;
 }
 .pos-card-stok {
   display: flex;

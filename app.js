@@ -1111,7 +1111,7 @@ function _productCardHTML(p){
     <div class="product-card" data-id="${id}" ${stok<=0?'style="opacity:.6; pointer-events:none;"':''}>
       <div class="product-card-img-wrap" style="position:relative;">
         ${imgHtml}
-        ${diskon?`<span class="badge-diskon" style="position:absolute; bottom:4px; right:4px;">-${diskon}%</span>`:""}
+        ${diskon?`<span class="badge-diskon">-${diskon}%</span>`:""}
         ${qty>0?`<span class="badge-qty-cart">${qty}</span>`:""}
         ${stok<=0?`<div class="product-card-stok habis" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%) rotate(-30deg); background:rgba(220,38,38,0.9); color:white; padding:4px 12px; border-radius:6px; font-weight:900; font-size:16px; letter-spacing:1px; z-index:10; white-space:nowrap; border:2px solid #fff;">HABIS</div>` : ''}
       </div>
@@ -1814,8 +1814,9 @@ async function _posRenderGrid(){
 
     return `
       <div class="pos-card${inCart?" in-cart":""}${stokNum<=0?" out-of-stock":""}" ${stokNum<=0?"style=\"opacity:0.6;\"":""} data-pos-id="${id}">
-        <div class="pos-card-img">
+        <div class="pos-card-img" style="position:relative;">
           ${imgHtml}
+          ${hasDiskon?`<span class="pos-card-diskon-badge">-${diskonGPos}%</span>`:""}
           ${qty>0?`<div class="pos-card-qty-badge">${qty}</div>`:""}
         </div>
         <div class="pos-card-body">
@@ -1825,7 +1826,6 @@ async function _posRenderGrid(){
           <div class="pos-card-price-wrap">
             ${hasDiskon?`<div class="pos-card-price-ori">Rp ${originalPrice.toLocaleString("id")}</div>`:""}
             <div class="pos-card-price">Rp ${price.toLocaleString("id")}<span style="font-size:9px; color:var(--text3); font-weight:normal;">/${p.satuan||'pcs'}</span></div>
-            ${hasDiskon?`<span class="pos-card-diskon-badge">-${diskonGPos}%</span>`:""}
           </div>
           ${qtyCtrl}
         </div>

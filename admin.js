@@ -714,8 +714,8 @@ function _updateExistingProduct(id){
   if(products[idx].k !== undefined) products[idx].k = kat;   else products[idx].kategori = kat;
   products[idx].stok = stok;
   products[idx].minStok = minStok;
+  if(sumber === 'Cash') { tempo = ''; }
   products[idx].sumber = sumber;
-  if(sumber === 'Cash') { tempo = ''; pSupplierName = ''; pSupplierWA = ''; pSupplierAlamat = ''; }
   products[idx].tempo = tempo;
   products[idx].supplierName = pSupplierName;
   products[idx].supplierWA = pSupplierWA;
@@ -1930,6 +1930,23 @@ function _editProductForm(id){
   set("pPrice", p.p||p.price||0);
   set("pStok",  p.stok !== undefined ? p.stok : "");
   set("pMinStok", p.minStok !== undefined ? p.minStok : 10);
+  set("pSumber", p.sumber||"Cash");
+  if(p.sumber === "Cash") {
+    set("pTempo", "");
+  } else if (p.tempo) {
+    let tempoStr = p.tempo;
+    if (tempoStr.includes('-')) {
+        const parts = tempoStr.split('-');
+        if(parts[0].length === 2 && parts[2].length === 4) {
+           tempoStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        } else if (parts[0].length === 2 && parts[2].length === 2) {
+           tempoStr = `20${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+    }
+    set("pTempo", tempoStr);
+  } else {
+    set("pTempo", "");
+  }
   set("pSupplierName", p.supplierName||"");
   set("pSupplierWA", p.supplierWA||"");
 
@@ -2686,3 +2703,39 @@ function showHistoryPelanggan(hp, nama){
 }
 window.showHistoryPelanggan = showHistoryPelanggan;
 window.Admin.showHistoryPelanggan = showHistoryPelanggan;
+
+window.simpanKategoriBaruInline = function() {
+    const input = document.getElementById("pKatBaru");
+    if (!input) return;
+    const nama = input.value.trim();
+    if (!nama) {
+        showToast("❌ Nama kategori kosong");
+        return;
+    }
+
+    let list = [];
+    try { list = JSON.parse(localStorage.getItem("kategoriList") || "[]"); } catch(e) {}
+
+    const limitObj = typeof getLimit === "function" ? getLimit() : {k: 999999};
+    if (!list.includes(nama) && limitObj.k < 999999 && list.length >= limitObj.k) {
+        showToast(`⚠️ Limit ${limitObj.k} kategori tercapai`);
+        return;
+    }
+
+    if (!list.includes(nama)) {
+        list.push(nama);
+        localStorage.setItem("kategoriList", JSON.stringify(list));
+    }
+
+    if (window.App && App.renderOwnerKategoriSelect) {
+        App.renderOwnerKategoriSelect(nama);
+    }
+
+    const sel = document.getElementById("pKategori");
+    if (sel) {
+        sel.value = nama;
+    }
+
+    input.value = "";
+    showToast("✅ Kategori ditambahkan");
+};
