@@ -4098,23 +4098,29 @@ input[type=color] {
 ═══════════════════════════════════════════ */
 .buyer-add-btn {
   width: 100%;
-  height: 36px;
-  border-radius: 10px;
-  border: none;
-  background: var(--accent);
-  color: #000;
-  font-size: 24px;
-  font-weight: 900;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  background: rgba(34, 197, 94, 0.15);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #4ade80;
+  font-size: 16px;
+  font-weight: 800;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
-  transition: background .15s, transform .1s;
-  box-shadow: 0 2px 10px rgba(92,241,123,.25);
+  transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
   margin: 0 auto;
 }
-.buyer-add-btn:hover  { background: var(--accent2, #4de87a); }
+.buyer-add-btn:hover  {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
+  background: rgba(34, 197, 94, 0.25);
+}
 .buyer-add-btn:active { transform: scale(.95); }
 
 /* Stepper when in cart */

@@ -2011,7 +2011,40 @@ function renderSupplierTable() {
   const tbody = document.getElementById("supplierTbody");
   if(!tbody) return;
 
+  // Auto-sync from products
   let sups = getSuppliers();
+  const prods = getProducts();
+  let changed = false;
+
+  prods.forEach(p => {
+      const sName = p.supplierName;
+      if (!sName) return; // ignore products without supplier
+
+      const sWA = p.supplierWA || "";
+      const sTempo = p.tempo || "";
+
+      const idx = sups.findIndex(s => s.nama === sName);
+      if (idx === -1) {
+          // Add new supplier from product
+          sups.push({
+              id: "SUP-" + Date.now() + Math.floor(Math.random()*1000),
+              nama: sName,
+              wa: sWA,
+              alamat: p.supplierAlamat || "",
+              hutang: 0, // default
+              tempo: sTempo,
+              status: "Aktif"
+          });
+          changed = true;
+      } else {
+          // Optionally sync WA/Tempo if missing in supplier but present in product
+          if (!sups[idx].wa && sWA) { sups[idx].wa = sWA; changed = true; }
+          // we don't automatically overwrite hutang/tempo here to avoid clobbering admin edits
+      }
+  });
+
+  if (changed) saveSuppliersList(sups);
+
   const term = (document.getElementById("supplierSearchInput")?.value || "").toLowerCase();
 
   if (term) {
@@ -2070,8 +2103,12 @@ function renderSupplierTable() {
           <td ondblclick="Admin.editSupplierInline('${s.id}', 'alamat')" style="cursor:text;">${window.escapeHTML(s.alamat || '-')}</td>
           <td ondblclick="Admin.editSupplierInline('${s.id}', 'hutang')" style="cursor:text;">${hutangDisp}</td>
           <td ondblclick="Admin.editSupplierInline('${s.id}', 'tempo')" style="cursor:text;"><span style="${statusColor}">${tempoDisp}</span></td>
-          <td><button onclick="Admin.filterProdukBySupplier('${window.escapeHTML(s.nama)}')" style="background:transparent; border:1px solid #3b82f6; color:#93c5fd; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:11px;">📦 ${prods} produk</button></td>
-          <td style="color:${statColor}; font-weight:bold;">${s.status || 'Aktif'}</td>
+          <td>
+            ${s.status === 'Aktif'
+              ? `<button onclick="Admin.showSupplierProductsModal('${window.escapeHTML(s.nama)}')" style="background:transparent; border:1px solid #22c55e; color:#22c55e; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:11px; font-weight:bold;">Aktif</button>`
+              : `<span style="color:#ef4444; font-weight:bold; font-size:11px; padding:4px 8px;">Tidak Aktif</span>`
+            }
+          </td>
           <td style="display:flex; gap:6px;">
             <button onclick="Admin.editSupplier('${s.id}')" title="Edit" style="background:transparent; border:1px solid #4a5568; color:white; padding:4px; border-radius:4px; cursor:pointer;">✏️</button>
             <a href="https://wa.me/${(s.wa||'').replace(/\\D/g,'')}" target="_blank" title="Chat WA" style="background:transparent; border:1px solid #22c55e; color:#22c55e; padding:4px; border-radius:4px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">💬</a>
@@ -2159,17 +2196,31 @@ function setSupplierSort(col) {
   renderSupplierTable();
 }
 
-function filterProdukBySupplier(nama) {
-  const prodBtn = document.querySelector('.owner-tabs .tab-btn:nth-child(3)');
-  if(prodBtn) {
-      if(window.showTab) window.showTab('tabProduk', prodBtn);
-  }
+function showSupplierProductsModal(nama) {
+  const tbody = document.getElementById("supplierProductsTbody");
+  if(!tbody) return;
 
-  const searchInput = document.getElementById("produkSearchAdmin");
-  if(searchInput) {
-    searchInput.value = nama;
-    filterProdukAdmin();
-  }
+  const prods = getProducts().filter(p => p.supplierName === nama);
+
+  document.getElementById("supplierProductsTitle").innerText = `Produk: ${nama}`;
+
+  tbody.innerHTML = prods.length === 0
+    ? `<tr><td colspan="6" style="text-align:center; padding:20px;">Tidak ada produk</td></tr>`
+    : prods.map(p => {
+      const img = p.thumb || p.img || "https://placehold.co/44/1e293b/22c55e?text=P";
+      return `
+        <tr>
+          <td><img src="${img}" style="width:36px; height:36px; border-radius:4px; object-fit:cover;"></td>
+          <td style="font-family:monospace; color:var(--accent);">${p.sku || "-"}</td>
+          <td style="font-weight:bold;">${p.n || p.name}</td>
+          <td>Rp ${(p.m||p.modal||0).toLocaleString('id')}</td>
+          <td>Rp ${(p.p||p.price||0).toLocaleString('id')}</td>
+          <td><b>${p.stok || 0}</b></td>
+        </tr>
+      `;
+    }).join("");
+
+  document.getElementById("supplierProductsModal").style.display = "flex";
 }
 
 function editSupplierInline(id, field) {
@@ -2774,7 +2825,7 @@ window.Admin = {
   addKasir, deleteKasir, renderKasirList,
   // Supplier
   renderSupplierTable, openSupplierModal, closeSupplierModal, saveSupplier,
-  editSupplier, deleteSupplier, setSupplierSort, filterProdukBySupplier, editSupplierInline,
+  editSupplier, deleteSupplier, setSupplierSort, showSupplierProductsModal, editSupplierInline,
   // Product inline edit
   _editProductPrice, _adjustProductStok, _changeProductImg, _editProductForm,
   filterProdukAdmin,

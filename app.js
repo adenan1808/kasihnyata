@@ -1045,7 +1045,7 @@ function _updateProductCards(){
       if(qty>0){
         qtyWrap.innerHTML=`<div class="stepper-row"><button class="stepper-btn stepper-min qty-btn" data-id="${id}" data-delta="-1">-</button><span class="stepper-num">${qty}</span><button class="stepper-btn stepper-plus qty-btn" data-id="${id}" data-delta="1">+</button></div>`;
       } else {
-        qtyWrap.innerHTML=`<button class="buyer-add-btn qty-btn" data-id="${id}" data-delta="1">+ Tambah</button>`;
+        qtyWrap.innerHTML=`<button class="buyer-add-btn qty-btn" data-id="${id}" data-delta="1">+</button>`;
       }
     }
   });
@@ -1089,7 +1089,7 @@ function _productCardHTML(p){
         </div>
        </div>`
     : `<div class="product-card-qty">
-        <button class="buyer-add-btn qty-btn" data-id="${id}" data-delta="1" style="font-size:13px; font-weight:bold;">+ Tambah</button>
+        <button class="buyer-add-btn qty-btn" data-id="${id}" data-delta="1">+</button>
        </div>`;
 
   const stokRaw = p.stok;
