@@ -289,6 +289,7 @@
     <button class="tab-btn" onclick="showTab('tabPromo',this)">🎁 Promo</button>
     <button class="tab-btn" onclick="showTab('tabAkuntansi',this)">📊 Akuntansi</button>
     <button class="tab-btn" onclick="showTab('tabTable',this)">📋 M. Stok</button>
+    <button class="tab-btn" onclick="showTab('tabSupplier',this)">🏢 M. Supplier</button>
     <button class="tab-btn" onclick="showTab('tabHistory',this)">📜 History</button>
     <button class="tab-btn" onclick="showTab('tabPelanggan',this)">👥 Pelanggan</button>
     <button class="tab-btn" onclick="showTab('tabBackup',this)">💾 Backup</button>
@@ -499,7 +500,6 @@
           <select id="pKategoriFilter" onchange="Admin.filterProdukAdmin()" style="padding:10px 14px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px; width: 150px;">
              <option value="all">Semua Kategori</option>
           </select>
-          <button onclick="App.openTambahKategoriModal()" style="padding:10px 14px; background:transparent; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px; cursor:pointer;">+ Kategori</button>
           <span style="color:#a0aec0; font-size:13px; padding: 0 4px;" id="produkCountDisplay">0 produk</span>
           <button onclick="Admin.openProductModal()" style="padding:10px 16px; background:#22c55e; border:none; border-radius:8px; color:#0f172a; font-weight:bold; font-size:13px; cursor:pointer;">+ Tambah Produk</button>
         </div>
@@ -823,6 +823,47 @@
   </div>
 
   <!-- TAB HISTORY -->
+  <!-- MANAJEMEN SUPPLIER TAB -->
+  <div id="tabSupplier" class="tab-panel">
+    <div class="panel-box" style="padding:0; overflow:hidden;">
+      <div style="padding:16px; border-bottom:1px solid #273251; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <h2 style="margin:0; font-size:18px; color:white; font-weight:700;">Manajemen Supplier</h2>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <input id="supplierSearchInput" placeholder="Cari nama / no WA..." oninput="Admin.renderSupplierTable()" style="padding:10px 14px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px; width: 200px;">
+          <div style="padding:10px 14px; border:1px solid #b45309; border-radius:8px; color:#fcd34d; font-size:13px; background:rgba(180,83,9,0.2); display:flex; align-items:center; gap:6px;">
+            ⏰ Peringatan: <span id="supplierTempoWarning">7 hari</span>
+          </div>
+          <button onclick="Admin.openSupplierModal()" style="padding:10px 16px; background:#22c55e; border:none; border-radius:8px; color:#0f172a; font-weight:bold; font-size:13px; cursor:pointer;">+ Tambah Supplier</button>
+        </div>
+      </div>
+      <div style="background:#1e293b; padding:8px 16px; display:flex; justify-content:space-between; font-size:12px; color:#94a3b8; border-bottom:1px solid #273251;">
+        <div style="display:flex; gap:16px;">
+          <span><span style="color:#facc15;">●</span> Kuning = ada hutang</span>
+          <span><span style="color:#f97316;">●</span> Oranye = jatuh tempo <7 hari</span>
+          <span><span style="color:#ef4444;">●</span> Merah = lewat jatuh tempo</span>
+        </div>
+        <div>💡 Klik 2x sel teks untuk edit langsung</div>
+      </div>
+      <div class="table-container">
+        <table class="admin-table" id="supplierTable">
+          <thead>
+            <tr>
+              <th onclick="Admin.setSupplierSort('nama')" style="cursor:pointer">Nama Supplier &#8693;</th>
+              <th>No. WhatsApp</th>
+              <th>Alamat</th>
+              <th onclick="Admin.setSupplierSort('hutang')" style="cursor:pointer">Hutang (Rp) &#8693;</th>
+              <th onclick="Admin.setSupplierSort('tempo')" style="cursor:pointer">Jatuh Tempo &#8693;</th>
+              <th>Produk</th>
+              <th onclick="Admin.setSupplierSort('status')" style="cursor:pointer">Status &#8693;</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="supplierTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <div id="tabHistory" class="tab-panel">
     <div class="panel-box">
       <div class="panel-box-header"><span class="panel-icon">🧾</span><div><div class="panel-title">Riwayat Transaksi Lengkap</div><div class="panel-desc">Daftar semua transaksi beserta detail</div></div></div>
@@ -929,6 +970,55 @@
     <div class="kpopup-label" style="margin-top:14px">Tambah baru</div>
     <input id="katNewInput" placeholder="Tulis kategori baru...">
     <button onclick="App.addNewKategori()" class="btn-save">➕ Tambah Kategori</button>
+  </div>
+</div>
+
+<!-- MODAL SUPPLIER -->
+<div id="supplierModal" class="modal">
+  <div class="modal-box" style="max-width:500px;">
+    <div class="modal-header">
+      <h3 id="supplierModalTitle">Tambah Supplier</h3>
+      <button onclick="Admin.closeSupplierModal()" class="modal-close">✕</button>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px; margin-top:16px;">
+      <input type="hidden" id="supId">
+
+      <div>
+        <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Nama Supplier *</label>
+        <input id="supNama" placeholder="Contoh: PT Unilever" style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
+      </div>
+
+      <div>
+        <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">No. WhatsApp</label>
+        <input id="supWA" placeholder="08..." style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
+      </div>
+
+      <div>
+        <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Alamat</label>
+        <textarea id="supAlamat" placeholder="Alamat supplier..." style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px; min-height:60px;"></textarea>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+        <div>
+          <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Hutang (Rp)</label>
+          <input id="supHutang" type="text" placeholder="0" style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;" oninput="this.value=this.value.replace(/\\D/g,'')">
+        </div>
+        <div>
+          <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Jatuh Tempo</label>
+          <input id="supTempo" type="date" style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px; color-scheme: dark;">
+        </div>
+      </div>
+
+      <div>
+        <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Status</label>
+        <select id="supStatus" style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
+          <option value="Aktif">Aktif</option>
+          <option value="Tidak Aktif">Tidak Aktif</option>
+        </select>
+      </div>
+
+      <button onclick="Admin.saveSupplier()" style="margin-top:16px; width:100%; padding:12px; background:#22c55e; color:#0f172a; border:none; border-radius:8px; font-weight:bold; font-size:14px; cursor:pointer;">Simpan Supplier</button>
+    </div>
   </div>
 </div>
 

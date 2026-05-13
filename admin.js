@@ -948,10 +948,11 @@ function renderOwnerProdukList(){
           const n = (p.n||p.name||"").toLowerCase();
           const k = (p.k||p.kategori||"Umum").toLowerCase();
           const s = (p.sku||"").toLowerCase();
+          const sup = (p.supplierName||"").toLowerCase();
           if(_produkAdminFilterType === 'nama') return n.includes(_produkAdminFilter);
           if(_produkAdminFilterType === 'kategori') return k.includes(_produkAdminFilter);
           if(_produkAdminFilterType === 'sku') return s.includes(_produkAdminFilter);
-          return (n + " " + s + " " + k).includes(_produkAdminFilter);
+          return n.includes(_produkAdminFilter) || k.includes(_produkAdminFilter) || s.includes(_produkAdminFilter) || sup.includes(_produkAdminFilter);
       });
   }
   if (window._produkAdminSortCol) {
@@ -1069,7 +1070,13 @@ function renderOwnerProdukList(){
     }
 
     const skuDisplay = p.sku || "xxx-xxx-xxxxxx";
-    const statusDisp = p.sumber || "Cash";
+
+    // Status Display with distinct colors and without white box
+    let statusDisp = p.sumber || "Cash";
+    let statusColor = "white";
+    if (statusDisp === "Hutang") statusColor = "#facc15"; // Yellow
+    else if (statusDisp === "Titip Jual") statusColor = "#60a5fa"; // Blue
+    else statusColor = "#22c55e"; // Green for Cash
 
     tr.innerHTML = `
       <td><img src="${img||"https://placehold.co/44/1e293b/22c55e?text=P"}" loading="lazy" style="width:36px; height:36px; border-radius:4px; object-fit:cover; display:block; margin:auto;" onerror="this.src='https://placehold.co/44/1e293b/22c55e?text=P'"></td>
@@ -1081,11 +1088,10 @@ function renderOwnerProdukList(){
       <td>
         <input type="number" class="opir-stok-input" data-id="${id}" value="${stokNum !== null ? stokNum : 0}" onclick="event.stopPropagation();" style="width: 60px; height:24px; font-size:13px; font-weight:bold; padding:0 4px; text-align:center; border:1px solid #4a5568; background:#2d3748; color:white; border-radius:4px;">
       </td>
-      <td>${statusDisp}</td>
+      <td style="color:${statusColor}; font-weight:bold;">${statusDisp}</td>
       <td title="${p.supplierName||''}"><div style="width:100%; overflow:hidden; text-overflow:ellipsis;">${p.supplierName||'-'}</div></td>
       <td>${tempoWarning}</td>
       <td style="text-align:center; display:flex; gap:8px; justify-content:center; align-items:center;">
-        <button class="opir-edit-btn" data-id="${id}" title="Edit produk" style="width: 24px; height: 24px; font-size: 13px; border: none; background: transparent; cursor: pointer; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">✏️</button>
         <button class="owner-produk-del" data-id="${id}" title="Hapus produk" style="width: 24px; height: 24px; font-size: 13px; border: none; background: transparent; cursor: pointer; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">🗑️</button>
       </td>
     `;
@@ -1985,6 +1991,216 @@ function _editProductForm(id){
 }
 
 
+//========================================================================
+// SUPPLIER MANAGEMENT
+//========================================================================
+
+let _supplierList = [];
+let _supplierSortCol = 'nama';
+let _supplierSortAsc = true;
+
+function getSuppliers() {
+  try { return JSON.parse(localStorage.getItem('suppliers') || "[]"); }
+  catch(e) { return []; }
+}
+function saveSuppliersList(list) {
+  localStorage.setItem('suppliers', JSON.stringify(list));
+}
+
+function renderSupplierTable() {
+  const tbody = document.getElementById("supplierTbody");
+  if(!tbody) return;
+
+  let sups = getSuppliers();
+  const term = (document.getElementById("supplierSearchInput")?.value || "").toLowerCase();
+
+  if (term) {
+    sups = sups.filter(s =>
+      (s.nama || "").toLowerCase().includes(term) ||
+      (s.wa || "").toLowerCase().includes(term)
+    );
+  }
+
+  sups.sort((a,b) => {
+    let vA = a[_supplierSortCol] || "";
+    let vB = b[_supplierSortCol] || "";
+
+    if (_supplierSortCol === 'hutang') {
+      vA = Number(vA) || 0;
+      vB = Number(vB) || 0;
+    }
+
+    if (vA < vB) return _supplierSortAsc ? -1 : 1;
+    if (vA > vB) return _supplierSortAsc ? 1 : -1;
+    return 0;
+  });
+
+  const now = new Date();
+
+  tbody.innerHTML = sups.length === 0
+    ? `<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text3);">Belum ada data supplier</td></tr>`
+    : sups.map(s => {
+      let hutangVal = Number(s.hutang) || 0;
+      let hutangDisp = hutangVal > 0 ? `<span style="color:#facc15; font-weight:bold;">Rp ${hutangVal.toLocaleString('id')}</span>` : `<span style="color:#22c55e;">Lunas</span>`;
+
+      let tempoDisp = "-";
+      let statusColor = "";
+
+      if (hutangVal > 0 && s.tempo) {
+        const tDate = new Date(s.tempo);
+        tempoDisp = tDate.toLocaleDateString("id-ID", {day:"numeric",month:"short",year:"numeric"});
+        const diffDays = Math.ceil((tDate - now) / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) {
+           statusColor = "color:#ef4444; font-weight:bold;"; // Red (overdue)
+        } else if (diffDays <= 7) {
+           statusColor = "color:#f97316; font-weight:bold;"; // Orange (<=7 days)
+        } else {
+           statusColor = "color:#facc15;"; // Yellow (has debt but > 7 days)
+        }
+      }
+
+      const statColor = s.status === 'Aktif' ? '#22c55e' : '#ef4444';
+      const prods = getProducts().filter(p => p.supplierName === s.nama).length;
+
+      return `
+        <tr>
+          <td ondblclick="Admin.editSupplierInline('${s.id}', 'nama')" style="cursor:text; font-weight:bold;">${window.escapeHTML(s.nama)}</td>
+          <td ondblclick="Admin.editSupplierInline('${s.id}', 'wa')" style="cursor:text; color:var(--accent); font-family:monospace;">${window.escapeHTML(s.wa || '-')}</td>
+          <td ondblclick="Admin.editSupplierInline('${s.id}', 'alamat')" style="cursor:text;">${window.escapeHTML(s.alamat || '-')}</td>
+          <td ondblclick="Admin.editSupplierInline('${s.id}', 'hutang')" style="cursor:text;">${hutangDisp}</td>
+          <td ondblclick="Admin.editSupplierInline('${s.id}', 'tempo')" style="cursor:text;"><span style="${statusColor}">${tempoDisp}</span></td>
+          <td><button onclick="Admin.filterProdukBySupplier('${window.escapeHTML(s.nama)}')" style="background:transparent; border:1px solid #3b82f6; color:#93c5fd; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:11px;">📦 ${prods} produk</button></td>
+          <td style="color:${statColor}; font-weight:bold;">${s.status || 'Aktif'}</td>
+          <td style="display:flex; gap:6px;">
+            <button onclick="Admin.editSupplier('${s.id}')" title="Edit" style="background:transparent; border:1px solid #4a5568; color:white; padding:4px; border-radius:4px; cursor:pointer;">✏️</button>
+            <a href="https://wa.me/${(s.wa||'').replace(/\\D/g,'')}" target="_blank" title="Chat WA" style="background:transparent; border:1px solid #22c55e; color:#22c55e; padding:4px; border-radius:4px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">💬</a>
+            <button onclick="Admin.deleteSupplier('${s.id}')" title="Hapus" style="background:transparent; border:1px solid #ef4444; color:#ef4444; padding:4px; border-radius:4px; cursor:pointer;">🗑️</button>
+          </td>
+        </tr>
+      `;
+    }).join("");
+}
+
+function openSupplierModal() {
+  document.getElementById("supId").value = "";
+  document.getElementById("supNama").value = "";
+  document.getElementById("supWA").value = "";
+  document.getElementById("supAlamat").value = "";
+  document.getElementById("supHutang").value = "";
+  document.getElementById("supTempo").value = "";
+  document.getElementById("supStatus").value = "Aktif";
+
+  document.getElementById("supplierModalTitle").innerText = "Tambah Supplier";
+  document.getElementById("supplierModal").style.display = "flex";
+}
+
+function closeSupplierModal() {
+  document.getElementById("supplierModal").style.display = "none";
+}
+
+function saveSupplier() {
+  const id = document.getElementById("supId").value;
+  const nama = document.getElementById("supNama").value.trim();
+  const wa = document.getElementById("supWA").value.trim();
+  const alamat = document.getElementById("supAlamat").value.trim();
+  const hutang = parseInt(document.getElementById("supHutang").value.replace(/\\D/g, '')) || 0;
+  const tempo = document.getElementById("supTempo").value;
+  const status = document.getElementById("supStatus").value;
+
+  if (!nama) { showToast("Nama supplier wajib diisi!"); return; }
+
+  let sups = getSuppliers();
+  if (id) {
+    const idx = sups.findIndex(s => s.id === id);
+    if (idx !== -1) {
+      sups[idx] = { ...sups[idx], nama, wa, alamat, hutang, tempo, status };
+    }
+  } else {
+    sups.push({
+      id: "SUP-" + Date.now(),
+      nama, wa, alamat, hutang, tempo, status
+    });
+  }
+
+  saveSuppliersList(sups);
+  closeSupplierModal();
+  renderSupplierTable();
+  showToast("Supplier berhasil disimpan");
+}
+
+function editSupplier(id) {
+  const s = getSuppliers().find(x => x.id === id);
+  if (!s) return;
+
+  document.getElementById("supId").value = s.id;
+  document.getElementById("supNama").value = s.nama || "";
+  document.getElementById("supWA").value = s.wa || "";
+  document.getElementById("supAlamat").value = s.alamat || "";
+  document.getElementById("supHutang").value = s.hutang || "";
+  document.getElementById("supTempo").value = s.tempo || "";
+  document.getElementById("supStatus").value = s.status || "Aktif";
+
+  document.getElementById("supplierModalTitle").innerText = "Edit Supplier";
+  document.getElementById("supplierModal").style.display = "flex";
+}
+
+function deleteSupplier(id) {
+  if (!confirm("Hapus supplier ini?")) return;
+  let sups = getSuppliers();
+  sups = sups.filter(s => s.id !== id);
+  saveSuppliersList(sups);
+  renderSupplierTable();
+}
+
+function setSupplierSort(col) {
+  if (_supplierSortCol === col) _supplierSortAsc = !_supplierSortAsc;
+  else { _supplierSortCol = col; _supplierSortAsc = true; }
+  renderSupplierTable();
+}
+
+function filterProdukBySupplier(nama) {
+  const prodBtn = document.querySelector('.owner-tabs .tab-btn:nth-child(3)');
+  if(prodBtn) {
+      if(window.showTab) window.showTab('tabProduk', prodBtn);
+  }
+
+  const searchInput = document.getElementById("produkSearchAdmin");
+  if(searchInput) {
+    searchInput.value = nama;
+    filterProdukAdmin();
+  }
+}
+
+function editSupplierInline(id, field) {
+  const sups = getSuppliers();
+  const idx = sups.findIndex(s => s.id === id);
+  if (idx === -1) return;
+
+  const s = sups[idx];
+  let newVal;
+
+  if (field === 'nama') {
+    newVal = prompt("Edit Nama Supplier:", s.nama);
+  } else if (field === 'wa') {
+    newVal = prompt("Edit No. WA:", s.wa);
+  } else if (field === 'alamat') {
+    newVal = prompt("Edit Alamat:", s.alamat);
+  } else if (field === 'hutang') {
+    newVal = prompt("Edit Hutang (angka):", s.hutang);
+    if (newVal !== null) newVal = parseInt(newVal.replace(/\\D/g, '')) || 0;
+  } else if (field === 'tempo') {
+    newVal = prompt("Edit Jatuh Tempo (YYYY-MM-DD):", s.tempo);
+  }
+
+  if (newVal !== null && newVal !== undefined) {
+    sups[idx][field] = newVal;
+    saveSuppliersList(sups);
+    renderSupplierTable();
+    showToast("Supplier diupdate");
+  }
+}
+
 /* ================= KATEGORI ADMIN HELPERS ================= */
 function deleteSelectedKategori(){
   const sel = document.getElementById("pKategori");
@@ -2177,7 +2393,7 @@ function renderTable(){
         <td>${margin}%</td>
         <td>
           <div style="display:flex; flex-direction:column; gap:2px; align-items:center;">
-            <span style="font-size:11px; background:#e2e8f0; padding:2px 6px; border-radius:4px; font-weight:600;">${sumberProd}</span>
+            <span style="font-size:11px; padding:2px 6px; border-radius:4px; font-weight:600;">${sumberProd}</span>
             ${statusWarningHtml}
           </div>
         </td>
@@ -2556,6 +2772,9 @@ window.Admin = {
 
   // Kasir
   addKasir, deleteKasir, renderKasirList,
+  // Supplier
+  renderSupplierTable, openSupplierModal, closeSupplierModal, saveSupplier,
+  editSupplier, deleteSupplier, setSupplierSort, filterProdukBySupplier, editSupplierInline,
   // Product inline edit
   _editProductPrice, _adjustProductStok, _changeProductImg, _editProductForm,
   filterProdukAdmin,

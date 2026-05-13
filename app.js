@@ -169,6 +169,10 @@ async function switchToOwner(){
   document.getElementById("buyerView").style.display="none";
   document.getElementById("ownerView").style.display="block";
 
+  // Hide sticky cart in owner view
+  const stickyCart = document.getElementById("stickyCart");
+  if(stickyCart) stickyCart.style.display = "none";
+
   if(window.Admin) Admin.renderOwnerProdukList && Admin.renderOwnerProdukList();
   renderOwnerKategoriSelect();
 }
@@ -1041,7 +1045,7 @@ function _updateProductCards(){
       if(qty>0){
         qtyWrap.innerHTML=`<div class="stepper-row"><button class="stepper-btn stepper-min qty-btn" data-id="${id}" data-delta="-1">-</button><span class="stepper-num">${qty}</span><button class="stepper-btn stepper-plus qty-btn" data-id="${id}" data-delta="1">+</button></div>`;
       } else {
-        qtyWrap.innerHTML=`<button class="buyer-add-btn qty-btn" data-id="${id}" data-delta="1">+</button>`;
+        qtyWrap.innerHTML=`<button class="buyer-add-btn qty-btn" data-id="${id}" data-delta="1">+ Tambah</button>`;
       }
     }
   });
@@ -1085,7 +1089,7 @@ function _productCardHTML(p){
         </div>
        </div>`
     : `<div class="product-card-qty">
-        <button class="buyer-add-btn qty-btn" data-id="${id}" data-delta="1">+</button>
+        <button class="buyer-add-btn qty-btn" data-id="${id}" data-delta="1" style="font-size:13px; font-weight:bold;">+ Tambah</button>
        </div>`;
 
   const stokRaw = p.stok;
@@ -1209,7 +1213,8 @@ document.querySelectorAll("[data-id]").forEach(el=>{
   const data=calculateCart();
   const bar=document.getElementById("stickyCart"); if(!bar) return;
 
-  const isWebBuyer = document.getElementById("buyerView") && document.getElementById("buyerView").style.display !== "none";
+  // Only show the sticky cart in buyer view, hide it unconditionally in Admin/Owner mode
+  const isWebBuyer = document.getElementById("buyerView") && document.getElementById("buyerView").style.display !== "none" && (document.getElementById("ownerView")?.style.display === "none");
 
   if(data.items>0 && isWebBuyer){
     bar.style.display="flex";
