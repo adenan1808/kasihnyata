@@ -1398,7 +1398,8 @@ function buildBackupPayload(){
     "heroSlideSpeedSec","heroOverlayColor","heroOverlayOpacity","heroTextColor",
     "kategoriList","_kasirList","_lastKategori","defaultMargin",
     "qris","qrisImg","qrisStatus","ongkirDefault","bankName","bankRek",
-    "transaksi","_customers","_backupList","heroPromoLeftImages","heroPromoRightImages"
+    "transaksi","_customers","_backupList","heroPromoLeftImages","heroPromoRightImages",
+    "suppliers"
   ];
   const lsData = {};
   lsKeys.forEach(k => { const v = localStorage.getItem(k); if(v !== null) lsData[k] = v; });
@@ -1714,7 +1715,8 @@ function importData(){
         ["kategoriList","transaksi","_kasirList","_customers",
          "promoTitle","promoDesc","sponsorTitle","sponsorDesc",
          "heroSlideSpeedSec","qris","qrisImg","ownerPin","kasirPin",
-         "storeHeaderImg","heroPromoLeftImages","heroPromoRightImages"
+         "storeHeaderImg","heroPromoLeftImages","heroPromoRightImages",
+         "suppliers"
         ].forEach(k => {
           if(d[k] !== undefined)
             localStorage.setItem(k, typeof d[k]==="string" ? d[k] : JSON.stringify(d[k]));
@@ -1906,7 +1908,58 @@ function _changeProductImg(id){
 window.openProductModal = openProductModal;
 window.closeProductModal = closeProductModal;
 
+function populateSupplierSelect(selectedValue) {
+  const sel = document.getElementById("pSupplierName");
+  if(!sel) return;
+  const sups = getSuppliers();
+  sel.innerHTML = '<option value="">Pilih Supplier...</option>' +
+                  sups.map(s => `<option value="${window.escapeHTML(s.nama)}" data-wa="${window.escapeHTML(s.wa||'')}">${window.escapeHTML(s.nama)}</option>`).join("");
+  if(selectedValue) sel.value = selectedValue;
+}
+
+function populateSupplierWA() {
+  const sel = document.getElementById("pSupplierName");
+  const waInput = document.getElementById("pSupplierWA");
+  if(!sel || !waInput) return;
+  const opt = sel.options[sel.selectedIndex];
+  if(opt && opt.dataset.wa) waInput.value = opt.dataset.wa;
+}
+
+function simpanSupplierBaruInline() {
+  const nameInput = document.getElementById("pSupplierBaru");
+  const waInput = document.getElementById("pSupplierWA");
+  if(!nameInput) return;
+
+  const nama = nameInput.value.trim();
+  if(!nama) return;
+
+  const wa = waInput ? waInput.value.trim() : "";
+  let sups = getSuppliers();
+
+  const idx = sups.findIndex(s => s.nama.toLowerCase() === nama.toLowerCase());
+  if (idx === -1) {
+    sups.push({
+      id: "SUP-" + Date.now() + Math.floor(Math.random()*1000),
+      nama: nama,
+      wa: wa,
+      alamat: "",
+      hutang: 0,
+      tempo: "",
+      status: "Aktif"
+    });
+    saveSuppliersList(sups);
+    renderSupplierTable(); // Update the supplier tab UI if open
+    showToast("Supplier baru ditambahkan");
+  } else {
+    showToast("Supplier sudah ada, langsung dipilih.");
+  }
+
+  nameInput.value = "";
+  populateSupplierSelect(nama);
+}
+
 function openProductModal() {
+  populateSupplierSelect();
   document.getElementById("productModal").style.display = "flex";
   document.getElementById("productModalTitle").textContent = window._editingProductId ? "Edit Produk" : "Tambah Produk Baru";
 }
@@ -1920,6 +1973,8 @@ function _editProductForm(id){
   const products = getProducts();
   const p = products.find(px => String(px.i||px.id) === String(id));
   if(!p){ showToast("Produk tidak ditemukan"); return; }
+
+  populateSupplierSelect();
   // Populate form fields
   const set = (elId, val) => { const el = document.getElementById(elId); if(el) el.value = val; };
   set("pName",  p.n||p.name||"");
@@ -2826,6 +2881,7 @@ window.Admin = {
   // Supplier
   renderSupplierTable, openSupplierModal, closeSupplierModal, saveSupplier,
   editSupplier, deleteSupplier, setSupplierSort, showSupplierProductsModal, editSupplierInline,
+  populateSupplierSelect, populateSupplierWA, simpanSupplierBaruInline,
   // Product inline edit
   _editProductPrice, _adjustProductStok, _changeProductImg, _editProductForm,
   filterProdukAdmin,
