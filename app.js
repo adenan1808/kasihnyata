@@ -1137,7 +1137,54 @@ document.addEventListener("click", e=>{
   if(btnAdd && btnAdd.dataset.id){
     const id    = +btnAdd.dataset.id;
     const delta = +btnAdd.dataset.delta;
-    if(!isNaN(id) && !isNaN(delta)) changeQty(id, delta);
+    if(!isNaN(id) && !isNaN(delta)) {
+      changeQty(id, delta);
+      const descModal = document.getElementById("buyerProductDescModal");
+      if(descModal && descModal.style.display === "flex") {
+          descModal.style.display = "none";
+      }
+    }
+    return; // Stop event if we hit a button
+  }
+
+  // Product image click to open description modal
+  const imgWrap = e.target.closest(".product-card-img-wrap, .product-card-img");
+  if(imgWrap && document.getElementById("buyerView")?.style.display !== "none"){
+    const card = imgWrap.closest(".product-card");
+    if(card && card.dataset.id){
+      const id = +card.dataset.id;
+      const products = getProducts();
+      const p = products.find(x => (x.i||x.id) === id);
+      if(p) {
+        document.getElementById("descModalImg").src = p.thumb || p.img || p.g || "https://placehold.co/300/1e2740/5cf17b?text=%F0%9F%9B%8D";
+        document.getElementById("descModalName").innerText = p.n || p.name || "";
+        document.getElementById("descModalKat").innerText = p.k || p.kategori || "Umum";
+        document.getElementById("descModalPrice").innerText = "Rp " + (p.p || p.price || 0).toLocaleString("id");
+
+        const cfg = getConfig();
+        const diskon = cfg.diskonGlobal || 0;
+        if (diskon > 0) {
+            document.getElementById("descModalOri").innerText = "Rp " + (p.p || p.price || 0).toLocaleString("id");
+            document.getElementById("descModalOri").style.display = "block";
+            document.getElementById("descModalPrice").innerText = "Rp " + getHarga(p).toLocaleString("id");
+            document.getElementById("descModalDiskon").innerText = `-${diskon}%`;
+            document.getElementById("descModalDiskon").style.display = "block";
+        } else {
+            document.getElementById("descModalOri").style.display = "none";
+            document.getElementById("descModalDiskon").style.display = "none";
+        }
+
+        document.getElementById("descModalText").innerText = p.desc || "Tidak ada deskripsi rinci.";
+
+        const addBtn = document.getElementById("descModalAddBtn");
+        addBtn.onclick = () => {
+            changeQty(id, 1);
+            document.getElementById("buyerProductDescModal").style.display = "none";
+        };
+
+        document.getElementById("buyerProductDescModal").style.display = "flex";
+      }
+    }
   }
 });
 
@@ -2467,6 +2514,11 @@ document.addEventListener("input", e=>{
     }
     // Escape closes modals
     if(key==="Escape"){
+      const descModal = document.getElementById("buyerProductDescModal");
+      if(descModal && descModal.style.display !== "none") {
+          descModal.style.display = "none";
+          return;
+      }
       if(isCheckoutOpen()){ closeCheckout(); return; }
       if(isCartOpen()){ closeCart(); return; }
     }

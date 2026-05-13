@@ -3769,7 +3769,7 @@ input[type=color] {
   letter-spacing: 0.04em;
 }
 .data-table td {
-  padding: 9px 12px;
+  padding: 6px 12px;
   border-bottom: 1px solid var(--border2);
   vertical-align: middle;
 }
@@ -4557,6 +4557,13 @@ input[type=color] {
 }
 .admin-product-table tbody tr:hover {
   background: var(--surface2);
+}
+
+/* ═══════════════════════════════════════════
+   MENU HISTORY ROW SPACING
+═══════════════════════════════════════════ */
+#historyTableConfig.data-table td {
+  padding: 4px 12px;
 }
 
 /* ═══════════════════════════════════════════

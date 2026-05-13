@@ -867,7 +867,7 @@
     <div class="panel-box">
       <div class="panel-box-header"><span class="panel-icon">🧾</span><div><div class="panel-title">Riwayat Transaksi Lengkap</div><div class="panel-desc">Daftar semua transaksi beserta detail</div></div></div>
       <div class="table-wrap">
-        <table class="data-table">
+        <table class="data-table" id="historyTableConfig">
           <thead>
             <tr>
               <th>No</th>
@@ -972,23 +972,56 @@
   </div>
 </div>
 
+<!-- MODAL DESKRIPSI PRODUK (BUYER) -->
+<div id="buyerProductDescModal" class="modal">
+  <div class="modal-box" style="max-width:600px; width:95%; padding:0; overflow:hidden;">
+    <div style="display:flex; flex-direction:row; height:100%;">
+      <!-- Kiri: Gambar -->
+      <div style="flex:1; background:#1e293b; display:flex; align-items:center; justify-content:center; padding:16px;">
+        <img id="descModalImg" src="" style="width:100%; max-height:300px; object-fit:contain; border-radius:8px;">
+      </div>
+      <!-- Kanan: Detail -->
+      <div style="flex:1; padding:20px; display:flex; flex-direction:column;">
+        <h2 id="descModalName" style="margin:0 0 4px 0; font-size:20px; font-weight:800; color:white;">Nama Produk</h2>
+        <div id="descModalKat" style="font-size:12px; color:var(--accent); margin-bottom:12px;">Kategori</div>
+
+        <div style="display:flex; align-items:baseline; gap:8px; margin-bottom:16px;">
+          <div id="descModalPrice" style="font-size:22px; font-weight:900; color:#4ade80;">Rp 0</div>
+          <div id="descModalOri" style="font-size:14px; text-decoration:line-through; color:var(--text3); display:none;">Rp 0</div>
+          <div id="descModalDiskon" style="background:#ef4444; color:white; font-size:11px; padding:2px 6px; border-radius:4px; font-weight:bold; display:none;">-0%</div>
+        </div>
+
+        <div style="flex:1; font-size:13px; color:var(--text2); line-height:1.5; margin-bottom:20px;">
+          <b style="color:white; display:block; margin-bottom:4px;">Deskripsi:</b>
+          <div id="descModalText" style="white-space:pre-wrap;">Tidak ada deskripsi.</div>
+        </div>
+
+        <div style="display:flex; gap:12px; margin-top:auto;">
+          <button onclick="document.getElementById('buyerProductDescModal').style.display='none'" style="flex:1; padding:12px; background:transparent; border:1px solid #4a5568; border-radius:8px; color:white; font-size:14px; font-weight:bold; cursor:pointer;">Kembali (Esc)</button>
+          <button id="descModalAddBtn" style="flex:1; padding:12px; background:var(--accent); border:none; border-radius:8px; color:var(--bg); font-size:14px; font-weight:bold; cursor:pointer;">+ Keranjang</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL SUPPLIER PRODUCTS -->
 <div id="supplierProductsModal" class="modal">
   <div class="modal-box" style="max-width:800px; width:95%;">
-    <div class="modal-header">
-      <h3 id="supplierProductsTitle">Produk Supplier</h3>
+    <div class="modal-header" style="border-bottom:1px solid #273251; padding-bottom:12px;">
+      <h3 id="supplierProductsTitle" style="font-size:16px; margin:0;">Produk Supplier</h3>
       <button onclick="document.getElementById('supplierProductsModal').style.display='none'" class="modal-close">✕</button>
     </div>
     <div class="table-container" style="margin-top:16px; max-height:400px; overflow-y:auto;">
-      <table class="admin-table">
+      <table class="admin-table" id="supplierProductsTable" style="width:100%; border-collapse:separate; border-spacing:0; font-size:13px;">
         <thead>
           <tr>
-            <th>Img</th>
-            <th>SKU</th>
-            <th>Nama Produk</th>
-            <th>Harga Modal</th>
-            <th>Harga Jual</th>
-            <th>Stok</th>
+            <th style="padding:12px; background:rgba(30,41,59,0.95); color:#94a3b8; font-weight:600; text-transform:uppercase; font-size:11px; position:sticky; top:0; z-index:10; border-bottom:1px solid rgba(255,255,255,0.05);">Img</th>
+            <th style="padding:12px; background:rgba(30,41,59,0.95); color:#94a3b8; font-weight:600; text-transform:uppercase; font-size:11px; position:sticky; top:0; z-index:10; border-bottom:1px solid rgba(255,255,255,0.05);">SKU</th>
+            <th style="padding:12px; background:rgba(30,41,59,0.95); color:#94a3b8; font-weight:600; text-transform:uppercase; font-size:11px; position:sticky; top:0; z-index:10; border-bottom:1px solid rgba(255,255,255,0.05);">Nama Produk</th>
+            <th style="padding:12px; background:rgba(30,41,59,0.95); color:#94a3b8; font-weight:600; text-transform:uppercase; font-size:11px; position:sticky; top:0; z-index:10; border-bottom:1px solid rgba(255,255,255,0.05);">Harga Modal</th>
+            <th style="padding:12px; background:rgba(30,41,59,0.95); color:#94a3b8; font-weight:600; text-transform:uppercase; font-size:11px; position:sticky; top:0; z-index:10; border-bottom:1px solid rgba(255,255,255,0.05);">Harga Jual</th>
+            <th style="padding:12px; background:rgba(30,41,59,0.95); color:#94a3b8; font-weight:600; text-transform:uppercase; font-size:11px; position:sticky; top:0; z-index:10; border-bottom:1px solid rgba(255,255,255,0.05);">Stok</th>
           </tr>
         </thead>
         <tbody id="supplierProductsTbody"></tbody>
@@ -1188,7 +1221,7 @@
       <button onclick="Admin.closeProductModal()" style="background:transparent; border:none; color:#a0aec0; font-size:18px; cursor:pointer;">✕</button>
     </div>
 
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
       <!-- Row 1 -->
       <div>
         <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Nama Produk *</label>
@@ -1219,32 +1252,43 @@
       </div>
 
       <!-- Row Baru Status Barang & Tempo -->
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
         <div>
           <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Status Barang</label>
-          <select id="pSumber" class="select-field" style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;" onchange="
+          <select id="pSumber" class="select-field" style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; font-weight:bold; color:#22c55e; font-size:13px;" onchange="
             const tEl = document.getElementById('pTempo');
-            if(this.value === 'Cash' && tEl) { tEl.value = ''; }
-            else if(tEl && !tEl.value) {
-                const d = new Date(); d.setDate(d.getDate() + 90);
-                const dd = String(d.getDate()).padStart(2, '0');
-                const mm = String(d.getMonth() + 1).padStart(2, '0');
-                tEl.value = d.getFullYear() + '-' + mm + '-' + dd;
+            if(this.value==='Cash') {
+              if(tEl) tEl.value = '';
+              this.style.color='#22c55e';
+            }
+            else if(this.value==='Hutang') {
+              this.style.color='#ef4444';
+              if(tEl && !tEl.value) {
+                  const d = new Date(); d.setDate(d.getDate() + 90);
+                  tEl.value = d.toISOString().split('T')[0];
+              }
+            }
+            else {
+              this.style.color='#f97316';
+              if(tEl && !tEl.value) {
+                  const d = new Date(); d.setDate(d.getDate() + 90);
+                  tEl.value = d.toISOString().split('T')[0];
+              }
             }
           ">
-            <option value="Cash">Cash</option>
-            <option value="Hutang">Hutang</option>
-            <option value="Titip Jual">Titip Jual</option>
+            <option value="Cash" style="color:#22c55e; background:#1e293b; font-weight:bold;">Cash</option>
+            <option value="Hutang" style="color:#ef4444; background:#1e293b; font-weight:bold;">Hutang</option>
+            <option value="Titip Jual" style="color:#f97316; background:#1e293b; font-weight:bold;">Titip Jual</option>
           </select>
         </div>
         <div>
-          <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Jatuh Tempo <span style="color:#ef4444; font-size:10px;">(Hutang/Titip)</span></label>
+          <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Jatuh Tempo</label>
           <input type="date" id="pTempo" style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px; color-scheme:dark;">
         </div>
       </div>
 
       <!-- Row 3 -->
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; grid-column: span 2;">
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; grid-column: span 2;">
         <div>
           <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Supplier</label>
           <select id="pSupplierName" onchange="Admin.populateSupplierWA()" style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
@@ -1258,9 +1302,13 @@
             <button type="button" onclick="Admin.simpanSupplierBaruInline()" style="padding:0 12px; background:var(--accent); color:var(--bg); border:none; border-radius:8px; font-weight:bold; cursor:pointer;">+ Tambah</button>
           </div>
         </div>
-        <div style="grid-column: span 2;">
-          <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">No. WA Supplier <small>(Otomatis / Opsional)</small></label>
+        <div>
+          <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">No. WA Supplier <small>(Otomatis/Opsional)</small></label>
           <input id="pSupplierWA" placeholder="08..." style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
+        </div>
+        <div>
+          <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Alamat Supplier <small>(Otomatis/Opsional)</small></label>
+          <input id="pSupplierAlamat" placeholder="Alamat..." style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
         </div>
       </div>
 
@@ -1285,7 +1333,7 @@
     </div>
 
     <!-- Row 4 -->
-    <div style="display:flex; gap:16px; margin-top:16px;">
+    <div style="display:flex; gap:12px; margin-top:12px;">
       <div style="flex:1;">
         <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Harga Modal (Rp) *</label>
         <input id="pModal" type="number" placeholder="" oninput="autoHargaJual()" style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
@@ -1301,7 +1349,7 @@
     </div>
 
     <!-- Row 5 -->
-    <div style="display:flex; gap:16px; margin-top:16px;">
+    <div style="display:flex; gap:12px; margin-top:12px;">
       <div style="flex:1;">
         <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Stok Awal</label>
         <input id="pStok" type="number" placeholder="0" style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
@@ -1319,7 +1367,7 @@
     </div>
 
     <!-- Row 6 -->
-    <div style="margin-top:16px;">
+    <div style="margin-top:12px;">
       <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Gambar (auto compress WebP 720px)</label>
       <div style="display:flex; align-items:center; background:#2d3748; border:1px solid #4a5568; border-radius:8px; padding:6px; cursor:pointer;" onclick="document.getElementById('pImg').click()">
          <button type="button" style="background:#e2e8f0; color:black; padding:6px 12px; font-size:12px; border:none; border-radius:4px; margin-right:10px; cursor:pointer;">Choose File</button>
@@ -1330,9 +1378,12 @@
     </div>
 
     <!-- Buttons -->
-    <div style="display:flex; gap:16px; margin-top:24px;">
-      <button onclick="Admin.closeProductModal()" style="flex:1; padding:12px; background:transparent; border:1px solid #4a5568; border-radius:8px; color:white; font-size:14px; font-weight:bold; cursor:pointer;">Batal</button>
-      <button onclick="Admin.addProduct()" style="flex:1; padding:12px; background:#22c55e; border:none; border-radius:8px; color:#0f172a; font-size:14px; font-weight:bold; cursor:pointer;">Simpan Produk</button>
+    <div style="margin-top:16px;">
+        <div style="font-size:11px; color:#a0aec0; margin-bottom:8px; text-align:center;">💡 Info: Tambah produk bisa menggunakan Scanner Barcode atau diimpor massal dari MS. Excel di tab "Manajemen Stok".</div>
+        <div style="display:flex; gap:12px;">
+          <button onclick="Admin.closeProductModal()" style="flex:1; padding:12px; background:transparent; border:1px solid #4a5568; border-radius:8px; color:white; font-size:14px; font-weight:bold; cursor:pointer;">Batal</button>
+          <button onclick="Admin.addProduct()" style="flex:1; padding:12px; background:#22c55e; border:none; border-radius:8px; color:#0f172a; font-size:14px; font-weight:bold; cursor:pointer;">Simpan Produk</button>
+        </div>
     </div>
 
   </div>

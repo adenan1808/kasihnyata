@@ -1913,16 +1913,20 @@ function populateSupplierSelect(selectedValue) {
   if(!sel) return;
   const sups = getSuppliers();
   sel.innerHTML = '<option value="">Pilih Supplier...</option>' +
-                  sups.map(s => `<option value="${window.escapeHTML(s.nama)}" data-wa="${window.escapeHTML(s.wa||'')}">${window.escapeHTML(s.nama)}</option>`).join("");
+                  sups.map(s => `<option value="${window.escapeHTML(s.nama)}" data-wa="${window.escapeHTML(s.wa||'')}" data-alamat="${window.escapeHTML(s.alamat||'')}">${window.escapeHTML(s.nama)}</option>`).join("");
   if(selectedValue) sel.value = selectedValue;
 }
 
 function populateSupplierWA() {
   const sel = document.getElementById("pSupplierName");
   const waInput = document.getElementById("pSupplierWA");
-  if(!sel || !waInput) return;
+  const alamatInput = document.getElementById("pSupplierAlamat");
+  if(!sel) return;
   const opt = sel.options[sel.selectedIndex];
-  if(opt && opt.dataset.wa) waInput.value = opt.dataset.wa;
+  if(opt) {
+      if(waInput && opt.dataset.wa) waInput.value = opt.dataset.wa;
+      if(alamatInput && opt.dataset.alamat) alamatInput.value = opt.dataset.alamat;
+  }
 }
 
 function simpanSupplierBaruInline() {
@@ -1992,7 +1996,14 @@ function _editProductForm(id){
   set("pStok",  p.stok !== undefined ? p.stok : "");
   set("pMinStok", p.minStok !== undefined ? p.minStok : 10);
   set("pSumber", p.sumber||"Cash");
-  if(p.sumber === "Cash") {
+  const sumberEl = document.getElementById("pSumber");
+  if(sumberEl) {
+      if(p.sumber === "Hutang") sumberEl.style.color = "#ef4444";
+      else if(p.sumber === "Titip Jual") sumberEl.style.color = "#f97316";
+      else sumberEl.style.color = "#22c55e";
+  }
+
+  if(p.sumber === "Cash" || !p.sumber) {
     set("pTempo", "");
   } else if (p.tempo) {
     let tempoStr = p.tempo;
@@ -2262,15 +2273,15 @@ function showSupplierProductsModal(nama) {
   tbody.innerHTML = prods.length === 0
     ? `<tr><td colspan="6" style="text-align:center; padding:20px;">Tidak ada produk</td></tr>`
     : prods.map(p => {
-      const img = p.thumb || p.img || "https://placehold.co/44/1e293b/22c55e?text=P";
+      const img = p.thumb || p.img || p.g || "https://placehold.co/44/1e293b/22c55e?text=P";
       return `
-        <tr>
-          <td><img src="${img}" style="width:36px; height:36px; border-radius:4px; object-fit:cover;"></td>
-          <td style="font-family:monospace; color:var(--accent);">${p.sku || "-"}</td>
-          <td style="font-weight:bold;">${p.n || p.name}</td>
-          <td>Rp ${(p.m||p.modal||0).toLocaleString('id')}</td>
-          <td>Rp ${(p.p||p.price||0).toLocaleString('id')}</td>
-          <td><b>${p.stok || 0}</b></td>
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.03); transition: background 0.15s;">
+          <td style="padding:12px;"><img src="${img}" style="width:36px; height:36px; border-radius:4px; object-fit:cover;"></td>
+          <td style="padding:12px; font-family:monospace; color:var(--accent);">${p.sku || "-"}</td>
+          <td style="padding:12px; font-weight:bold; color:var(--text1);">${p.n || p.name}</td>
+          <td style="padding:12px; color:var(--text2);">Rp ${(p.m||p.modal||0).toLocaleString('id')}</td>
+          <td style="padding:12px; color:var(--text1); font-weight:bold;">Rp ${(p.p||p.price||0).toLocaleString('id')}</td>
+          <td style="padding:12px;"><b>${p.stok || 0}</b></td>
         </tr>
       `;
     }).join("");
