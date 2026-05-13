@@ -2110,9 +2110,9 @@ function renderSupplierTable() {
             }
           </td>
           <td style="display:flex; gap:6px;">
-            <button onclick="Admin.editSupplier('${s.id}')" title="Edit" style="background:transparent; border:1px solid #4a5568; color:white; padding:4px; border-radius:4px; cursor:pointer;">✏️</button>
-            <a href="https://wa.me/${(s.wa||'').replace(/\\D/g,'')}" target="_blank" title="Chat WA" style="background:transparent; border:1px solid #22c55e; color:#22c55e; padding:4px; border-radius:4px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">💬</a>
-            <button onclick="Admin.deleteSupplier('${s.id}')" title="Hapus" style="background:transparent; border:1px solid #ef4444; color:#ef4444; padding:4px; border-radius:4px; cursor:pointer;">🗑️</button>
+            <button onclick="Admin.editSupplier('${s.id}')" title="Edit" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; padding:6px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✏️</button>
+            <a href="https://wa.me/${(s.wa||'').replace(/\\D/g,'')}" target="_blank" title="Chat WA" style="background:rgba(34, 197, 94, 0.15); border:1px solid rgba(34, 197, 94, 0.3); color:#4ade80; padding:6px; border-radius:6px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">💬</a>
+            <button onclick="Admin.deleteSupplier('${s.id}')" title="Hapus" style="background:rgba(239, 68, 68, 0.15); border:1px solid rgba(239, 68, 68, 0.3); color:#f87171; padding:6px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center;">🗑️</button>
           </td>
         </tr>
       `;

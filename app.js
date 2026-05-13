@@ -2051,8 +2051,15 @@ async function posBayar(){
 
   const total = _getPosGrandTotal();
   const dibayarInput = document.getElementById("posDibayar");
-  const dibayar = dibayarInput ? (parseFloat(dibayarInput.value.replace(/\D/g, '')) || 0) : 0;
+  let dibayar = dibayarInput ? (parseFloat(dibayarInput.value.replace(/\D/g, '')) || 0) : 0;
   const rawPayMethod = document.getElementById("posPayMethod")?.value || "Tunai";
+
+  // If payment method is cash and dibayar is 0, auto-assume exact cash.
+  if (rawPayMethod === "Tunai" && dibayar === 0) {
+      dibayar = total;
+      if(dibayarInput) dibayarInput.value = dibayar.toLocaleString('id');
+  }
+
   if (rawPayMethod === "Tunai" && dibayar < total) {
       const kembalianEl = document.getElementById("posKembalian");
       const kembalianLabelEl = document.getElementById("posKembalianLabel");
@@ -2607,7 +2614,7 @@ function calcKembalian() {
   }
 
   if (bayarBtn) {
-    if (getCart().length > 0 && (!isTunai || dibayar >= total)) {
+    if (getCart().length > 0 && (!isTunai || dibayar >= total || dibayar === 0)) {
       bayarBtn.disabled = false;
     } else {
       bayarBtn.disabled = true;
