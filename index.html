@@ -830,8 +830,8 @@
         <h2 style="margin:0; font-size:18px; color:white; font-weight:700;">Manajemen Supplier</h2>
         <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
           <input id="supplierSearchInput" placeholder="Cari nama / no WA..." oninput="Admin.renderSupplierTable()" style="padding:10px 14px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px; width: 200px;">
-          <div style="padding:10px 14px; border:1px solid #b45309; border-radius:8px; color:#fcd34d; font-size:13px; background:rgba(180,83,9,0.2); display:flex; align-items:center; gap:6px;">
-            ⏰ Peringatan: <span id="supplierTempoWarning">7 hari</span>
+          <div style="padding:10px 14px; border:1px solid #b45309; border-radius:8px; color:#fcd34d; font-size:13px; background:rgba(180,83,9,0.2); display:flex; align-items:center; gap:6px; cursor:pointer;" onclick="Admin.openTempoWarningSettings()">
+            ⏰ Peringatan: <span id="supplierTempoWarning">7 hari</span> ⚙️
           </div>
           <button onclick="Admin.openSupplierModal()" style="padding:10px 16px; background:#22c55e; border:none; border-radius:8px; color:#0f172a; font-weight:bold; font-size:13px; cursor:pointer;">+ Tambah Supplier</button>
         </div>
@@ -1026,6 +1026,31 @@
         </thead>
         <tbody id="supplierProductsTbody"></tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TEMPO WARNING SETTINGS -->
+<div id="tempoWarningModal" class="modal">
+  <div class="modal-box" style="max-width:300px;">
+    <div class="modal-header" style="border-bottom:1px solid #273251; padding-bottom:8px;">
+      <h3 style="font-size:16px; margin:0;">Peringatan Jatuh Tempo</h3>
+      <button onclick="document.getElementById('tempoWarningModal').style.display='none'" class="modal-close">✕</button>
+    </div>
+    <div style="margin-top:16px;">
+      <label class="field-label">Munculkan peringatan (oranye) dalam:</label>
+      <select id="tempoWarningSelect" style="width:100%; padding:8px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px; margin-bottom:12px;" onchange="
+        if(this.value === 'custom') { document.getElementById('tempoWarningCustom').style.display='block'; }
+        else { document.getElementById('tempoWarningCustom').style.display='none'; }
+      ">
+        <option value="3">3 Hari</option>
+        <option value="7" selected>7 Hari</option>
+        <option value="14">14 Hari</option>
+        <option value="30">30 Hari</option>
+        <option value="custom">Custom (Hari)</option>
+      </select>
+      <input type="number" id="tempoWarningCustom" placeholder="Berapa hari?" style="width:100%; padding:8px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px; display:none; margin-bottom:12px;">
+      <button onclick="Admin.saveTempoWarningSettings()" style="width:100%; padding:10px; background:var(--accent); color:var(--bg); border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Simpan</button>
     </div>
   </div>
 </div>

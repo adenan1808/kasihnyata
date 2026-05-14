@@ -1092,7 +1092,7 @@ function renderOwnerProdukList(){
       <td title="${p.supplierName||''}"><div style="width:100%; overflow:hidden; text-overflow:ellipsis;">${p.supplierName||'-'}</div></td>
       <td>${tempoWarning}</td>
       <td style="text-align:center; display:flex; gap:8px; justify-content:center; align-items:center;">
-        <button class="owner-produk-del" data-id="${id}" title="Hapus produk" style="width: 24px; height: 24px; font-size: 13px; border: none; background: transparent; cursor: pointer; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">🗑️</button>
+        <button class="owner-produk-del" data-id="${id}" title="Hapus produk" style="width: 20px; height: 20px; font-size: 11px; border: none; background: rgba(239, 68, 68, 0.15); border-radius:4px; color: #ef4444; cursor: pointer; transition: transform 0.1s; display:flex; align-items:center; justify-content:center;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">🗑️</button>
       </td>
     `;
 
@@ -2113,6 +2113,10 @@ function renderSupplierTable() {
 
   const term = (document.getElementById("supplierSearchInput")?.value || "").toLowerCase();
 
+  const warnDays = parseInt(localStorage.getItem("supplierTempoWarningDays") || "7", 10);
+  const warnSpan = document.getElementById("supplierTempoWarning");
+  if(warnSpan) warnSpan.textContent = warnDays + " hari";
+
   if (term) {
     sups = sups.filter(s =>
       (s.nama || "").toLowerCase().includes(term) ||
@@ -2150,12 +2154,14 @@ function renderSupplierTable() {
         tempoDisp = tDate.toLocaleDateString("id-ID", {day:"numeric",month:"short",year:"numeric"});
         const diffDays = Math.ceil((tDate - now) / (1000 * 60 * 60 * 24));
 
+        const warningDays = parseInt(localStorage.getItem("supplierTempoWarningDays") || "7", 10);
+
         if (diffDays < 0) {
            statusColor = "color:#ef4444; font-weight:bold;"; // Red (overdue)
-        } else if (diffDays <= 7) {
-           statusColor = "color:#f97316; font-weight:bold;"; // Orange (<=7 days)
+        } else if (diffDays <= warningDays) {
+           statusColor = "color:#f97316; font-weight:bold;"; // Orange (<= warning days)
         } else {
-           statusColor = "color:#facc15;"; // Yellow (has debt but > 7 days)
+           statusColor = "color:#facc15;"; // Yellow (has debt but > warning days)
         }
       }
 
@@ -2175,14 +2181,50 @@ function renderSupplierTable() {
               : `<span style="color:#ef4444; font-weight:bold; font-size:11px; padding:4px 8px;">Tidak Aktif</span>`
             }
           </td>
-          <td style="display:flex; gap:6px;">
-            <button onclick="Admin.editSupplier('${s.id}')" title="Edit" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; padding:6px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✏️</button>
-            <a href="https://wa.me/${(s.wa||'').replace(/\\D/g,'')}" target="_blank" title="Chat WA" style="background:rgba(34, 197, 94, 0.15); border:1px solid rgba(34, 197, 94, 0.3); color:#4ade80; padding:6px; border-radius:6px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">💬</a>
-            <button onclick="Admin.deleteSupplier('${s.id}')" title="Hapus" style="background:rgba(239, 68, 68, 0.15); border:1px solid rgba(239, 68, 68, 0.3); color:#f87171; padding:6px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center;">🗑️</button>
+          <td style="display:flex; gap:4px;">
+            <button onclick="Admin.editSupplier('${s.id}')" title="Edit" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; padding:4px 6px; border-radius:4px; font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✏️</button>
+            <a href="https://wa.me/${(s.wa||'').replace(/\\D/g,'')}" target="_blank" title="Chat WA" style="background:rgba(34, 197, 94, 0.15); border:1px solid rgba(34, 197, 94, 0.3); color:#4ade80; padding:4px 6px; border-radius:4px; font-size:11px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">💬</a>
+            <button onclick="Admin.deleteSupplier('${s.id}')" title="Hapus" style="background:rgba(239, 68, 68, 0.15); border:1px solid rgba(239, 68, 68, 0.3); color:#f87171; padding:4px 6px; border-radius:4px; font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center;">🗑️</button>
           </td>
         </tr>
       `;
     }).join("");
+}
+
+function openTempoWarningSettings() {
+  const current = localStorage.getItem("supplierTempoWarningDays") || "7";
+  const sel = document.getElementById("tempoWarningSelect");
+  const cust = document.getElementById("tempoWarningCustom");
+  if(sel) {
+      if(["3", "7", "14", "30"].includes(current)) {
+          sel.value = current;
+          if(cust) cust.style.display = "none";
+      } else {
+          sel.value = "custom";
+          if(cust) {
+              cust.style.display = "block";
+              cust.value = current;
+          }
+      }
+  }
+  document.getElementById('tempoWarningModal').style.display = 'flex';
+}
+
+function saveTempoWarningSettings() {
+  const sel = document.getElementById("tempoWarningSelect");
+  let val = "7";
+  if(sel) {
+      if(sel.value === "custom") {
+          const cust = document.getElementById("tempoWarningCustom");
+          val = cust ? (parseInt(cust.value, 10) || 7).toString() : "7";
+      } else {
+          val = sel.value;
+      }
+  }
+  localStorage.setItem("supplierTempoWarningDays", val);
+  document.getElementById('tempoWarningModal').style.display = 'none';
+  renderSupplierTable();
+  showToast("Pengaturan peringatan disimpan");
 }
 
 function openSupplierModal() {
@@ -2509,8 +2551,8 @@ function renderTable(){
         <td style="color:${laba>=0?'#4ade80':'#f87171'}">${rp(laba)}</td>
         <td>${margin}%</td>
         <td>
-          <div style="display:flex; flex-direction:column; gap:2px; align-items:center;">
-            <span style="font-size:11px; padding:2px 6px; border-radius:4px; font-weight:600;">${sumberProd}</span>
+          <div style="display:flex; flex-direction:row; gap:6px; align-items:center;">
+            <span style="font-size:11px; padding:2px 6px; border-radius:4px; font-weight:600; white-space:nowrap;">${sumberProd}</span>
             ${statusWarningHtml}
           </div>
         </td>
@@ -2892,7 +2934,7 @@ window.Admin = {
   // Supplier
   renderSupplierTable, openSupplierModal, closeSupplierModal, saveSupplier,
   editSupplier, deleteSupplier, setSupplierSort, showSupplierProductsModal, editSupplierInline,
-  populateSupplierSelect, populateSupplierWA, simpanSupplierBaruInline,
+  populateSupplierSelect, populateSupplierWA, simpanSupplierBaruInline, openTempoWarningSettings, saveTempoWarningSettings,
   // Product inline edit
   _editProductPrice, _adjustProductStok, _changeProductImg, _editProductForm,
   filterProdukAdmin,
