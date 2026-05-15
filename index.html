@@ -1239,180 +1239,231 @@
 
 <!-- TAMBAH / EDIT PRODUK MODAL -->
 <div id="productModal" class="modal">
-  <div class="modal-box" style="max-width: 600px; padding: 24px; background: #1a202c; border: 1px solid #2d3748;">
+  <div class="modal-box" style="max-width: 900px; padding: 0; background: #1a202c; border: 1px solid #2d3748; display: flex; flex-direction: column; max-height: 90vh;">
 
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+    <!-- Header -->
+    <div style="padding: 20px 24px; border-bottom: 1px solid #2d3748; display:flex; justify-content:space-between; align-items:center; position: sticky; top: 0; background: #1a202c; z-index: 10;">
       <h3 style="margin:0; font-size:18px; color:white; font-weight:bold;" id="productModalTitle">Tambah Produk Baru</h3>
       <button onclick="Admin.closeProductModal()" style="background:transparent; border:none; color:#a0aec0; font-size:18px; cursor:pointer;">✕</button>
     </div>
 
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-      <!-- Row 1 -->
-      <div>
-        <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Nama Produk *</label>
-        <input id="pName" placeholder="Nama produk" style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
-      </div>
-      <div>
-        <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Brand / Merek</label>
-        <input id="pBrand" placeholder="Indomie, Aqua, dll" style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
-      </div>
+    <!-- Body -->
+    <div style="padding: 24px; overflow-y: auto; flex: 1;">
 
-      <!-- Row 2 -->
-      <div>
-        <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px; display:flex; justify-content:space-between;">
-          <span>Kategori *</span>
+      <!-- Section: Identitas Produk -->
+      <div style="margin-bottom: 24px; padding: 16px; background: #2d3748; border-radius: 8px;">
+        <h4 style="color: var(--accent); font-size: 15px; margin-bottom: 16px; font-weight:bold;">1. Identitas Produk</h4>
+        <div style="display:flex; flex-direction:column; gap:16px;">
           <div>
-            <span onclick="App.openTambahKategoriModal()" style="cursor:pointer; color:var(--accent);" title="Tambah Kategori">➕</span>
-            <span onclick="Admin.deleteSelectedKategori()" style="cursor:pointer; color:#ef4444; margin-left:8px;" title="Hapus Kategori">🗑️</span>
+            <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Nama Produk *</label>
+            <input id="pName" placeholder="Nama produk lengkap" style="width:100%; padding:10px 12px; background:#1a202c; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
           </div>
-        </label>
-        <select id="pKategori" class="select-field" style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;"></select>
-      </div>
-      <div>
-        <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Atau Kategori Baru</label>
-        <div style="display:flex; gap:8px;">
-          <input id="pKatBaru" placeholder="Tulis kategori baru..." onkeypress="if(event.key === 'Enter'){ event.preventDefault(); window.simpanKategoriBaruInline(); }" style="flex:1; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
-          <button type="button" onclick="window.simpanKategoriBaruInline()" style="padding:0 12px; background:var(--accent); color:var(--bg); border:none; border-radius:8px; font-weight:bold; cursor:pointer;">+ Tambah</button>
-        </div>
-      </div>
 
-      <!-- Row Baru Status Barang & Tempo -->
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-        <div>
-          <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Status Barang</label>
-          <select id="pSumber" class="select-field" style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; font-weight:bold; color:#22c55e; font-size:13px;" onchange="
-            const tEl = document.getElementById('pTempo');
-            if(this.value==='Cash') {
-              if(tEl) tEl.value = '';
-              this.style.color='#22c55e';
-            }
-            else if(this.value==='Hutang') {
-              this.style.color='#ef4444';
-              if(tEl && !tEl.value) {
-                  const d = new Date(); d.setDate(d.getDate() + 90);
-                  tEl.value = d.toISOString().split('T')[0];
-              }
-            }
-            else {
-              this.style.color='#f97316';
-              if(tEl && !tEl.value) {
-                  const d = new Date(); d.setDate(d.getDate() + 90);
-                  tEl.value = d.toISOString().split('T')[0];
-              }
-            }
-          ">
-            <option value="Cash" style="color:#22c55e; background:#1e293b; font-weight:bold;">Cash</option>
-            <option value="Hutang" style="color:#ef4444; background:#1e293b; font-weight:bold;">Hutang</option>
-            <option value="Titip Jual" style="color:#f97316; background:#1e293b; font-weight:bold;">Titip Jual</option>
-          </select>
-        </div>
-        <div>
-          <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Jatuh Tempo</label>
-          <input type="date" id="pTempo" style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px; color-scheme:dark;">
-        </div>
-      </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+            <div>
+              <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Brand / Merek</label>
+              <input id="pBrand" placeholder="Indomie, Aqua, dll" style="width:100%; padding:10px 12px; background:#1a202c; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
+            </div>
+            <div>
+              <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px; display:flex; justify-content:space-between;">
+                <span>Kategori *</span>
+                <div>
+                  <span onclick="App.openTambahKategoriModal()" style="cursor:pointer; color:var(--accent);" title="Tambah Kategori">➕</span>
+                  <span onclick="Admin.deleteSelectedKategori()" style="cursor:pointer; color:#ef4444; margin-left:8px;" title="Hapus Kategori">🗑️</span>
+                </div>
+              </label>
+              <select id="pKategori" class="select-field" style="width:100%; padding:10px 12px; background:#1a202c; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;"></select>
+            </div>
+          </div>
 
-      <!-- Row 3 -->
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; grid-column: span 2;">
-        <div>
-          <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Supplier</label>
-          <select id="pSupplierName" onchange="Admin.populateSupplierWA()" style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
-            <option value="">Pilih Supplier...</option>
-          </select>
-        </div>
-        <div>
-          <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Atau Supplier Baru</label>
-          <div style="display:flex; gap:8px;">
-            <input id="pSupplierBaru" placeholder="Nama Supplier Baru..." onkeypress="if(event.key === 'Enter'){ event.preventDefault(); Admin.simpanSupplierBaruInline(); }" style="flex:1; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
-            <button type="button" onclick="Admin.simpanSupplierBaruInline()" style="padding:0 12px; background:var(--accent); color:var(--bg); border:none; border-radius:8px; font-weight:bold; cursor:pointer;">+ Tambah</button>
+          <!-- Hidden inputs for legacy logic/fallbacks -->
+          <input type="hidden" id="pKatBaru" value="">
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+            <div>
+              <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px; display:flex; justify-content:space-between;">
+                <span>SKU (kosong = otomatis)</span>
+                <span onclick="window.generateAndSetSKU()" style="cursor:pointer; color:var(--accent);" title="Auto Generate SKU">Otomatis</span>
+              </label>
+              <div style="display:flex; align-items:center; gap:4px; width:100%;">
+                <input id="pSku1" placeholder="MKN" style="width:30%; padding:10px 8px; background:#1a202c; border:1px solid #4a5568; border-radius:8px; color:#a0aec0; font-size:13px; text-align:center;">
+                <span style="color:#a0aec0; font-weight:bold;">-</span>
+                <input id="pSku2" placeholder="IND" style="width:30%; padding:10px 8px; background:#1a202c; border:1px solid #4a5568; border-radius:8px; color:#a0aec0; font-size:13px; text-align:center;">
+                <span style="color:#a0aec0; font-weight:bold;">-</span>
+                <input id="pSku3" placeholder="000001" style="flex:1; padding:10px 12px; background:#1a202c; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px; text-align:center;">
+              </div>
+            </div>
+            <div>
+              <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Barcode (Scanner)</label>
+              <input id="pBarcode" placeholder="Arahkan scanner ke sini..." style="width:100%; padding:10px 12px; background:#1a202c; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
+            </div>
           </div>
         </div>
-        <div>
-          <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">No. WA Supplier <small>(Otomatis/Opsional)</small></label>
-          <input id="pSupplierWA" placeholder="08..." style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
-        </div>
-        <div>
-          <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Alamat Supplier <small>(Otomatis/Opsional)</small></label>
-          <input id="pSupplierAlamat" placeholder="Alamat..." style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
-        </div>
       </div>
 
-      <!-- Row 4 -->
-      <div>
-        <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px; display:flex; justify-content:space-between;">
-          <span>SKU (kosong = otomatis)</span>
-          <span onclick="window.generateAndSetSKU()" style="cursor:pointer; color:var(--accent);" title="Auto Generate SKU">Otomatis</span>
-        </label>
-        <div style="display:flex; align-items:center; gap:4px; width:100%;">
-          <input id="pSku1" placeholder="MKN" style="width:30%; padding:10px 8px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:#a0aec0; font-size:13px; text-align:center;">
-          <span style="color:#a0aec0; font-weight:bold;">-</span>
-          <input id="pSku2" placeholder="IND" style="width:30%; padding:10px 8px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:#a0aec0; font-size:13px; text-align:center;">
-          <span style="color:#a0aec0; font-weight:bold;">-</span>
-          <input id="pSku3" placeholder="000001" style="flex:1; padding:10px 8px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:#a0aec0; font-size:13px; text-align:center;">
+      <!-- Section: Harga -->
+      <div style="margin-bottom: 24px; padding: 16px; background: #2d3748; border-radius: 8px;">
+        <h4 style="color: var(--accent); font-size: 15px; margin-bottom: 16px; font-weight:bold;">2. Harga</h4>
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px;">
+          <div style="background: #1a202c; padding: 16px; border-radius: 8px; border: 1px solid #4a5568;">
+            <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Harga Modal (Rp) *</label>
+            <input id="pModal" type="number" placeholder="0" oninput="autoHargaJual()" style="width:100%; padding:12px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:16px; font-weight:bold;">
+          </div>
+          <div style="background: #1a202c; padding: 16px; border-radius: 8px; border: 1px solid #4a5568;">
+            <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Markup (%)</label>
+            <input id="defaultMargin" type="number" placeholder="20" value="20" oninput="autoHargaJual()" style="width:100%; padding:12px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:16px; font-weight:bold;">
+          </div>
+          <div style="background: rgba(34, 197, 94, 0.1); padding: 16px; border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.3);">
+            <label class="field-label" style="font-size:12px; color:#22c55e; margin-bottom:6px;">Harga Jual (Rp) *</label>
+            <input id="pPrice" type="number" placeholder="0" oninput="autoMargin()" style="width:100%; padding:12px 12px; background:#1a202c; border:1px solid #22c55e; border-radius:8px; color:#22c55e; font-size:18px; font-weight:bold;">
+          </div>
         </div>
       </div>
-      <div>
-        <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Barcode</label>
-        <input id="pBarcode" placeholder="8991234567890" style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:#a0aec0; font-size:13px;">
+
+      <!-- Section: Stok -->
+      <div style="margin-bottom: 24px; padding: 16px; background: #2d3748; border-radius: 8px;">
+        <h4 style="color: var(--accent); font-size: 15px; margin-bottom: 16px; font-weight:bold;">3. Stok</h4>
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px;">
+          <div>
+            <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Stok Awal</label>
+            <input id="pStok" type="number" placeholder="0" style="width:100%; padding:10px 12px; background:#1a202c; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
+          </div>
+          <div>
+            <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Stok Minimum</label>
+            <input id="pMinStok" type="number" placeholder="10" value="10" style="width:100%; padding:10px 12px; background:#1a202c; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
+          </div>
+          <div>
+            <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px; display:flex; justify-content:space-between;"><span>Satuan</span><span onclick="App.openSatuanModal()" style="cursor:pointer; color:var(--accent);" title="Edit Satuan">⚙️</span></label>
+            <select id="pSatuan" style="width:100%; padding:10px 12px; background:#1a202c; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
+               <option value="pcs">pcs</option>
+            </select>
+          </div>
+        </div>
       </div>
+
+      <!-- Section: Supplier -->
+      <div style="margin-bottom: 24px; padding: 16px; background: #2d3748; border-radius: 8px;">
+        <h4 style="color: var(--accent); font-size: 15px; margin-bottom: 16px; font-weight:bold;">4. Supplier</h4>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom: 16px;">
+          <div>
+            <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px; display:flex; justify-content:space-between;">
+              <span>Supplier</span>
+              <div>
+                <span onclick="Admin.openTambahSupplierModal()" style="cursor:pointer; color:var(--accent);" title="Tambah Supplier">➕</span>
+              </div>
+            </label>
+            <select id="pSupplierName" onchange="Admin.populateSupplierWA()" style="width:100%; padding:10px 12px; background:#1a202c; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
+              <option value="">Pilih Supplier...</option>
+            </select>
+            <!-- Hidden inputs to preserve logic -->
+            <input type="hidden" id="pSupplierBaru" value="">
+            <input type="hidden" id="pSupplierAlamat" value="">
+          </div>
+          <div>
+            <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">No. WA Supplier</label>
+            <input id="pSupplierWA" placeholder="08..." style="width:100%; padding:10px 12px; background:#1a202c; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+          <div>
+            <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Tipe Pembayaran Supplier</label>
+            <select id="pSumber" class="select-field" style="width:100%; padding:10px 12px; background:#1a202c; border:1px solid #4a5568; border-radius:8px; font-weight:bold; color:#22c55e; font-size:13px;" onchange="
+              const tEl = document.getElementById('pTempoContainer');
+              const tInput = document.getElementById('pTempo');
+              if(this.value==='Cash') {
+                tEl.style.display = 'none';
+                tInput.value = '';
+                this.style.color='#22c55e';
+              }
+              else if(this.value==='Hutang') {
+                tEl.style.display = 'block';
+                this.style.color='#ef4444';
+                if(!tInput.value) {
+                    const d = new Date(); d.setDate(d.getDate() + 90);
+                    tInput.value = d.toISOString().split('T')[0];
+                }
+              }
+              else {
+                tEl.style.display = 'block';
+                this.style.color='#f97316';
+                if(!tInput.value) {
+                    const d = new Date(); d.setDate(d.getDate() + 90);
+                    tInput.value = d.toISOString().split('T')[0];
+                }
+              }
+            ">
+              <option value="Cash" style="color:#22c55e; background:#1e293b; font-weight:bold;">Cash</option>
+              <option value="Hutang" style="color:#ef4444; background:#1e293b; font-weight:bold;">Tempo / Hutang</option>
+              <option value="Titip Jual" style="color:#f97316; background:#1e293b; font-weight:bold;">Titip Jual / Konsinyasi</option>
+            </select>
+          </div>
+          <div id="pTempoContainer" style="display:none;">
+            <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Jatuh Tempo</label>
+            <input type="date" id="pTempo" style="width:100%; padding:10px 12px; background:#1a202c; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px; color-scheme:dark;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Tambahan (Media) -->
+      <div style="padding: 16px; background: #2d3748; border-radius: 8px;">
+        <h4 style="color: var(--accent); font-size: 15px; margin-bottom: 16px; font-weight:bold;">5. Tambahan (Media)</h4>
+        <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Gambar (auto compress WebP 720px)</label>
+        <div class="upload-area" style="display:flex; flex-direction:column; align-items:center; justify-content:center; background:#1a202c; border:2px dashed #4a5568; border-radius:8px; padding:24px; cursor:pointer; text-align:center;" onclick="document.getElementById('pImg').click()">
+           <div id="pImgPrev" style="margin-bottom:12px; display:none;"></div>
+           <button type="button" style="background:#e2e8f0; color:black; padding:8px 16px; font-size:13px; border:none; border-radius:4px; margin-bottom:8px; cursor:pointer; font-weight:bold;">📸 Pilih atau Drag & Drop Gambar</button>
+           <span id="pImgText" style="color:#a0aec0; font-size:12px;">Maksimal 5MB. Format JPG, PNG, WebP.</span>
+        </div>
+        <input type="file" id="pImg" accept="image/*" style="display:none" onchange="const f = this.files[0]; if(f) { document.getElementById('pImgText').textContent = f.name; const r = new FileReader(); r.onload=e=>{ document.getElementById('pImgPrev').innerHTML = '<img src=''+e.target.result+'' style='height:80px; border-radius:8px; object-fit:cover;'>'; document.getElementById('pImgPrev').style.display='block'; }; r.readAsDataURL(f); }">
+      </div>
+
     </div>
 
-    <!-- Row 4 -->
-    <div style="display:flex; gap:12px; margin-top:12px;">
-      <div style="flex:1;">
-        <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Harga Modal (Rp) *</label>
-        <input id="pModal" type="number" placeholder="" oninput="autoHargaJual()" style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
-      </div>
-      <div style="flex:1;">
-        <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Markup (%)</label>
-        <input id="defaultMargin" type="number" placeholder="20" value="20" oninput="autoHargaJual()" style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
-      </div>
-      <div style="flex:1;">
-        <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Harga Jual (Rp) *</label>
-        <input id="pPrice" type="number" placeholder="" style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
-      </div>
-    </div>
-
-    <!-- Row 5 -->
-    <div style="display:flex; gap:12px; margin-top:12px;">
-      <div style="flex:1;">
-        <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Stok Awal</label>
-        <input id="pStok" type="number" placeholder="0" style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
-      </div>
-      <div style="flex:1;">
-        <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Stok Minimum</label>
-        <input id="pMinStok" type="number" placeholder="10" value="10" style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
-      </div>
-      <div style="flex:1;">
-        <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px; display:flex; justify-content:space-between;"><span>Satuan</span><span onclick="App.openSatuanModal()" style="cursor:pointer; color:var(--accent);" title="Edit Satuan">⚙️</span></label>
-        <select id="pSatuan" style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px;">
-           <option value="pcs">pcs</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Row 6 -->
-    <div style="margin-top:12px;">
-      <label class="field-label" style="font-size:12px; color:#a0aec0; margin-bottom:6px;">Gambar (auto compress WebP 720px)</label>
-      <div style="display:flex; align-items:center; background:#2d3748; border:1px solid #4a5568; border-radius:8px; padding:6px; cursor:pointer;" onclick="document.getElementById('pImg').click()">
-         <button type="button" style="background:#e2e8f0; color:black; padding:6px 12px; font-size:12px; border:none; border-radius:4px; margin-right:10px; cursor:pointer;">Choose File</button>
-         <span id="pImgText" style="color:#a0aec0; font-size:12px;">No file chosen</span>
-         <div id="pImgPrev" style="margin-left:auto; display:none;"></div>
-      </div>
-      <input type="file" id="pImg" accept="image/*" style="display:none" onchange="const f = this.files[0]; if(f) { document.getElementById('pImgText').textContent = f.name; const r = new FileReader(); r.onload=e=>{ document.getElementById('pImgPrev').innerHTML = '<img src=\''+e.target.result+'\' style=\'height:24px; border-radius:4px;\'>'; document.getElementById('pImgPrev').style.display='block'; }; r.readAsDataURL(f); }">
-    </div>
-
-    <!-- Buttons -->
-    <div style="margin-top:16px;">
-        <div style="font-size:11px; color:#a0aec0; margin-bottom:8px; text-align:center;">💡 Info: Tambah produk bisa menggunakan Scanner Barcode atau diimpor massal dari MS. Excel di tab "Manajemen Stok".</div>
-        <div style="display:flex; gap:12px;">
-          <button onclick="Admin.closeProductModal()" style="flex:1; padding:12px; background:transparent; border:1px solid #4a5568; border-radius:8px; color:white; font-size:14px; font-weight:bold; cursor:pointer;">Batal</button>
-          <button onclick="Admin.addProduct()" style="flex:1; padding:12px; background:#22c55e; border:none; border-radius:8px; color:#0f172a; font-size:14px; font-weight:bold; cursor:pointer;">Simpan Produk</button>
+    <!-- Footer -->
+    <div style="padding: 16px 24px; border-top: 1px solid #2d3748; background: #1a202c; position: sticky; bottom: 0; z-index: 10;">
+        <div style="font-size:11px; color:#a0aec0; margin-bottom:12px; text-align:center;">💡 Info: Tambah produk bisa menggunakan Scanner Barcode atau diimpor massal dari MS. Excel di tab "Manajemen Stok".</div>
+        <div style="display:flex; gap:12px; justify-content: flex-end;">
+          <button onclick="Admin.closeProductModal()" style="padding:12px 24px; background:transparent; border:1px solid #4a5568; border-radius:8px; color:white; font-size:14px; font-weight:bold; cursor:pointer; min-width: 120px;">Batal</button>
+          <button onclick="Admin.addProduct()" style="padding:12px 24px; background:#22c55e; border:none; border-radius:8px; color:#0f172a; font-size:14px; font-weight:bold; cursor:pointer; min-width: 160px;">Simpan Produk</button>
         </div>
     </div>
 
   </div>
 </div>
 
+<!-- MINI POPUP SUPPLIER BARU -->
+<div id="supplierMiniModal" class="modal" style="z-index: 9999;">
+  <div class="modal-box" style="max-width: 400px; padding: 24px; background: #1a202c; border: 1px solid #2d3748;">
+    <h3 style="margin:0 0 16px 0; font-size:18px; color:white;">Tambah Supplier Baru</h3>
+    <input id="miniSupplierName" placeholder="Nama Supplier..." style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px; margin-bottom: 12px;">
+    <input id="miniSupplierWA" placeholder="No WhatsApp..." style="width:100%; padding:10px 12px; background:#2d3748; border:1px solid #4a5568; border-radius:8px; color:white; font-size:13px; margin-bottom: 16px;">
+    <div style="display:flex; gap:12px; justify-content:flex-end;">
+      <button onclick="document.getElementById('supplierMiniModal').style.display='none';" class="btn-sm" style="background:transparent; border:1px solid #4a5568;">Batal</button>
+      <button onclick="Admin.simpanSupplierMini()" class="btn-sm" style="background:#22c55e; color:black;">Simpan</button>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+  window.autoHargaJual = function() {
+    const modal = parseFloat(document.getElementById('pModal').value) || 0;
+    const margin = parseFloat(document.getElementById('defaultMargin').value) || 0;
+    if(modal > 0) {
+      document.getElementById('pPrice').value = Math.round(modal + (modal * margin / 100));
+    } else {
+      document.getElementById('pPrice').value = '';
+    }
+  };
+
+  window.autoMargin = function() {
+    const modal = parseFloat(document.getElementById('pModal').value) || 0;
+    const price = parseFloat(document.getElementById('pPrice').value) || 0;
+    if (modal > 0 && price >= modal) {
+       document.getElementById('defaultMargin').value = Math.round(((price - modal) / modal) * 100);
+    }
+  };
+</script>
 </body>
+
 </html>

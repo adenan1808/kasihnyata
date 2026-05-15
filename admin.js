@@ -3118,3 +3118,52 @@ window.simpanKategoriBaruInline = function() {
     input.value = "";
     showToast("✅ Kategori ditambahkan");
 };
+
+
+window.Admin.openTambahSupplierModal = function() {
+    document.getElementById('miniSupplierName').value = '';
+    document.getElementById('miniSupplierWA').value = '';
+    document.getElementById('supplierMiniModal').style.display = 'flex';
+};
+
+window.Admin.simpanSupplierMini = async function() {
+    const name = document.getElementById('miniSupplierName').value.trim();
+    const wa = document.getElementById('miniSupplierWA').value.trim();
+    if (!name) { alert("Nama supplier harus diisi"); return; }
+
+    try {
+        let suppliers = JSON.parse(localStorage.getItem('suppliers') || "[]");
+        if (!Array.isArray(suppliers)) suppliers = [];
+
+        suppliers.push({ name: name, wa: wa, alamat: '' });
+        localStorage.setItem('suppliers', JSON.stringify(suppliers));
+
+        document.getElementById('supplierMiniModal').style.display = 'none';
+
+        // Re-populate dropdown and select the new one
+        if(window.Admin && window.Admin.populateSupplierSelect) {
+             window.Admin.populateSupplierSelect();
+        }
+
+        const sel = document.getElementById('pSupplierName');
+        if (sel) {
+            let optionExists = false;
+            for(let i=0; i<sel.options.length; i++){
+                if(sel.options[i].value === name) optionExists = true;
+            }
+            if(!optionExists) {
+               const opt = document.createElement('option');
+               opt.value = name;
+               opt.textContent = name;
+               sel.appendChild(opt);
+            }
+            sel.value = name;
+
+            const waInp = document.getElementById('pSupplierWA');
+            if(waInp) waInp.value = wa;
+        }
+    } catch(e) {
+        console.error(e);
+        alert("Gagal simpan supplier");
+    }
+};
