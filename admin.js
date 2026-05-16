@@ -707,6 +707,7 @@ function _updateExistingProduct(id){
   if(price <= 0){ showToast("Harga jual harus > 0"); return; }
   if(products[idx].n !== undefined) products[idx].n = name; else products[idx].name = name;
   products[idx].brand = brand;
+  products[idx].desc = desc;
   products[idx].barcode = barcode;
   products[idx].satuan = satuan;
   if(products[idx].p !== undefined) products[idx].p = price; else products[idx].price = price;
@@ -1005,6 +1006,7 @@ function renderOwnerProdukList(){
             <tr>
                 <th style="padding:12px 16px;">Img</th>
                 <th style="padding:12px 16px;">SKU</th>
+                <th style="padding:12px 16px;">Deskripsi</th>
                 <th onclick="sortProdukAdmin('n')" style="padding:12px 16px; cursor:pointer;">Nama Produk &#8593;</th>
                 <th onclick="sortProdukAdmin('k')" style="padding:12px 16px; cursor:pointer;">Kategori &#8593;</th>
                 <th onclick="sortProdukAdmin('m')" style="padding:12px 16px; cursor:pointer;">Harga Modal</th>
@@ -3165,5 +3167,111 @@ window.Admin.simpanSupplierMini = async function() {
     } catch(e) {
         console.error(e);
         alert("Gagal simpan supplier");
+    }
+};
+
+
+
+window.autoHargaJual = function() {
+    const modal = parseFloat(document.getElementById('pModal').value) || 0;
+    const margin = parseFloat(document.getElementById('defaultMargin').value) || 0;
+    if(modal > 0) {
+      document.getElementById('pPrice').value = Math.round(modal + (modal * margin / 100));
+    } else {
+      document.getElementById('pPrice').value = '';
+    }
+};
+
+window.autoMargin = function() {
+    const modal = parseFloat(document.getElementById('pModal').value) || 0;
+    const price = parseFloat(document.getElementById('pPrice').value) || 0;
+    if (modal > 0 && price >= modal) {
+       document.getElementById('defaultMargin').value = Math.round(((price - modal) / modal) * 100);
+    }
+};
+
+window.simpanKategoriBaruInline = function() {
+    const input = document.getElementById('pKatBaru');
+    if(!input) return;
+    const val = input.value.trim();
+    if (!val) { alert("Kategori baru tidak boleh kosong"); return; }
+
+    let kats = JSON.parse(localStorage.getItem('kategori_list') || '["Umum"]');
+    if (!kats.includes(val)) {
+        kats.push(val);
+        localStorage.setItem('kategori_list', JSON.stringify(kats));
+    }
+    input.value = '';
+    if(typeof populateKategoriOptions === 'function') populateKategoriOptions();
+    setTimeout(() => {
+        const sel = document.getElementById('pKategori');
+        if(sel) sel.value = val;
+    }, 100);
+};
+
+window.deleteSelectedKategoriInline = function() {
+    const sel = document.getElementById('pKategori');
+    if(!sel) return;
+    const val = sel.value;
+    if (!val || val === 'Umum') { alert("Pilih kategori selain 'Umum' untuk dihapus"); return; }
+    if (!confirm(`Yakin ingin menghapus kategori "${val}"?`)) return;
+
+    let kats = JSON.parse(localStorage.getItem('kategori_list') || '["Umum"]');
+    kats = kats.filter(k => k !== val);
+    localStorage.setItem('kategori_list', JSON.stringify(kats));
+
+    if(typeof populateKategoriOptions === 'function') populateKategoriOptions();
+};
+
+window.addSatuanInline = function() {
+    const input = document.getElementById('newSatuanInputModal');
+    if(!input) return;
+    const val = input.value.trim();
+    if (!val) { alert("Nama satuan tidak boleh kosong"); return; }
+
+    let dbSatuan = JSON.parse(localStorage.getItem('satuan_list') || '["pcs","kg","liter","box","pack"]');
+    if (!dbSatuan.includes(val)) {
+        dbSatuan.push(val);
+        localStorage.setItem('satuan_list', JSON.stringify(dbSatuan));
+    }
+    input.value = '';
+
+    const sel = document.getElementById('pSatuan');
+    if(sel){
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = val;
+        sel.appendChild(opt);
+        sel.value = val;
+    }
+};
+
+window.deleteSelectedSatuanInline = function() {
+    const sel = document.getElementById('pSatuan');
+    if(!sel) return;
+    const val = sel.value;
+    if (!val) { alert("Pilih satuan yang ingin dihapus"); return; }
+    if (!confirm(`Yakin ingin menghapus satuan "${val}"?`)) return;
+
+    let dbSatuan = JSON.parse(localStorage.getItem('satuan_list') || '["pcs","kg","liter","box","pack"]');
+    dbSatuan = dbSatuan.filter(s => s !== val);
+    localStorage.setItem('satuan_list', JSON.stringify(dbSatuan));
+
+    sel.innerHTML = '';
+    dbSatuan.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.textContent = s;
+        sel.appendChild(opt);
+    });
+};
+
+window.showProductDesc = function(id) {
+    const products = JSON.parse(localStorage.getItem('products') || "[]");
+    const p = products.find(x => x.id === id);
+    if (p && p.desc) {
+        alert("Deskripsi Produk:\n\n" + p.desc);
+    } else {
+        alert("Deskripsi tidak tersedia.");
     }
 };
