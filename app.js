@@ -77,12 +77,6 @@ const saveCart   = c => localStorage.setItem("cart", JSON.stringify(c));
 const getKategoriTersimpan  = ()=> JSON.parse(localStorage.getItem("kategoriList")||"[]");
 const saveKategoriTersimpan = list => localStorage.setItem("kategoriList", JSON.stringify(list));
 
-const showToast = msg=>{
-  const el=document.getElementById("toast"); if(!el) return;
-  el.innerText=msg; el.classList.add("show");
-  clearTimeout(showToast._t);
-  showToast._t=setTimeout(()=>el.classList.remove("show"),2200);
-};
 
 /* ================= LIMIT (canonical  Core is source of truth) ================= */
 function getLimit(){

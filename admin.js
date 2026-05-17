@@ -153,21 +153,6 @@ function _getLimit(){
 }
 
 /* ================= TAB SWITCH ================= */
-function showTab(id, btn){
-  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
-  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
-  document.getElementById(id)?.classList.add("active");
-  if(btn) btn.classList.add("active");
-  if(id==="tabProduk") renderOwnerProdukList();
-  if(id==="tabBackup") renderBackupHistory();
-  if(id==="tabPromo")  loadConfig();
-  if(id==="tabAkuntansi") renderAkuntansi();
-  if(id==="tabTable")     { renderTable(); renderPelangganList(); }
-  if(id==="tabHistory")   renderHistory();
-  if(id==="tabPelanggan") renderPelangganList();
-
-  if(id==="tabToko")      renderKasirList();
-}
 
 /* ================= IMAGE COMPRESSION (WebP, 320-400px, 20-50KB) ================= */
 
