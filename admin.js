@@ -1671,8 +1671,7 @@ function closeProductModal() {
   document.getElementById('productModal').style.display = 'none';
   clearProductForm();
 }
-window.Admin.openProductModal = openProductModal;
-window.Admin.closeProductModal = closeProductModal;
+
 
 function initAdmin(){
   checkTierAndMenus();
@@ -1706,7 +1705,11 @@ function importData(){
         const d=JSON.parse(ev.target.result);
         if(d.products && d.products.length){
           const normed = d.products.map(p => p.i !== undefined ? p : normalizeProduct(p));
-  localStorage.setItem("products", JSON.stringify(normed)); if(typeof window.notifySync==="function") window.notifySync("products");
+          localStorage.setItem("products", JSON.stringify(normed));
+          if(window.Core && window.Core.idbPutAll) {
+             window.Core.idbPutAll("products", normed);
+          }
+          if(typeof window.notifySync==="function") window.notifySync("products");
           invalidateProductCache && invalidateProductCache();
         }
         if(d.lsData && typeof d.lsData === "object"){
