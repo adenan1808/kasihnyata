@@ -7,7 +7,7 @@ import { generateUUID } from '../utils/helpers';
 import { exportPurchaseTransactionsCSV } from '../utils/csvExport';
 import { printPurchaseInvoice } from '../utils/thermalPrint';
 import { compressImage } from '../utils/imageCompressor';
-import type { Produk, PurchaseTransaction, PurchaseTransactionItem, StokLog, Supplier } from '../types/local';
+import type { Produk, PurchaseTransaction, PurchaseTransactionItem, StokLog, Supplier, Kategori } from '../types/local';
 
 type FilterStatus = 'ALL' | 'UNPAID' | 'PARTIAL' | 'PAID';
 type PaymentType = 'cash' | 'tempo';
@@ -36,12 +36,14 @@ const EMPTY_SUPPLIER_FORM: SupplierForm = { nama: '', noWA: '', alamat: '', huta
 
 // ─── Produk form (mirrored from ProdukPage) ────────────────────────────────────
 interface NewProdukForm {
-  nama: string; sku: string; kategori: string; satuan: string;
+  nama: string; sku: string; skuPart1: string; skuPart2: string; skuPart3: string;
+  kategori: string; satuan: string;
   hargaModal: number; deskripsi: string; gambarUrl: string;
   markupPersen: number; stokMinimum: number;
 }
 const EMPTY_PRODUK_FORM: NewProdukForm = {
-  nama: '', sku: '', kategori: 'Lainnya', satuan: 'pcs',
+  nama: '', sku: '', skuPart1: '', skuPart2: '', skuPart3: '',
+  kategori: 'Lainnya', satuan: 'pcs',
   hargaModal: 0, deskripsi: '', gambarUrl: '', markupPersen: 20, stokMinimum: 10,
 };
 
@@ -155,6 +157,24 @@ export default function PurchasePageImpl() {
   const suppliers = useLiveQuery<Supplier[]>(() => db.supplier.filter(s => s.isActive).toArray(), []) ?? [];
   const products = useLiveQuery<Produk[]>(() => db.produk.filter(p => p.isActive).toArray(), []) ?? [];
   const rawList = useLiveQuery<PurchaseTransaction[]>(() => db.purchaseTransactions.orderBy('createdAt').reverse().toArray(), []) ?? [];
+  const kategoriList = useLiveQuery<Kategori[]>(() => db.kategori.orderBy('nama').toArray(), []) ?? [];
+
+  // State untuk Kategori Modal
+  const [showKatModal, setShowKatModal] = useState(false);
+  const [katForm, setKatForm] = useState({ nama: '', kode: '', warna: '#22c55e' });
+  const [savingKat, setSavingKat] = useState(false);
+
+  // Custom Satuan State
+  const [customSatuanList, setCustomSatuanList] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem('customSatuanList') || '[]'); } catch { return []; }
+  });
+  const [showSatuanModal, setShowSatuanModal] = useState(false);
+  const [newSatuan, setNewSatuan] = useState('');
+
+  const availableSatuan = useMemo(() => {
+    const existing = Array.from(new Set(products.map(p => p.satuan).filter(Boolean)));
+    return Array.from(new Set([...existing, ...customSatuanList, 'pcs', 'kg', 'liter'])).sort();
+  }, [products, customSatuanList]);
 
   const supplierMap = useMemo(() => new Map(suppliers.map(s => [s.id, s])), [suppliers]);
   const productMap = useMemo(() => new Map(products.map(p => [p.id, p])), [products]);
@@ -330,6 +350,24 @@ export default function PurchasePageImpl() {
   };
 
   // ─── Save new Supplier (mirrored from SupplierPage) ─────────────────────────
+  const saveKategori = async () => {
+    if (!katForm.nama.trim()) { toast.error('Nama wajib'); return; }
+    setSavingKat(true);
+    try {
+      const now = Date.now();
+      const kode = katForm.kode.trim().toUpperCase().slice(0, 3) || katForm.nama.slice(0, 3).toUpperCase();
+      const ex = await db.kategori.where('nama').equals(katForm.nama.trim()).first();
+      if (ex) { toast.error('Kategori sudah ada!'); return; }
+      await db.kategori.add({ id: generateUUID(), nama: katForm.nama.trim(), kode, warna: katForm.warna, createdAt: now, updatedAt: now });
+      toast.success('Kategori ditambahkan!');
+      setShowKatModal(false);
+      setKatForm({ nama: '', kode: '', warna: '#22c55e' });
+      setNewProductForm(prev => ({ ...prev, kategori: katForm.nama.trim() }));
+    } finally {
+      setSavingKat(false);
+    }
+  };
+
   const handleSaveNewSupplier = async () => {
     if (!supplierForm.nama.trim()) { toast.error('Nama supplier wajib diisi'); return; }
     setSavingSupplier(true);
@@ -370,7 +408,24 @@ export default function PurchasePageImpl() {
     setSavingProduct(true);
     try {
       const now = Date.now();
-      const sku = newProductForm.sku || `LOC-${Date.now().toString().slice(-6)}`;
+      let sku = newProductForm.sku;
+      if (!sku) {
+        let p1 = newProductForm.skuPart1;
+        let p2 = newProductForm.skuPart2;
+        let p3 = newProductForm.skuPart3;
+        if (!p1 && !p2 && !p3) {
+          const supplierName = suppliers.find(s => s.id === form.supplierId)?.nama || 'SUP';
+          p1 = supplierName.slice(0, 3).toUpperCase().padEnd(3, 'X');
+          p2 = newProductForm.nama.slice(0, 3).toUpperCase().padEnd(3, 'X');
+          p3 = Date.now().toString().slice(-6);
+        } else {
+          p1 = p1 || 'XXX';
+          p2 = p2 || 'XXX';
+          p3 = p3 || '000000';
+        }
+        sku = `${p1}|${p2}|${p3}`;
+      }
+
       const defaultToko = await db.toko.toCollection().first();
       const defaultGudang = await db.gudang.toCollection().first();
 
@@ -391,7 +446,7 @@ export default function PurchasePageImpl() {
         gambarUrl: newProductForm.gambarUrl || undefined,
         supplierId: form.supplierId,
         tokoId: defaultToko?.id,
-        gudangId: defaultGudang?.id,
+        gudangId2: defaultGudang?.id,
         isActive: true,
         syncStatus: 'PENDING',
         createdAt: now,
@@ -603,7 +658,7 @@ export default function PurchasePageImpl() {
             hargaJual: Math.round(Number(item.hargaBeli || 0) * 1.15),
             stok: 0, stokMinimum: 5, satuan: 'pcs',
             supplierId: form.supplierId,
-            tokoId: defaultToko?.id, gudangId: defaultGudang?.id,
+            tokoId: defaultToko?.id, gudangId2: defaultGudang?.id,
             isActive: true, syncStatus: 'PENDING', createdAt: now, updatedAt: now,
           });
           normalizedItems[i].produkId = newId;
@@ -1689,6 +1744,83 @@ export default function PurchasePageImpl() {
         )}
       </AnimatePresence>
 
+      {/* ─── MODAL SATUAN ─── */}
+      <AnimatePresence>
+        {showSatuanModal && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[70] p-4">
+            <motion.div initial={{scale:.95,opacity:0}} animate={{scale:1,opacity:1}} exit={{scale:.95,opacity:0}}
+              className="bg-[#161b27] border border-[#2a3347] rounded-2xl w-[320px] max-h-[80vh] flex flex-col">
+              <div className="px-5 py-4 border-b border-[#2a3347] flex justify-between items-center">
+                <h2 className="font-bold">Manajemen Satuan</h2>
+                <button onClick={() => setShowSatuanModal(false)} className="text-slate-400 hover:text-white text-xl leading-none">×</button>
+              </div>
+              <div className="p-4 border-b border-[#2a3347]">
+                <div className="flex gap-2">
+                  <input value={newSatuan} onChange={e => setNewSatuan(e.target.value)} placeholder="Satuan baru..." className="input-base flex-1"/>
+                  <button onClick={() => {
+                    if (!newSatuan.trim()) return;
+                    if (availableSatuan.includes(newSatuan.trim().toLowerCase())) { toast.error('Satuan sudah ada'); return; }
+                    const updated = [...customSatuanList, newSatuan.trim().toLowerCase()];
+                    setCustomSatuanList(updated);
+                    localStorage.setItem('customSatuanList', JSON.stringify(updated));
+                    setNewProductForm(prev => ({ ...prev, satuan: newSatuan.trim().toLowerCase() }));
+                    setNewSatuan('');
+                    setShowSatuanModal(false);
+                    toast.success('Satuan ditambahkan');
+                  }} className="btn-primary px-3 text-sm">+</button>
+                </div>
+              </div>
+              <div className="overflow-y-auto flex-1 p-4 space-y-1.5">
+                {customSatuanList.map(s => (
+                  <div key={s} className="flex items-center gap-3 px-3 py-2.5 bg-[#1e2535] rounded-lg border border-[#2a3347]">
+                    <span className="text-sm flex-1">{s}</span>
+                    <button onClick={() => {
+                      if (!confirm(`Hapus satuan "${s}"?`)) return;
+                      const updated = customSatuanList.filter(x => x !== s);
+                      setCustomSatuanList(updated);
+                      localStorage.setItem('customSatuanList', JSON.stringify(updated));
+                    }} className="text-red-400 hover:text-red-300 text-xs">Hapus</button>
+                  </div>
+                ))}
+                {customSatuanList.length === 0 && <div className="text-xs text-slate-500 text-center py-4">Belum ada satuan custom</div>}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ─── MODAL KATEGORI ─── */}
+      <AnimatePresence>
+        {showKatModal && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[70] p-4">
+            <motion.div initial={{scale:.95,opacity:0}} animate={{scale:1,opacity:1}} exit={{scale:.95,opacity:0}}
+              className="bg-[#161b27] border border-[#2a3347] rounded-2xl w-[480px] max-h-[80vh] flex flex-col">
+              <div className="px-5 py-4 border-b border-[#2a3347] flex justify-between items-center">
+                <h2 className="font-bold">Manajemen Kategori</h2>
+                <button onClick={() => setShowKatModal(false)} className="text-slate-400 hover:text-white text-xl leading-none">×</button>
+              </div>
+              <div className="p-4 border-b border-[#2a3347]">
+                <div className="flex gap-2">
+                  <input value={katForm.nama} onChange={e => setKatForm(f => ({...f, nama: e.target.value}))} placeholder="Nama kategori" className="input-base flex-1"/>
+                  <input value={katForm.kode} onChange={e => setKatForm(f => ({...f, kode: e.target.value.toUpperCase().slice(0,3)}))} placeholder="KOD" maxLength={3} className="input-base w-16 text-center font-mono uppercase" title="Kode 3 huruf"/>
+                  <input type="color" value={katForm.warna} onChange={e => setKatForm(f => ({...f, warna: e.target.value}))} className="w-10 h-9 rounded border border-[#2a3347] bg-[#1e2535] cursor-pointer p-0.5"/>
+                  <button onClick={saveKategori} disabled={savingKat} className="btn-primary px-3 text-sm">+</button>
+                </div>
+              </div>
+              <div className="overflow-y-auto flex-1 p-4 space-y-1.5">
+                {kategoriList.map(k => (
+                  <div key={k.id} className="flex items-center gap-3 px-3 py-2.5 bg-[#1e2535] rounded-lg border border-[#2a3347]">
+                    <span className="w-3 h-3 rounded-full flex-shrink-0" style={{background: k.warna || '#64748b'}}/>
+                    <span className="font-mono text-[10px] text-slate-500 w-8">{k.kode}</span>
+                    <span className="text-sm flex-1">{k.nama}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* ─── MODAL TAMBAH PRODUK BARU (mirrored dari ProdukPage) ─── */}
       <AnimatePresence>
         {showProductModal && (
@@ -1734,24 +1866,51 @@ export default function PurchasePageImpl() {
                 {/* SKU + Kategori */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs text-slate-400 block mb-1">SKU <span className="text-slate-600 font-normal">(opsional)</span></label>
-                    <input
-                      value={newProductForm.sku}
-                      onChange={e => setNewProductForm(prev => ({ ...prev, sku: e.target.value }))}
-                      className="input-base font-mono"
-                      placeholder="Auto-generate jika kosong"
-                    />
+                    <label className="text-xs text-slate-400 block mb-1">SKU (aaa | xxx | 123456)</label>
+                    <div className="flex items-center gap-1">
+                      <input
+                        value={newProductForm.skuPart1}
+                        onChange={e => setNewProductForm(prev => ({ ...prev, skuPart1: e.target.value.toUpperCase().slice(0, 3) }))}
+                        className="input-base font-mono text-center px-1"
+                        placeholder="SUP"
+                        maxLength={3}
+                      />
+                      <span className="text-slate-500">|</span>
+                      <input
+                        value={newProductForm.skuPart2}
+                        onChange={e => setNewProductForm(prev => ({ ...prev, skuPart2: e.target.value.toUpperCase().slice(0, 3) }))}
+                        className="input-base font-mono text-center px-1"
+                        placeholder="PRD"
+                        maxLength={3}
+                      />
+                      <span className="text-slate-500">|</span>
+                      <input
+                        value={newProductForm.skuPart3}
+                        onChange={e => setNewProductForm(prev => ({ ...prev, skuPart3: e.target.value.replace(/\D/g, '').slice(0, 6) }))}
+                        className="input-base font-mono text-center px-1"
+                        placeholder="000001"
+                        maxLength={6}
+                      />
+                    </div>
                   </div>
                   <div>
                     <label className="text-xs text-slate-400 block mb-1">Kategori</label>
                     <select
                       value={newProductForm.kategori}
-                      onChange={e => setNewProductForm(prev => ({ ...prev, kategori: e.target.value }))}
+                      onChange={e => {
+                        if (e.target.value === 'NEW_CATEGORY') {
+                          setShowKatModal(true);
+                        } else {
+                          setNewProductForm(prev => ({ ...prev, kategori: e.target.value }));
+                        }
+                      }}
                       className="input-base"
                     >
-                      {['Lainnya','Sembako','Minuman','Makanan','Elektronik','Kebersihan','Kesehatan'].map(k => (
-                        <option key={k} value={k}>{k}</option>
+                      {kategoriList.map(k => (
+                        <option key={k.id} value={k.nama}>{k.nama}</option>
                       ))}
+                      {kategoriList.length === 0 && <option value="Lainnya">Lainnya</option>}
+                      <option value="NEW_CATEGORY">+ Kategori Baru</option>
                     </select>
                   </div>
                 </div>
@@ -1760,12 +1919,22 @@ export default function PurchasePageImpl() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs text-slate-400 block mb-1">Satuan</label>
-                    <input
+                    <select
                       value={newProductForm.satuan}
-                      onChange={e => setNewProductForm(prev => ({ ...prev, satuan: e.target.value }))}
+                      onChange={e => {
+                        if (e.target.value === 'NEW_SATUAN') {
+                          setShowSatuanModal(true);
+                        } else {
+                          setNewProductForm(prev => ({ ...prev, satuan: e.target.value }));
+                        }
+                      }}
                       className="input-base"
-                      placeholder="pcs / kg / liter"
-                    />
+                    >
+                      {availableSatuan.map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                      <option value="NEW_SATUAN">+ Tambah Satuan</option>
+                    </select>
                   </div>
                   <div>
                     <label className="text-xs text-slate-400 block mb-1">Markup (%)</label>
